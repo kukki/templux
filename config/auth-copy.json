@@ -117,7 +117,7 @@
   "methodExpired": "已过期",
   "methodCancelled": "已取消",
   "methodAgentNote": "Agent保持独立，随机密码重置使用CLI受限文件入口：templux reset-agent。",
-  "methodSelfNote": "本人密码变更使用宿主CLI：templux reset-person --account <ID> --credential-file 新文件.json --confirm --non-interactive。避免旧会话失效抢先丢失新凭据。",
+  "methodSelfNote": "本人已有密码重置使用宿主CLI：./templux reset-person --account <ID> --credential-file person-<ID>-reset.json --confirm --non-interactive。文件已存在时须另选新文件，避免旧会话失效抢先丢失新凭据。",
   "credential_delivery_failed": "变更已提交，但浏览器下载未完成。请核对账号与审计，再明确重置生成新凭据；不能复取旧随机密码。",
   "login_method_save_failed": "登录方式或关键审计保存失败，变更未提交。",
   "link_request_unavailable": "验证请求已过期、取消或完成，请重新发起。",
@@ -129,5 +129,7 @@
   "password_identity_required": "目标须先具备可用的正常密码方式；首次启用请发起验证。",
   "password_already_enabled": "密码已经启用，请使用管理员随机重置。",
   "person_required": "仅人员可关联登录方式，Agent始终独立。",
-  "self_password_change_cli": "本人密码变更请使用宿主CLI受限文件交付，页面不会重置本人的密码。"
+  "self_password_change_cli": "本人密码变更请使用宿主CLI受限文件交付，页面不会重置本人的密码。",
+  "methodSelfVerifyNote": "本人首次启用密码：先发起请求，再正常重新飞书登录并从账号页验证。只有已验证请求才显示最终CLI完成命令；reset-person不能首次启用。",
+  "methodSelfEnableNote": "此请求已由本人验证。最终启用须通过宿主CLI受限文件交付：./templux complete-login-link --request <REQUEST> --credential-file person-<ID>-link-<REQUEST>.json --confirm --non-interactive。文件已存在须另选新文件，成功后所有旧会话失效。"
 }

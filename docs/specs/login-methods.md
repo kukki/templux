@@ -48,4 +48,12 @@ Web随机凭据仅在确认COMMIT后的单次HTTPS响应中返回，Cache-Contro
 
 只新增不可变0006及身份域唯一索引。升级已有库仍遵守默认备份/历史校验；存在手工造成的同person/realm重复身份时迁移失败回滚，不能自动合并。请求表expiry索引供受控维护使用；本票不引入后台调度或业务范围模型。原用户环境0004未升级；隔离0005备份恢复、0006应用已验收，实际升级须另行安排。
 
-2026-10-15读取完整官方[授权码](https://open.feishu.cn/document/common-capabilities/sso/api/obtain-oauth-code)、[token](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/authentication-management/access-token/get-user-access-token)、[用户信息](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/authen-v1/user_info/get)。复用现有Confidential Client协议：v1授权页/client_id/response_type/注册redirect_uri/state，v3 token authorization_code+server secret，Bearer user_info严格组织域验证；不存远程token或秘密于关联表。PKCE为官方可选增强，本票保留既有协议，不增额外远程权限或刷新令牌。真实组织关联仍需用户正常授权及实际身份冲突验收，隔离外部协议模拟不替代真人验收，T03人工待办仍开放。
+2026-10-15读取完整官方[授权码](https://open.feishu.cn/document/common-capabilities/sso/api/obtain-oauth-code)、[token](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/authentication-management/access-token/get-user-access-token-v3)、[用户信息](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/authen-v1/user_info/get)。复用现有Confidential Client协议：v1授权页/client_id/response_type/注册redirect_uri/state，v3 token authorization_code+server secret，Bearer user_info严格组织域验证；不存远程token或秘密于关联表。PKCE为官方可选增强，本票保留既有协议，不增额外远程权限或刷新令牌。真实组织关联仍需用户正常授权及实际身份冲突验收，隔离外部协议模拟不替代真人验收，T03人工待办仍开放。
+
+## T08 F1/F2修复合同
+
+0007在OAuth持久state行新增purpose及login_request_id，普通登录与登录方式关联的用途由服务器写入，并有关系/枚举约束及FK索引。既有0006当前映射的关联state在迁移中回填，0001–0006保持不变。consumeOAuth用单条DELETE RETURNING在浏览器/state一次性校验与消费同时捕获用途、请求ID及当前映射；元数据缺失、不一致或伪装普通用途但实际映射关联的记录拒绝。不得在远程兑换后按“找不到映射”猜测为普通登录。
+
+远程token/user_info调用在SQL事务外。关联用途回调兑换后按已捕获请求ID读取，再检查state当前匹配、pending、期限、版本及有效证明会话；替换、取消、过期、版本变更、请求缺失均拒绝，不注册Pending/发行普通会话。正常普通登录保持原合同，正常关联只标记verified。新请求重试须重新验证，身份已验证不等于已绑定目标或已授业务权限。
+
+本人首次启用在未验证阶段只显示正常重新飞书登录/账号页证明步骤，不显示最终CLI命令。已verified的本人password请求用含真实requestId的 `./templux complete-login-link --request <ID> --credential-file person-<账号ID>-link-<ID>.json --confirm --non-interactive`，不显示必然409的Web完成按钮。本人已有密码重置继续显示 `./templux reset-person --account <ID> --credential-file person-<ID>-reset.json --confirm --non-interactive`。所有示例为合法ASCII文件名，文件已存在须另选新文件；不绕过证明/确认/受限文件规则。本人feishu关联以及他人已验证请求的Web完成保持原入口。

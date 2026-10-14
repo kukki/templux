@@ -67,12 +67,12 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
       const query = request.query as Record<string, unknown>;
       const state = typeof query.state === 'string' ? query.state : '';
       const browser = requestCookie(request, 'templux_oauth') ?? '';
-      await consumeOAuth(pool, state, browser);
+      const context=await consumeOAuth(pool, state, browser);
       reply.header('Set-Cookie', cookie('templux_oauth', '', 0, settings.secure));
       if (query.error !== undefined) throw new AuthError('login_cancelled', 400);
       if (typeof query.code !== 'string' || !query.code || query.code.length > 4096) throw new AuthError('provider_invalid', 400);
       const identity = await exchangeIdentity(settings, query.code, transport);
-      if(await verifyFeishuLink(pool,state,identity,settings,roles))return reply.redirect('/account?link=verified');
+      if(context.purpose==='login_link'){await verifyFeishuLink(pool,state,identity,settings,roles,context.requestId);return reply.redirect('/account?link=verified');}
       const result = await registerSession(pool, identity, settings, () => server.log.error({ event: 'login_audit_failed' }, '登录成功审计未保存。'));
       reply.header('Set-Cookie', cookie('templux_session', result.token, settings.maximumSeconds, settings.secure));
       return reply.redirect('/account');

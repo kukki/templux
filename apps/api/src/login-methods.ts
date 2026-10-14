@@ -7,7 +7,7 @@ import {normalizeUsername,generatePassword,hashPassword} from './password.js';
 import type {Identity} from './feishu.js';
 export type Credential={username:string;password:string};
 export type Delivery=(credential:Credential)=>{cleanup:()=>void;file:string};
-type Link={id:string;account_id:string;expected_version:string;method:'feishu'|'password';username:string|null;status:string;expired:boolean;app_id:string|null;tenant_key:string|null;subject:string|null;verified_name:string|null;proof_session_hash:string|null};
+type Link={id:string;account_id:string;expected_version:string;method:'feishu'|'password';username:string|null;status:string;expired:boolean;app_id:string|null;tenant_key:string|null;subject:string|null;verified_name:string|null;proof_session_hash:string|null;oauth_state_hash:string|null};
 const invalid=()=>new ManagementError('invalid_management_input',400,'登录方式管理参数无效。');
 export function managementId(id:string){if(!/^[1-9][0-9]{0,18}$/.test(id)||BigInt(id)>9223372036854775807n)throw invalid();return id;}
 async function target(client:pg.PoolClient,id:string,version?:string){const row=(await client.query<{id:string;kind:string;state:string;auth_version:string}>('SELECT id,kind,state,auth_version FROM templux.accounts WHERE id=$1 FOR UPDATE',[managementId(id)])).rows[0];
@@ -47,13 +47,13 @@ export async function beginFeishuLink(pool:pg.Pool,id:string,token:string|undefi
  await safe(()=>transaction(pool,async client=>{await authorizationLock(client);const owner=await loadSession(client,token,config,definitions);const link=await request(client,id);await target(client,link.account_id,link.expected_version);
  if(link.method!=='feishu'||link.status!=='pending'||owner.id!==link.account_id||owner.loginMethod!=='password')throw new ManagementError('link_verification_denied',403,'须由目标人员通过正常密码登录验证。');await fresh(client,digest(token!));
  await client.query('DELETE FROM templux.oauth_requests WHERE state_hash=(SELECT oauth_state_hash FROM templux.login_method_requests WHERE id=$1)',[link.id]);
- await client.query("INSERT INTO templux.oauth_requests(state_hash,browser_hash,expires_at) VALUES($1,$2,clock_timestamp()+interval '10 minutes')",[digest(state),digest(browser)]);
+ await client.query("INSERT INTO templux.oauth_requests(state_hash,browser_hash,expires_at,purpose,login_request_id) VALUES($1,$2,clock_timestamp()+interval '10 minutes','login_link',$3)",[digest(state),digest(browser),link.id]);
  await client.query('UPDATE templux.login_method_requests SET oauth_state_hash=$2,proof_session_hash=$3 WHERE id=$1',[link.id,digest(state),digest(token!)]);
  }));return {state,browser};
 }
-export async function verifyFeishuLink(pool:pg.Pool,state:string,identity:Identity,config:AuthConfig,definitions:Roles){
- return safe(()=>transaction(pool,async client=>{await authorizationLock(client);const link=(await client.query<Link>('SELECT *,expires_at<=clock_timestamp() AS expired FROM templux.login_method_requests WHERE oauth_state_hash=$1 FOR UPDATE',[digest(state)])).rows[0];
- if(!link)return false;if(link.expired||link.status!=='pending'||link.method!=='feishu')throw new ManagementError('link_request_unavailable',409,'请求已失效。');const account=await target(client,link.account_id,link.expected_version);
+export async function verifyFeishuLink(pool:pg.Pool,state:string,identity:Identity,config:AuthConfig,definitions:Roles,requestId:string){
+ return safe(()=>transaction(pool,async client=>{await authorizationLock(client);const link=(await client.query<Link>('SELECT *,expires_at<=clock_timestamp() AS expired FROM templux.login_method_requests WHERE id=$1 FOR UPDATE',[managementId(requestId)])).rows[0];
+ if(!link||link.oauth_state_hash!==digest(state))throw new ManagementError('link_request_unavailable',409,'关联请求上下文已失效。');if(link.expired||link.status!=='pending'||link.method!=='feishu')throw new ManagementError('link_request_unavailable',409,'请求已失效。');const account=await target(client,link.account_id,link.expected_version);
  const owner=await loadSessionHash(client,link.proof_session_hash??'',config,definitions);if(owner.id!==account.id||owner.loginMethod!=='password')throw new ManagementError('link_verification_denied',403,'目标密码验证已失效。');await fresh(client,link.proof_session_hash!);
  const collision=(await client.query<{account_id:string}>('SELECT account_id FROM templux.identities WHERE provider=\'feishu\' AND app_id=$1 AND tenant_key=$2 AND subject=$3',[identity.appId,identity.tenantKey,identity.subject])).rows[0];
  const existing=await currentFeishu(client,account.id,identity);

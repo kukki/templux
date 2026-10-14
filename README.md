@@ -103,4 +103,4 @@ docker compose up -d --wait database
 
 管理员从人员编辑区发起请求，目标本人正常重新登录并验证后再由管理员最终确认。请求15分钟有效，身份验证须在正常登录5分钟内；姓名/邮箱不合并，身份/用户名占用拒绝。人员飞书与密码共享账号状态、角色及版本，关联或重置使所有旧方式会话失效，不清除T07失败限制。Agent仍独立，通过CLI受限文件重置。
 
-网页他人随机密码只在本次no-store响应请求下载，请确认私有目录保存完成再受控交付；取消/丢失不能复取，需要再次明确重置。本人密码变更使用 `./templux reset-person --account <ID> --credential-file 新文件.json --confirm --non-interactive`，防止会话失效抢先丢掉密码。菜单14–17及关联命令见 [登录方式合同](docs/specs/login-methods.md)；隔离0006、SQL/HTTP/CLI/网页证据见 [T08验收](docs/discovery/t08-acceptance.md)。原真人授权环境仍0004，升级须另行备份与安排；T03真实组织人工验收仍未完成。
+网页他人随机密码只在本次no-store响应请求下载，请确认私有目录保存完成再受控交付；取消/丢失不能复取，需要再次明确重置。本人密码变更使用 `./templux reset-person --account <ID> --credential-file 新文件.json --confirm --non-interactive`，防止会话失效抢先丢掉密码。菜单14–17及关联命令见 [登录方式合同](docs/specs/login-methods.md)；隔离0006/0007、SQL/HTTP/CLI/网页证据见 [T08验收](docs/discovery/t08-acceptance.md)。原真人授权环境仍0004，升级须另行备份与安排；T03真实组织人工验收仍未完成。

@@ -39,12 +39,15 @@ export async function beginOAuth(pool: pg.Pool) {
     [digest(state), digest(browser)]);
   return { state, browser };
 }
-export async function consumeOAuth(pool: pg.Pool, state: string, browser: string): Promise<void> {
+export type OAuthContext={purpose:'login';requestId:null}|{purpose:'login_link';requestId:string};
+export async function consumeOAuth(pool: pg.Pool, state: string, browser: string): Promise<OAuthContext> {
   if (![state, browser].every(value => /^[A-Za-z0-9_-]{43}$/.test(value))) throw new AuthError('invalid_state', 400);
-  const result = await pool.query<{ state_hash: string }>(
-    'DELETE FROM templux.oauth_requests WHERE state_hash=$1 AND browser_hash=$2 AND expires_at>now() RETURNING state_hash', [digest(state), digest(browser)]);
-  if (!result.rows[0]) throw new AuthError('invalid_state', 400);
-
+  const result = await pool.query<{ purpose: string; login_request_id: string|null; mapped_request_id: string|null }>(
+    'DELETE FROM templux.oauth_requests WHERE state_hash=$1 AND browser_hash=$2 AND expires_at>now() RETURNING purpose,login_request_id,(SELECT id FROM templux.login_method_requests WHERE oauth_state_hash=$1) AS mapped_request_id', [digest(state), digest(browser)]);
+  const context=result.rows[0];
+  if(context?.purpose==='login'&&context.login_request_id===null&&context.mapped_request_id===null)return {purpose:'login',requestId:null};
+  if(context?.purpose==='login_link'&&context.login_request_id&&context.login_request_id===context.mapped_request_id)return {purpose:'login_link',requestId:context.login_request_id};
+  throw new AuthError('invalid_state',400);
 }
 export async function registerSession(pool: pg.Pool, identity: Identity, config: AuthConfig, logFailure: () => void) {
   const token = opaqueToken();
