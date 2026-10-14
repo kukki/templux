@@ -1,0 +1,61 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "通用表格默认只读，窄屏默认表格容器内横向滚动。成功查询无匹配时，结果区标题加简短说明，保留搜索筛选及分页数量入口；文案可配置。现在只定表格无结果时是否保持表头。",
+      "source_evidence": [
+        {
+          "project": "Skoope",
+          "path": "src/components/overview-table.tsx:153-178",
+          "behavior": "rows.length为0显示空结果文字，不渲染表格和表头；搜索筛选分页保留。提示文案层次已经另定，不随本题带入。"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/catchouse-app.js:1028-1033",
+          "behavior": "桌面无结果仍渲染表格及表头，tbody跨列单元格内显示空结果提示。prototype参考，未证明生产接入。移动列表不涉及表头。"
+        },
+        {
+          "project": "Supplieroom",
+          "path": "src/modules/supplier-po/ui/supplier-po-workspace.tsx:341-360",
+          "behavior": "采购单为卡片列表，对表格表头没有可比证据，不能算作支持隐藏或保留。"
+        }
+      ],
+      "evidence_limits": "三个函数已图搜索、入向追踪、snippet读取（长函数截断部分直接源码补读），证据文件覆盖均metadata_match/no_recorded_issue；未运行浏览器验收，不概括全项目所有列表。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "仅选择复用表格正常无匹配时的默认结构，保留既定标题说明、搜索筛选、分页；不处理权限不足、加载失败，不增加业务按钮；项目可配置另一种变体。"
+    },
+    "questions": {
+      "empty_table_header": {
+        "type": "choice",
+        "instructions": "从两个实际来源选择通用表格正常无结果时的默认结构，来源缺失不算支持任一选项，不按项目数量投票。用户希望统一控件样式与项目可配置，偏好不足可needs_clarification。",
+        "criteria": {
+          "keep_header": "Catchouse看板prototype：保留表格表头，在表体跨列显示已定空结果提示。",
+          "hide_table": "Skoope总览：隐藏表格及表头，结果区域显示已定空结果提示。",
+          "needs_clarification": "两者均有合理场景，需要用户指定通用模板默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "empty_table_header": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.34,
+        "probabilities": {
+          "keep_header": 0.01,
+          "hide_table": 0.43,
+          "needs_clarification": 0.56
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1120,
+      "output_tokens": 50
+    }
+  },
+  "selected_probability": 0.56,
+  "auto_selected": false
+}

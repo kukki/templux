@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，控件按需复用；项目级配置风格和交互默认值，使用既定主题响应式，非用户主题切换。",
+      "confirmed": "普通顶部通知默认15秒，有进度条及手动关闭；鼠标悬停或键盘焦点进入时暂停，离开继续剩余时间；有上限堆叠，超出按顺序排队，每条实际显示时才计时。已确认桌面可见3条、窄屏1条，上限项目可配置。维护通知另行持续显示不可关闭，不占普通通知队列。独立浮动面板桌面窄屏均仅同时一个，替换保护编辑内容。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送访谈摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定活动中（正在显示或排队）的普通通知去重匹配方式，已关闭或已过期的不参与本次合并；不决定队列总容量或严重程度优先级。"
+    },
+    "questions": {
+      "toast_deduplication": {
+        "type": "choice",
+        "instructions": "推荐轻量模板普通通知的去重匹配方式，避免重复挤满队列也避免不同业务事件误合并。用户只要求统一可复用规范，业务内容由项目定义。不足可needs_clarification。",
+        "criteria": {
+          "explicit_key_only": "由调用方可选提供去重键，同键且同严重程度的活动通知合并并显示重复次数；不提供键则逐条排队，不仅凭相同文字合并。",
+          "text_and_severity": "默认相同文字及严重程度的活动通知自动合并并显示次数，项目可覆盖匹配规则。",
+          "no_deduplication": "默认不去重，每次通知都独立排队，业务调用方自行避免重复。",
+          "needs_clarification": "重复通知是否同一事件无法确定，需要用户决定匹配方式。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "toast_deduplication": {
+        "type": "choice",
+        "choice": "explicit_key_only",
+        "confidence": 0.87,
+        "probabilities": {
+          "explicit_key_only": 0.9,
+          "text_and_severity": 0.07,
+          "no_deduplication": 0.0,
+          "needs_clarification": 0.03
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 878,
+      "output_tokens": 67
+    }
+  },
+  "selected_probability": 0.9,
+  "auto_selected": true
+}

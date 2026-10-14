@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量可独立运行的通用模板，服务不同组织独立部署，登录认证与账号管理、容器CLI、统一UI规范，项目可扩展。",
+      "confirmed": "默认管理员、普通用户两个预定义角色，可多角色并集，新项目可扩展角色与授权。首次飞书登录Pending，CLI授权为管理员，不自动首用户管理员。人员同账号可飞书密码关联，管理员发起验证，Agent独立显式授权。宿主管理CLI不要求应用账号登录，运维权限为边界，人工菜单变更确认和Agent显式确认参数；可禁用账号和变更角色，关键变更可靠审计保存失败不提交。权限变化旧会话全部失效，每请求PG核验。最新稳定版公共修复、累计提案与骨架三方候选已按授权采用。用户已确认常规操作拒绝停用或降权最后一个有效管理员，初始化不受影响。 管理员发起启用密码及关联登录方式已确认，但尚未决定人员是否能自行修改已启用密码。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定人员账号已启用密码后是否自助修改，不允许用户自助启用原本未开通的密码方式，不新增邮件或短信忘记密码流程。Agent凭据仍沿已定CLI创建重置；改密后的会话处理另定。"
+    },
+    "questions": {
+      "person_self_password_change": {
+        "type": "choice",
+        "instructions": "推荐轻量模板已启用密码的人员账号是否提供自助修改密码。用户要管理员控制开通和关联，但这不等于已禁止修改既有密码。需校验本人旧密码；忘记密码仍管理员处理，不引入新外部服务。不足可needs_clarification。",
+        "criteria": {
+          "self_change_with_old_password": "允许已登录人员验证旧密码后自行修改已启用密码；开通关联仍管理员发起，忘记密码由管理员重置。",
+          "admin_reset_only": "首版所有密码修改均由管理员通过管理界面或CLI重置，人员不自助修改。",
+          "needs_clarification": "需要用户明确是否给人员自助改密入口。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "person_self_password_change": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.49,
+        "probabilities": {
+          "self_change_with_old_password": 0.32,
+          "admin_reset_only": 0.02,
+          "needs_clarification": 0.66
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 989,
+      "output_tokens": 55
+    }
+  },
+  "selected_probability": 0.66,
+  "auto_selected": false
+}

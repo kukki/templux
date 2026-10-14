@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse的通用模板，可独立启动，认证、轻量账号、日志、Docker、CLI、统一网页元素风格行为规范；元素按需使用，不固化业务。",
+      "confirmed": "项目配置风格布局及控件默认值，使用既定主题响应式，默认浅色背景蓝色强调。默认纵向导航可收为图标，允许用户临时收起并浏览器按项目账号记忆；窄屏菜单按钮打开文字侧边抽屉，选目的页关闭。表单列入控件示例。业务字段和校验规则属于各新项目，模板只定义共通交互及承接字段错误的能力。 已自动采用表单首次失焦校验、提交全量校验、错误字段修改后及时复查，服务端最终校验，字段错误就近显示。用户已明确统一搜索内嵌字段名称与提示，普通表单则已选择字段名称在控件上方持续显示，提示及错误就近放置。 已自动采用未保存编辑时应用内离开或关闭编辑表单提醒，无修改已保存及仅筛选不提醒，不阻挡权限失效强制退出。用户要求表格控件示例及响应式，已确认窄屏保留全部列仅表格区域横向滚动，页面不整体溢出。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，并允许发送访谈摘要、已定决策及候选到TypeSafe官方API。",
+      "scope": "仅决定新项目按需使用表格内联编辑时的默认保存方式，不强制所有表格可编辑，不定义业务字段、审批或数据范围。默认交互可由新项目配置变体。"
+    },
+    "questions": {
+      "inline_edit_save_default": {
+        "type": "choice",
+        "instructions": "推荐通用表格可选内联编辑的默认保存方式。已确认普通表单未保存离开提醒及字段校验，但尚未定义内联编辑粒度。兼顾轻量可预测交互和高效录入；如业务决定差异大可needs_clarification。",
+        "criteria": {
+          "row_explicit_save": "一行进入编辑状态，提供保存与取消；只有显式保存才提交本行修改，失败保留输入并显示错误。",
+          "cell_blur_save": "单元格编辑完成失焦即提交，显示保存中及失败状态，失败保留输入供重试。",
+          "batch_explicit_save": "允许多行暂存编辑，统一保存或取消；失败需呈现哪些行未成功。",
+          "needs_clarification": "需要用户明确内联编辑的默认保存粒度及触发方式。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "inline_edit_save_default": {
+        "type": "choice",
+        "choice": "cell_blur_save",
+        "confidence": 0.36,
+        "probabilities": {
+          "row_explicit_save": 0.2,
+          "cell_blur_save": 0.52,
+          "batch_explicit_save": 0.01,
+          "needs_clarification": 0.27
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1096,
+      "output_tokens": 64
+    }
+  },
+  "selected_probability": 0.52,
+  "auto_selected": false
+}

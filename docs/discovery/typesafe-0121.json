@@ -1,0 +1,67 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从Supplieroom、Skoope、Catchouse提取可复用模板网页元素规范；元素项目按需使用，项目级配置变体，默认固定主题响应式。",
+      "confirmed": "图片预览默认保持比例适应视口，关闭按钮遮罩Escape关闭，点击图片自身不关闭，首版有项目可配置缩放平移变体。三所查控件关闭后恢复打开控件焦点，直接采用。业务图片来源上传留存属于项目，不固化。管理审计时间用户已选默认到秒。 已按93%采用图片组可选能力，单图默认，项目启用并传列表才显示前后及页数，边界不循环，切图重置缩放平移。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/shared/ui/image-preview-dialog.tsx:6-56",
+          "pattern": "该完整控件直接img，无自定义loading/error/retry反馈，沿用浏览器原生图像行为。"
+        },
+        {
+          "project": "Skoope",
+          "path": "src/components/sku-detail-interactions.tsx:27-51",
+          "pattern": "primary和可选fallback去重后按顺序，onError自动下一个，全部失败后无图占位，缩略图没有source时禁用打开，不显示手动重试按钮。"
+        },
+        {
+          "project": "Catchouse",
+          "paths": [
+            "prototype/catchouse-app.js:460-463",
+            "prototype/catchouse-app.js:2082",
+            "prototype/catchouse-app.js:2191-2201"
+          ],
+          "pattern": "mediaFrame显示加载中，失败文字加重试按钮；错误监听记录状态，点击重试清除错误标记重绘，prototype参考未运行生产验收。"
+        }
+      ],
+      "evidence_limits": "图追踪精确源码及覆盖检查metadata_match无问题，未运行浏览器，不宣称全项目所有入口一致，不发送源码数据。",
+      "delegation": "用户要求共通直接采用，明显来源分歧交TypeSafe，实际选项概率严格大于75%自动采用，否则用户选，允许摘要候选发送官方API。",
+      "scope": "仅选择通用图片控件默认加载失败交互，不决定来源URL权限、图片上传存储或新业务接口，不组合创造来源没有的自动备选加手动重试新默认；项目可配置其它变体。"
+    },
+    "questions": {
+      "image_load_failure_default": {
+        "type": "choice",
+        "instructions": "从来源已有三种图片失败交互选择模板默认，保持已定单图图库关闭缩放行为。Catchouse加载失败重试、Skoope自动备选占位、Supplieroom原生行为均真实核对，不按项目数投票。需要额外图片来源时由项目提供，无法选择可needs_clarification。",
+        "criteria": {
+          "explicit_failure_retry": "采用Catchouse：加载中有提示，失败明确显示并给手动重试入口，不自动无限重试。",
+          "fallback_then_placeholder": "采用Skoope：项目提供备选图时自动尝试，候选都失败后显示无图占位，没有有效源则不打开预览，不默认给手动重试按钮。",
+          "native_image_feedback": "采用Supplieroom所查预览控件，保留原生img及alt反馈，不内置专用失败或重试控件。",
+          "needs_clarification": "不同来源各有取舍，需要用户选择默认失败反馈。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "image_load_failure_default": {
+        "type": "choice",
+        "choice": "native_image_feedback",
+        "confidence": 0.27,
+        "probabilities": {
+          "explicit_failure_retry": 0.06,
+          "fallback_then_placeholder": 0.16,
+          "native_image_feedback": 0.45,
+          "needs_clarification": 0.33
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1331,
+      "output_tokens": 60
+    }
+  },
+  "selected_probability": 0.45,
+  "auto_selected": false
+}

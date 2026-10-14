@@ -1,0 +1,103 @@
+import { createHash } from 'node:crypto';
+import { readdir, readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import pg from 'pg';
+
+export class OperationError extends Error {}
+
+export function databasePool(): pg.Pool {
+  const value = process.env.DATABASE_URL;
+  try {
+    if (!value) throw new Error();
+    const url = new URL(value);
+    if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname) throw new Error();
+  } catch {
+    throw new OperationError('DATABASE_URL 必须是有效的 PostgreSQL 连接地址。');
+  }
+  return new pg.Pool({
+    connectionString: value,
+    max: 5,
+    connectionTimeoutMillis: 3000,
+    query_timeout: 5000,
+    idleTimeoutMillis: 10000,
+  });
+}
+
+type Migration = { version: string; sql: string; checksum: string };
+
+export async function migrations(): Promise<Migration[]> {
+  const directory = fileURLToPath(new URL('../../../database/migrations/', import.meta.url));
+  const names = (await readdir(directory)).filter(name => /^\d{4}_[a-z0-9_-]+\.sql$/.test(name)).sort();
+  if (!names.length) throw new OperationError('未找到数据库迁移，部署已中止。');
+  const result = await Promise.all(names.map(async name => {
+    const sql = await readFile(`${directory}/${name}`, 'utf8');
+    return { version: name.slice(0, 4), sql, checksum: createHash('sha256').update(sql).digest('hex') };
+  }));
+  if (new Set(result.map(item => item.version)).size !== result.length) {
+    throw new OperationError('数据库迁移版本重复，部署已中止。');
+  }
+  return result;
+}
+
+type AppliedMigration = { version: string; checksum: string };
+
+function validateHistory(applied: AppliedMigration[], expected: Migration[]): void {
+  for (const [index, row] of applied.entries()) {
+    const source = expected[index];
+    if (!source || source.version !== row.version || source.checksum !== row.checksum) {
+      throw new OperationError('数据库迁移历史与当前发布不匹配，部署已中止。');
+    }
+  }
+}
+
+export async function schemaVersion(pool: pg.Pool, expected: Migration[]): Promise<string> {
+  const result = await pool.query<AppliedMigration>(
+    'SELECT version, checksum FROM public.templux_migrations ORDER BY version',
+  );
+  validateHistory(result.rows, expected);
+  if (result.rows.length !== expected.length) throw new OperationError('数据库存在待执行迁移。');
+  return result.rows.at(-1)!.version;
+}
+
+export async function migrate(pool: pg.Pool): Promise<{ schemaVersion: string; applied: number }> {
+  const expected = await migrations();
+  const client = await pool.connect();
+  let locked = false;
+  let appliedCount = 0;
+  try {
+    const lock = await client.query<{ acquired: boolean }>(
+      "SELECT pg_try_advisory_lock(hashtext('templux:migrations')) AS acquired",
+    );
+    locked = lock.rows[0]?.acquired === true;
+    if (!locked) throw new OperationError('另一个迁移正在执行，请稍后重试。');
+    await client.query(`CREATE TABLE IF NOT EXISTS public.templux_migrations (
+      version text PRIMARY KEY,
+      checksum text NOT NULL,
+      applied_at timestamptz NOT NULL DEFAULT now()
+    )`);
+    const applied = await client.query<AppliedMigration>(
+      'SELECT version, checksum FROM public.templux_migrations ORDER BY version',
+    );
+    validateHistory(applied.rows, expected);
+    for (const migration of expected.slice(applied.rows.length)) {
+      await client.query('BEGIN');
+      try {
+        await client.query(migration.sql);
+        await client.query('INSERT INTO public.templux_migrations (version, checksum) VALUES ($1, $2)',
+          [migration.version, migration.checksum]);
+        await client.query('COMMIT');
+        appliedCount++;
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      }
+    }
+    return { schemaVersion: expected.at(-1)!.version, applied: appliedCount };
+  } finally {
+    try {
+      if (locked) await client.query("SELECT pg_advisory_unlock(hashtext('templux:migrations'))");
+    } finally {
+      client.release();
+    }
+  }
+}

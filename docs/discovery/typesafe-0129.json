@@ -1,0 +1,68 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "模板网页元素按需使用且项目级配置。表格默认只读，项目定义字段与业务取数；正常无匹配保留表头及跨列空提示。当前只定项目启用表头点击排序时的默认切换规则，不强制所有列可排序。",
+      "source_evidence": [
+        {
+          "project": "Skoope",
+          "paths": [
+            "src/modules/identity/overview-table.ts:39-42",
+            "src/components/overview-table.tsx:134,155-165"
+          ],
+          "behavior": "点击新列升序，再次同列降序，再次取消该列排序(null)；单列排序，修改回第一页；箭头与aria-sort。取消后使用项目定义的稳定基础次序，不等于随机数据库顺序。"
+        },
+        {
+          "project": "Catchouse",
+          "paths": [
+            "prototype/catchouse-app.js:1029,1033,2001"
+          ],
+          "behavior": "启用排序的表头，点击新列降序，再次同列升序，之后同列升降交替，无点击取消状态；单列，修改回第一页，箭头显示方向。prototype参考。"
+        },
+        {
+          "project": "Supplieroom",
+          "paths": [
+            "src/modules/supplier-po/ui/supplier-po-workspace.tsx:96-104,282-295"
+          ],
+          "behavior": "采购单为卡片，使用排序下拉含默认及各业务字段升降序，改变回第一页。对表头点击循环没有可比依据，不算支持任一方案。"
+        }
+      ],
+      "evidence_limits": "已查源码、相关函数图定位及cycleTableSort入向与snippet，覆盖四文件均metadata_match/no_recorded_issue，长函数事件与渲染直接补读；无运行验收，不概括全项目。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "只选可排序表头的默认点击循环，采用来源实际完整循环（含首个方向）；项目可配置变体。项目必需提供可排序字段与基础次序/回调，不复制来源业务字段、比较算法或强制前端排序。"
+    },
+    "questions": {
+      "table_sort_cycle": {
+        "type": "choice",
+        "instructions": "为项目可选启用的通用表头排序选择默认点击循环，依据已有两种方案，不按项目数投票，不强加业务字段或数据排序实现。偏好不足可需要澄清。",
+        "criteria": {
+          "three_state": "Skoope：新列先升序，同列再降序，再取消该列排序，循环；回到项目基础次序。",
+          "two_state": "Catchouse prototype：新列先降序，同列再升序，此后升降交替，不含点击取消。",
+          "needs_clarification": "两种来源均合理，需要用户明确通用默认偏好。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "table_sort_cycle": {
+        "type": "choice",
+        "choice": "three_state",
+        "confidence": 0.8,
+        "probabilities": {
+          "three_state": 0.87,
+          "two_state": 0.01,
+          "needs_clarification": 0.12
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1225,
+      "output_tokens": 47
+    }
+  },
+  "selected_probability": 0.87,
+  "auto_selected": true
+}

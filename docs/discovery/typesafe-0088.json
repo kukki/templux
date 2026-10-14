@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从Supplieroom、Skoope、Catchouse整合通用模板，供新项目套用及作为独立项目启动；认证、轻量账号、日志、容器CLI、统一控件规范。",
+      "confirmed": "模板独立启动默认提供登录、账号管理与控件示例，使用自带样例数据，不增加完整样例业务。网页元素按需采用，不要求新项目固定包含全部控件。风格及交互默认由项目配置；新项目保有业务、配置及骨架，共享版本包分发公共能力，改进可审查反哺。触屏普通通知不增加专门暂停交互。 已按授权采用新项目保留独立可移除示例目录，开发测试默认启用、生产默认关闭，项目可配置启用并明确访问规则。 用户已确认控件示例使用独立样例文件，浏览器内存模拟操作，刷新或重置恢复，不增示例API及表；真实登录账号审计仍正常后端。账号首登飞书为Pending，经CLI授权有角色后才能进入。默认管理员与普通用户，Agent独立身份也要授权。 已按授权采用示例启用时已批准有角色的正常账号可访问，含普通用户及获授权Agent，匿名Pending禁用零角色不可访问，不赋予管理权限。用户一直用简体中文沟通，但尚未明确产品默认语言和是否需要用户切换语言。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选到TypeSafe官方API。",
+      "scope": "只决定模板首版默认文案语言与多语言能力范围，不决定翻译库、具体业务术语或日期时区；风格变体仍由项目配置。"
+    },
+    "questions": {
+      "ui_language_scope": {
+        "type": "choice",
+        "instructions": "为通用模板首版推荐界面文案语言与组织方式，用户中文沟通且重视新项目灵活配置。不能仅因沟通语言认定已确认产品语言，未明确可needs_clarification。",
+        "criteria": {
+          "chinese_centralized_project_locale": "默认简体中文，通用文案集中管理、避免散落组件，新项目可替换文案或配置目标语言；首版不提供终端用户语言切换及完整双语翻译。",
+          "chinese_english_user_switch": "首版提供完整简体中文及英文文案，允许用户切换语言。",
+          "english_centralized": "默认英文，通用文案集中管理，新项目可替换，首版不提供用户语言切换。",
+          "needs_clarification": "用户未明确产品默认语言及双语需求，需要选择首版范围。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "ui_language_scope": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.63,
+        "probabilities": {
+          "chinese_centralized_project_locale": 0.28,
+          "chinese_english_user_switch": 0.0,
+          "english_centralized": 0.0,
+          "needs_clarification": 0.72
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1114,
+      "output_tokens": 71
+    }
+  },
+  "selected_probability": 0.72,
+  "auto_selected": false
+}

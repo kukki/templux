@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从Supplieroom、Skoope、Catchouse整合通用模板，供新项目套用及作为独立项目启动；认证、轻量账号、日志、容器CLI、统一控件规范。",
+      "confirmed": "模板独立启动默认提供登录、账号管理与控件示例，使用自带样例数据，不增加完整样例业务。网页元素按需采用，不要求新项目固定包含全部控件。风格及交互默认由项目配置；新项目保有业务、配置及骨架，共享版本包分发公共能力，改进可审查反哺。触屏普通通知不增加专门暂停交互。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选到TypeSafe官方API。",
+      "scope": "只决定从模板新生成项目是否保留控件示例页以及默认可访问环境，不改变模板自身有示例的已定要求，不决定样例数据的实现或真实业务功能。"
+    },
+    "questions": {
+      "generated_project_demo_policy": {
+        "type": "choice",
+        "instructions": "推荐新项目生成后的控件示例页交付策略，模板本身已有示例，新项目业务及元素按需采用。兼顾开发参考与生产简洁；不因假想风险添加审批流程。需求不足可needs_clarification。",
+        "criteria": {
+          "retain_dev_default": "生成项目保留独立可移除的示例目录及页面，开发测试默认启用，生产默认关闭；可由项目配置启用并按明确访问规则开放。",
+          "retain_admin_all_env": "生成项目保留示例，开发测试及生产均默认管理员可访问。",
+          "omit_from_new_projects": "新项目生成默认不带示例页面，开发者到模板独立示例项目查看，可选择额外复制。",
+          "needs_clarification": "需用户决定示例是否随新项目交付及默认可见环境。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "generated_project_demo_policy": {
+        "type": "choice",
+        "choice": "retain_dev_default",
+        "confidence": 0.69,
+        "probabilities": {
+          "retain_dev_default": 0.77,
+          "retain_admin_all_env": 0.05,
+          "omit_from_new_projects": 0.01,
+          "needs_clarification": 0.17
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 871,
+      "output_tokens": 62
+    }
+  },
+  "selected_probability": 0.77,
+  "auto_selected": true
+}

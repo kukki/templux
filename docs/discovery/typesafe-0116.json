@@ -1,0 +1,69 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "三项目提取轻量模板，内部人员及受邀合作方，人员和独立Agent正常密码认证，来源共通直接采用，明显分歧才评估。",
+      "confirmed": "用户选择按来源IP+用户名组合分别累计失败；三项目默认阈值均5次，直接采用。密码失败临时限制、成功清理相应计数已采用。管理员统一重置，系统随机新密码，旧会话失效。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "paths": [
+            "src/modules/auth/application/login-rate-limiter.ts:1-31",
+            "src/modules/auth/runtime/auth-runtime.ts:29-39"
+          ],
+          "policy": "无参数构造默认阈值5，滚动取最近15分钟失败时间戳；达到5则阻挡，旧记录离开窗口后恢复；没有另加从第5次起完整15分钟锁定。"
+        },
+        {
+          "project": "Catchouse",
+          "paths": [
+            "server/auth.js:73-86,134-157",
+            "server/config.js:131-133"
+          ],
+          "policy": "从组内第一次失败开始的窗口默认15分钟，窗口内达到5次后，从触发时起限制15分钟；受限期间不再记录失败。"
+        },
+        {
+          "project": "Skoope",
+          "path": "src/modules/auth/local.ts:8,57-71,87-89",
+          "policy": "累计失败达到5次锁10分钟，锁内不增加，锁到期不自动清零，之后再次失败会再次锁10分钟；成功或管理员重置清零。其来源计数键是账号，但本题只借用时间算法，不重开IP用户名已定键。"
+        }
+      ],
+      "evidence_limits": "图及精确源码、覆盖检查已核对，metadata_match无报告问题；未测试实际部署或读取env，不按项目数量投票。",
+      "delegation": "用户授权实际选项概率严格大于75%自动选，否则用户选择，允许需求摘要已定决策来源候选发官方API。",
+      "scope": "只选择来源已有的时间算法，不重开IP用户名维度和5次默认，不选择存储，不新增混合或第三方方案。"
+    },
+    "questions": {
+      "password_failure_time_policy": {
+        "type": "choice",
+        "instructions": "根据已核对三项目现有时间算法，为轻量模板选择密码失败限制策略。保持IP加用户名计数及5次默认，明确区分滚动窗口和触发后固定限制，不能把不同15分钟策略视为相同。用户使用人员与授权Agent正常界面测试。需求不足可needs_clarification。",
+        "criteria": {
+          "supplier_sliding15": "采用Supplieroom：最近15分钟累计5次失败则阻挡，随旧失败记录离开滚动窗口恢复，无额外固定15分钟锁定。",
+          "catchouse_window15_block15": "采用Catchouse：首次失败起15分钟窗口内达到5次，从触发时起固定限制15分钟，成功清理相应记录。",
+          "skoope_cumulative_lock10": "借用Skoope时间算法：累计失败达到5次锁10分钟，锁到期不清零，下一次失败重新锁定，成功或管理员重置清零；按已确认IP用户名维度实现。",
+          "needs_clarification": "来源各有可用性取舍，当前需求不足以选择时间策略。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "password_failure_time_policy": {
+        "type": "choice",
+        "choice": "catchouse_window15_block15",
+        "confidence": 0.25,
+        "probabilities": {
+          "supplier_sliding15": 0.29,
+          "catchouse_window15_block15": 0.44,
+          "skoope_cumulative_lock10": 0.07,
+          "needs_clarification": 0.2
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1316,
+      "output_tokens": 79
+    }
+  },
+  "selected_probability": 0.44,
+  "auto_selected": false
+}

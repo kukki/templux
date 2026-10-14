@@ -1,0 +1,44 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未审查来源项目代码；没有维护团队规模、升级频率或多租户要求。",
+      "confirmed_followup": "用户希望新项目新增元素反哺模板，让其它项目与已套用项目受益。已确认通用改进须经审查后进入模板，业务内容和数据留在项目内；模板更新后自动生成升级提案及检查结果，由项目维护者确认后应用。首版面向内部员工及受邀合作方，账号由管理员创建、邀请或审批，不默认开放公众注册。不同组织各自部署一套；用户指定使用飞书认证，通过.env配置应用凭据与允许组织范围来限制内部用户。未说明是否保留本地密码登录，以及外部合作方的认证方式。模板需能独立启动。"
+    },
+    "questions": {
+      "login_methods": {
+        "type": "choice",
+        "instructions": "选择与用户已确认需求一致的首版人员登录方式。内部飞书用户须校验允许组织，所有登录方式均须经过本地账号授权，不开放公众注册。比较外部受邀人员接入、飞书依赖、独立启动和密码维护成本。用户只说使用飞书认证，没有明确说唯一登录方式。若缺乏足够依据决定是否允许本地密码登录，选 needs_clarification。",
+        "criteria": {
+          "feishu_and_controlled_password": "内部优先飞书；保留可配置的本地密码登录，用于管理员恢复和管理员明确开通的受邀合作方；每种方式均受本地权限约束，内部密码资格另行决定。",
+          "feishu_only": "所有人员只能通过允许组织的飞书身份登录；不维护人员本地密码，合作方须具备符合限制的飞书身份，故障恢复使用CLI等运维路径。",
+          "feishu_and_admin_password_only": "日常人员仅通过允许组织的飞书身份登录；本地密码只给恢复管理员使用，合作方须具备符合限制的飞书身份。",
+          "needs_clarification": "尚不能判断外部合作方是否拥有符合组织限制的飞书身份，以及本地密码登录的允许范围。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "login_methods": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.95,
+        "probabilities": {
+          "feishu_and_controlled_password": 0.01,
+          "feishu_only": 0.02,
+          "feishu_and_admin_password_only": 0.01,
+          "needs_clarification": 0.96
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1112,
+      "output_tokens": 67
+    }
+  },
+  "selected_probability": 0.96,
+  "auto_selected": false
+}

@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "基于Supplieroom、Skoope、Catchouse形成可独立Docker运行及供新项目复用的通用模板，认证、轻量用户、日志、统一网页元素规范、容器CLI及审查反哺升级。",
+      "confirmed": "支持授权独立Agent账号通过真实密码登录页面做界面测试，无认证后门。默认管理员及普通用户，权限变化使旧会话失效，服务端仍校验；Pending需CLI授权。前端Next.js、后端Fastify/TS、PostgreSQL，全部应用及管理逻辑容器运行，宿主DockerComposeShell。新项目控件示例内存样例数据、开发测试默认启用。备份恢复CLI、迁移前备份、默认5份、恢复旧会话失效，恢复每次指定模式目标已确认。尚未明确模板交付自动化测试基线。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选到TypeSafe官方API。",
+      "scope": "只决定自动化验收覆盖层次，不选择测试库或CI厂商，不操作真实生产和来源项目。所有测试使用隔离环境和明确授权的临时测试账号；飞书真实组织登录不要求进入无凭据的常规自动测试。"
+    },
+    "questions": {
+      "acceptance_test_baseline": {
+        "type": "choice",
+        "instructions": "推荐模板交付自动化验收基线，用户明确AI Coding Agent通过授权账号真实界面测试，需让新项目升级受益。选择覆盖层次，避免仅验证实现细节；不强制当前文档变更写测试。需求不足可needs_clarification。",
+        "criteria": {
+          "unit_api_browser": "模板提供关键逻辑及API集成测试，并包含隔离环境下通过真实密码登录的浏览器关键流程与控件交互验收；均可容器运行。飞书真实组织登录另行有凭据环境验收，不设认证后门。",
+          "unit_api_manual_browser": "关键逻辑及API集成自动测试，真实浏览器验收由人员或Agent按清单手动触发，不作为默认自动测试套件。",
+          "manual_only": "首版只提供人工或Agent操作验收清单，不内置自动测试套件。",
+          "needs_clarification": "需要用户明确自动化浏览器验收是否纳入首版。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "acceptance_test_baseline": {
+        "type": "choice",
+        "choice": "unit_api_browser",
+        "confidence": 0.84,
+        "probabilities": {
+          "unit_api_browser": 0.88,
+          "unit_api_manual_browser": 0.06,
+          "manual_only": 0.01,
+          "needs_clarification": 0.05
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 996,
+      "output_tokens": 63
+    }
+  },
+  "selected_probability": 0.88,
+  "auto_selected": true
+}

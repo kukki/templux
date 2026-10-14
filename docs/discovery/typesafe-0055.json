@@ -1,0 +1,26 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "通用独立可运行模板，容器内管理CLI，人工交互菜单与Agent一行脚本共用逻辑。宿主只有Docker、Compose、基础Shell。",
+      "confirmed": "无参数且有终端进菜单；完整参数直接执行；显式非交互模式；非交互或无终端缺参快速失败、非零退出码，不等待输入。管理账号、角色、维护、启动迁移；Agent初始随机密码只写受限指定文件，普通输出不打印凭据。结构化运行日志及审计已确认。",
+      "delegation": "用户授权选项概率严格大于75%自动采用；需求摘要、决策、候选项可发官方API。",
+      "question_scope": "仅决定CLI输出格式默认，不决定命令名称、退出码编号、具体JSON字段或破坏性操作审批。"
+    },
+    "questions": {
+      "cli_output_contract": {
+        "type": "choice",
+        "instructions": "为人工与Agent兼用的容器CLI推荐输出合同。兼顾人工可读及自动化稳定解析，避免日志污染结果。不确定关键需求时可选择needs_clarification。",
+        "criteria": {
+          "human_default_json_option": "默认人工可读；提供显式JSON模式，stdout仅输出结构化结果，运行日志与诊断写stderr，保留退出码表示成功失败；敏感凭据仍只写受限文件。",
+          "text_only": "首版只提供人工可读输出，Agent依赖退出码与文本读取，无稳定机器格式承诺。",
+          "json_default": "所有非交互命令默认JSON输出，人工阅读需显式文本模式。",
+          "needs_clarification": "现有约束不足以推荐默认输出格式，需要用户选择。"
+        }
+      }
+    }
+  },
+  "response": null,
+  "error": "Connection timed out; no probability result received.",
+  "auto_selected": false
+}

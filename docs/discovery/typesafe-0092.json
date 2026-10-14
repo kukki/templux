@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板汇总三套项目，供新项目生成复用，也可独立Docker启动；前后端独立，共享版本包反哺升级。",
+      "confirmed": "默认简体中文，文案集中管理，新项目可替换，无用户语言切换。PostgreSQL默认，Compose可提供数据库也可配置外部数据库；pg参数化SQL及版本化SQL迁移。统一启动升级命令先在管理容器迁移校验，再启动应用，失败中止；维护通知不自行停服，运维控制服务停启。宿主只Docker、Compose、Shell，管理CLI容器内执行，人工菜单及Agent一行参数模式，变更须显式确认，支持JSON。升级提案由维护者审批后应用，已确认提供容器数据库备份恢复CLI，人工菜单及Agent一行，恢复显式确认；定时及异地存储部署环境负责，不内置定时服务。 已自动采用已有数据库存在待迁移项时默认自动备份，失败中止迁移，全新空库及无待迁移项跳过；外部备份替代机制未定。 已自动采用外部备份显式替代并提供参考、写升级记录，操作者负责确认可恢复，模板不声称已验证任意外部快照。项目配置受版本管理，.env保存环境参数及凭据。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许需求摘要决策候选发到TypeSafe官方API。",
+      "scope": "仅决定模板内置备份命令的打包范围是否包含项目配置及.env，不读取或发送实际凭据，不讨论附件文件或业务数据范围，不新增定时服务。"
+    },
+    "questions": {
+      "backup_package_configuration": {
+        "type": "choice",
+        "instructions": "推荐模板内置数据库备份命令是否打包项目配置及.env。已有项目配置受版本控制，env含凭据，恢复需要正确配置。权衡单一数据库备份和一体化加密恢复包，不足可needs_clarification。",
+        "criteria": {
+          "database_only_config_separate": "内置命令只备份数据库；项目代码配置通过版本库恢复，.env由部署环境单独妥善备份，恢复文档明确必须准备兼容配置及必要密钥，不把数据库备份称为完整环境备份。",
+          "encrypted_database_config_env": "内置备份提供包含数据库、项目配置及.env的加密恢复包，解密凭据单独保存，不写明文env进普通备份包；需维护加解密与密钥交付能力。",
+          "needs_clarification": "需要用户决定是否将配置凭据纳入模板内置备份，现有需求不足。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "backup_package_configuration": {
+        "type": "choice",
+        "choice": "database_only_config_separate",
+        "confidence": 0.88,
+        "probabilities": {
+          "database_only_config_separate": 0.92,
+          "encrypted_database_config_env": 0.01,
+          "needs_clarification": 0.07
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1105,
+      "output_tokens": 57
+    }
+  },
+  "selected_probability": 0.92,
+  "auto_selected": true
+}

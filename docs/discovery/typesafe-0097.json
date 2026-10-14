@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "基于Supplieroom、Skoope、Catchouse形成可独立Docker运行及供新项目复用的通用模板，认证、轻量用户、日志、统一网页元素规范、容器CLI及审查反哺升级。",
+      "confirmed": "支持授权独立Agent账号通过真实密码登录页面做界面测试，无认证后门。默认管理员及普通用户，权限变化使旧会话失效，服务端仍校验；Pending需CLI授权。前端Next.js、后端Fastify/TS、PostgreSQL，全部应用及管理逻辑容器运行，宿主DockerComposeShell。新项目控件示例内存样例数据、开发测试默认启用。备份恢复CLI、迁移前备份、默认5份、恢复旧会话失效，恢复每次指定模式目标已确认。尚未明确模板交付自动化测试基线。 已自动采用关键逻辑API集成及真实密码登录浏览器关键流程自动化验收，隔离容器运行，飞书另在有凭据环境验收。项目配置切换风格布局变体，统一网页元素样式要求，默认浅蓝主题，响应式。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选到TypeSafe官方API。",
+      "scope": "只决定首版视觉回归是否以截图差异作为自动阻断条件，不决定像素阈值、工具、CI厂商或具体色值；行为与权限自动验收均已确认，不重问。"
+    },
+    "questions": {
+      "visual_regression_gate": {
+        "type": "choice",
+        "instructions": "推荐统一控件模板首版视觉回归方式，配置可切换主题布局，样式一致重要但截图基线维护也有成本。已有浏览器行为验收；判断截图是否自动阻断发布，缺乏偏好可needs_clarification。",
+        "criteria": {
+          "behavior_gate_screenshots_review": "自动验收交互及关键布局约束，产出代表性主题视口截图供人工审查；首版不因像素差异自动阻断。",
+          "screenshot_diff_gate": "除行为布局验收，还维护代表性主题视口截图基线，超出容差的视觉差异自动阻断，须审查更新基线。",
+          "no_visual_artifacts": "首版只自动验收行为，视觉由人员另行查看，不默认产出截图证据。",
+          "needs_clarification": "需用户决定是否投入截图基线维护及自动阻断。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "visual_regression_gate": {
+        "type": "choice",
+        "choice": "behavior_gate_screenshots_review",
+        "confidence": 0.23,
+        "probabilities": {
+          "behavior_gate_screenshots_review": 0.42,
+          "screenshot_diff_gate": 0.15,
+          "no_visual_artifacts": 0.01,
+          "needs_clarification": 0.42
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1036,
+      "output_tokens": 74
+    }
+  },
+  "selected_probability": 0.42,
+  "auto_selected": false
+}

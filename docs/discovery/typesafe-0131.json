@@ -1,0 +1,61 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "网页元素按需使用且项目可配置。排序下拉与可排序表头并存状态同步已按授权采用；表头升序降序取消、单字段改变回第一页。现在只决定排序/页码/每页数量三项列表状态的默认保存位置，不涉及搜索词或业务筛选。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/modules/supplier-po/ui/supplier-po-workspace.tsx:134-140,153-166",
+          "behavior": "从页面URL读取sort/page/pageSize，改变后replaceState写回页面URL。"
+        },
+        {
+          "project": "Skoope",
+          "path": "src/components/overview-table.tsx:108-131",
+          "behavior": "从查询参数初始化sort/page/pageSize；update使用replaceState写页面URL，popstate读取地址参数。"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/catchouse-app.js:5,54-59,74-77,784-793,1039-1052,2001",
+          "behavior": "所查看板排序页码每页数在页面state中，API查询URL带参数；readRoute只识别dashboard路由不读取这些参数，routePath只输出/dashboard。API请求参数不等于地址栏保存。prototype参考，不概括其他页面。"
+        }
+      ],
+      "evidence_limits": "已查源码、相关函数图定位及cycleTableSort入向与snippet，覆盖四文件均metadata_match/no_recorded_issue，长函数事件与渲染直接补读；无运行验收，不概括全项目。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "只选排序、页码、每页数三项在通用列表控件中的默认保存位置。A地址参数刷新可恢复，通过replace不让每次操作新增历史条目；B仅页面内存，刷新回项目默认。项目可配置。明确不发送搜索词到地址栏，不讨论业务条件敏感性、跨设备偏好或账号权限共享；任何URL不授权访问。"
+    },
+    "questions": {
+      "list_navigation_state_storage": {
+        "type": "choice",
+        "instructions": "从已核对的页面地址参数与页面内存两种现有方式选择列表排序/页码/每页数默认保存位置，不把API URL当页面URL，不按项目数量投票；只涉及三项通用状态，项目可以配置。偏好不足可needs_clarification。",
+        "criteria": {
+          "page_url": "Supplieroom/Skoope：三项写页面地址参数，刷新可恢复，更新替换当前历史条目。",
+          "page_memory": "Catchouse所查看板prototype：三项仅页面内存，刷新回默认。",
+          "needs_clarification": "刷新保留行为尚未明确，需要用户指定。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "list_navigation_state_storage": {
+        "type": "choice",
+        "choice": "page_url",
+        "confidence": 0.88,
+        "probabilities": {
+          "page_url": 0.92,
+          "page_memory": 0.0,
+          "needs_clarification": 0.08
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1239,
+      "output_tokens": 48
+    }
+  },
+  "selected_probability": 0.92,
+  "auto_selected": true
+}

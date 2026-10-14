@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "通用模板汇总Supplieroom、Skoope、Catchouse，规范页头页脚等网页元素，控件按需采用，模板可独立启动。",
+      "confirmed": "风格和布局变体由新项目配置，主题及导航方向只是例子，不是用户自行切换主题。各项目使用既定主题并支持响应式，样式与代码分离。已有项目配置值调整后重启生效，不需重建镜像。顶部普通通知15秒有限堆叠队列，维护通知持续显示；窄屏分页保留关键控制。首版审计页查询筛选分页，不导出。 用户明确选择页头页脚默认均随页面滚动，固定或吸附仅为项目可选变体。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送需求摘要、决策、候选到TypeSafe官方API。",
+      "scope": "只决定应用外壳默认提供哪些页头页脚内容，不决定具体排版、字体、版本号格式、版权文本或导航方向。网页元素按需使用，项目配置可隐藏可选内容；横向导航在页头，纵向导航可在侧栏。"
+    },
+    "questions": {
+      "shell_default_content": {
+        "type": "choice",
+        "instructions": "推荐轻量模板页头页脚的默认内容集合，兼顾独立启动展示和新项目快速更换品牌。保持项目级变体且不固化来源业务或组织。若用户需自行决定内容则needs_clarification。",
+        "criteria": {
+          "minimal_brand_account_footer": "默认页头有项目名称、可选Logo、当前账号与退出入口；导航按横向或纵向配置安排。页脚默认显示项目版本及可配置版权文字；这些展示区域可按项目配置隐藏或替换。",
+          "brand_account_no_footer_content": "默认页头有项目名称、可选Logo、当前账号与退出入口；导航按方向配置；页脚只留扩展区域，不默认展示版本或版权。",
+          "project_defined_all": "模板只规定区域及插槽，页头页脚没有默认内容，各新项目自行定义；模板演示页单独配置。",
+          "needs_clarification": "默认内容是品牌偏好，需要用户明确选择。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "shell_default_content": {
+        "type": "choice",
+        "choice": "minimal_brand_account_footer",
+        "confidence": 0.76,
+        "probabilities": {
+          "minimal_brand_account_footer": 0.82,
+          "brand_account_no_footer_content": 0.13,
+          "project_defined_all": 0.03,
+          "needs_clarification": 0.02
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 969,
+      "output_tokens": 63
+    }
+  },
+  "selected_probability": 0.82,
+  "auto_selected": true
+}

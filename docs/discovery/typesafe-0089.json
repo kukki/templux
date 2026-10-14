@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板汇总三套项目，供新项目生成复用，也可独立Docker启动；前后端独立，共享版本包反哺升级。",
+      "confirmed": "默认简体中文，文案集中管理，新项目可替换，无用户语言切换。PostgreSQL默认，Compose可提供数据库也可配置外部数据库；pg参数化SQL及版本化SQL迁移。统一启动升级命令先在管理容器迁移校验，再启动应用，失败中止；维护通知不自行停服，运维控制服务停启。宿主只Docker、Compose、Shell，管理CLI容器内执行，人工菜单及Agent一行参数模式，变更须显式确认，支持JSON。升级提案由维护者审批后应用，尚未定义备份恢复能力。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许需求摘要决策候选发到TypeSafe官方API。",
+      "scope": "只决定首版数据库备份恢复能力交付范围，不实施恢复，不定义业务数据范围、文件附件备份或具体保留周期，不引入额外宿主运行环境。"
+    },
+    "questions": {
+      "database_backup_restore_scope": {
+        "type": "choice",
+        "instructions": "推荐模板首版数据库备份恢复交付范围，轻量可独立Docker部署，升级有SQL迁移。数据库可内置或外部，外部管理员可用既有备份设施；不因假想风险引入审批流程。无法定默认可needs_clarification。",
+        "criteria": {
+          "cli_manual_schedule_external": "提供容器内执行的备份及恢复CLI，支持人工菜单与Agent一行命令；定时调度与异地存储交给部署环境或新项目，不内置定时备份服务。恢复遵从管理变更显式确认规则。",
+          "builtin_scheduled_backups": "除备份恢复CLI，还内置可配置定时备份及本地轮转，异地存储可扩展，增加模板维护的调度能力。",
+          "documentation_only": "首版只提供备份恢复操作文档，不封装项目命令，使用数据库或部署环境已有工具。",
+          "needs_clarification": "需要用户决定模板是否提供备份恢复命令及内置定时能力。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "database_backup_restore_scope": {
+        "type": "choice",
+        "choice": "cli_manual_schedule_external",
+        "confidence": 0.41,
+        "probabilities": {
+          "cli_manual_schedule_external": 0.56,
+          "builtin_scheduled_backups": 0.0,
+          "documentation_only": 0.16,
+          "needs_clarification": 0.27
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 964,
+      "output_tokens": 66
+    }
+  },
+  "selected_probability": 0.56,
+  "auto_selected": false
+}

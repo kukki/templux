@@ -1,0 +1,44 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未审查来源项目代码；没有维护团队规模、升级频率或多租户要求。",
+      "confirmed_followup": "用户希望新项目新增元素反哺模板，让其它项目与已套用项目受益。已确认通用改进须经审查后进入模板，业务内容和数据留在项目内；已选择模板更新后自动生成升级提案及检查结果，由项目维护者确认后应用。未来软件项目的主要用户群与注册开放程度尚未说明。"
+    },
+    "questions": {
+      "target_audience": {
+        "type": "choice",
+        "instructions": "根据已知需求，为第一版通用模板选择主要适用的应用类型。只决定首版的用户群和注册开放程度，不决定登录供应商、多租户或具体角色。不要仅因用户管理轻量就断言用户只做内部工具。无法判断未来主要用户群时选择 needs_clarification。",
+        "criteria": {
+          "controlled_business_apps": "主要服务内部员工及受邀合作方的业务工具，账号由管理员创建、邀请或审批，不默认允许公众自助注册。",
+          "public_self_service_apps": "主要服务公众可自助注册的产品，首版须覆盖注册、验证与账号自助流程。",
+          "both_configurable_modes": "首版就同时支持受控业务工具和公众自助产品，通过配置切换完整账号生命周期，通用性高但范围较大。",
+          "needs_clarification": "现有目标不足以确定首版面向受控业务工具、公众自助产品还是必须同时支持。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "target_audience": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.96,
+        "probabilities": {
+          "controlled_business_apps": 0.02,
+          "public_self_service_apps": 0.0,
+          "both_configurable_modes": 0.01,
+          "needs_clarification": 0.97
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 925,
+      "output_tokens": 67
+    }
+  },
+  "selected_probability": 0.97,
+  "auto_selected": false
+}

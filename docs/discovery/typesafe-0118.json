@@ -1,0 +1,67 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "来源三项目提取轻量通用模板，人员与独立授权Agent真实认证，登录审计和关键管理审计。",
+      "confirmed": "会话PG持久化，每受保护请求最新版本核验；密码失败PG记录、IP用户名键、15分钟5次固定限制15分钟；人员管理员统一随机重置，旧会话失效。管理账号角色等关键数据库变更须可靠保存审计否则不提交，但该先前决定明确排除了登录事件的失败行为。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "paths": [
+            "src/app/api/auth/login/route.ts:94-107",
+            "src/modules/auth/application/auth-audit.ts:72-93"
+          ],
+          "policy": "登录响应设会话cookie后，异步调用认证审计并catch记录运行错误，不阻断已成功登录"
+        },
+        {
+          "project": "Catchouse",
+          "path": "server/auth.js:62-72,154-156",
+          "policy": "建立会话后audit调用，audit自己捕获同步错误及异步append拒绝，只logger错误，不向login抛错"
+        },
+        {
+          "project": "Skoope",
+          "paths": [
+            "src/modules/auth/local.ts:86-104",
+            "src/modules/auth/agent.ts:37-58"
+          ],
+          "policy": "事务内建会话，再await数据库审计插入，成功才commit；审计异常rollback，登录不成功"
+        }
+      ],
+      "evidence_limits": "图追踪精确源码覆盖已核对，metadata_match无报告问题，未故障注入或验收运行，不发送源码凭据。",
+      "delegation": "用户要求先来源共通，再来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户决定，允许摘要候选发官方API。",
+      "scope": "只选择密码登录成功审计特定写入失败的行为，账号会话本身仍正常可处理；不允许数据库整体不可用时绕过认证，不决定失败登录、Feishu、登出或管理操作行为。"
+    },
+    "questions": {
+      "password_login_audit_write_failure": {
+        "type": "choice",
+        "instructions": "在来源已有方案中选择密码登录成功审计写入失败行为，用户要轻量认证可用及关键审计，但未决定本项。区分审计单独失败和整库不可用，区别已有管理变更强审计规则，不能机械投票。不足可needs_clarification。",
+        "criteria": {
+          "continue_login_report_error": "采用Supplieroom/Catchouse：账号会话核验成功时允许登录，成功审计写失败记录运行错误供处理，不声称审计已落盘。",
+          "reject_login_transaction": "采用Skoope：会话创建与成功审计保存绑定，审计写入失败则回滚会话创建并明确报错，登录不成功。",
+          "needs_clarification": "可用性与完整成功登录审计存在取舍，需要用户明确。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "password_login_audit_write_failure": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.49,
+        "probabilities": {
+          "continue_login_report_error": 0.29,
+          "reject_login_transaction": 0.05,
+          "needs_clarification": 0.66
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1171,
+      "output_tokens": 56
+    }
+  },
+  "selected_probability": 0.66,
+  "auto_selected": false
+}

@@ -1,0 +1,67 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从Skoope、Supplieroom、Catchouse提取轻量通用模板，内部员工及受邀合作方，各组织独立部署；人员飞书和受控密码，独立Agent授权登录真实测试。",
+      "confirmed": "人员密码管理员统一重置，不自助改密；随机新密码已按来源及90%选项概率采用。Agent密码规则不重开。所有账号版本与会话PG核验，权限变化失效。密码失败临时限制、成功清理相关失败记录是三项目共通能力，已直接采用。",
+      "user_workflow": "先三项目源码核对，共通直接采用；明显分歧才给TypeSafe选已存在方案，选项概率超过75%自动选，否则用户选。允许摘要决策候选发送官方API。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "dimension": "source_ip_plus_username",
+          "paths": [
+            "src/modules/auth/application/supplier-login.ts:24-61",
+            "src/modules/auth/application/login-rate-limiter.ts:1-31"
+          ],
+          "fact": "rateKey为来源IP和规范化用户名组合；各组合独立失败记录及成功清理"
+        },
+        {
+          "project": "Catchouse",
+          "dimension": "source_ip_plus_username",
+          "path": "server/auth.js:73-86,134-157",
+          "fact": "failureKey为IP和规范化用户名组合；各组合失败计数与成功清理"
+        },
+        {
+          "project": "Skoope",
+          "dimension": "account_credential",
+          "path": "src/modules/auth/local.ts:37-105",
+          "fact": "按账号查密码凭据记录，持有行锁更新失败计数和locked_until；来源不作为该凭据记录的计数键"
+        }
+      ],
+      "evidence_limits": "图定位追踪、源码及覆盖检查完成，相关文件无报告缺口metadata_match。未审计各项目外层所有限流，不发送源码凭据，不按2对1机械投票。",
+      "scope": "只选择模板密码失败计数维度，时长次数、存储、代理IP识别另定。不引入两层混合新方案，因为本轮要求只从源项目现有分歧选择。"
+    },
+    "questions": {
+      "password_failure_counter_dimension": {
+        "type": "choice",
+        "instructions": "在已有两种来源方案中选择模板密码失败计数维度。账号维度跨来源共享失败，也会使来自其它来源的该账号受同一限制；IP加用户名组合按来源区分，但切换来源会使用不同计数。结合内部及邀请账号和Agent测试，不声称任一全面防护；意图不足可needs_clarification。",
+        "criteria": {
+          "ip_username_pair": "采用Supplieroom/Catchouse：按来源IP和用户名组合分别计数及临时限制。",
+          "account_global": "采用Skoope密码凭据模式：按账号统一计数及临时限制，跨来源共享。",
+          "needs_clarification": "两种来源方案有不同可用性及覆盖取舍，需要用户决定计数维度。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "password_failure_counter_dimension": {
+        "type": "choice",
+        "choice": "ip_username_pair",
+        "confidence": 0.38,
+        "probabilities": {
+          "ip_username_pair": 0.59,
+          "account_global": 0.03,
+          "needs_clarification": 0.38
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1197,
+      "output_tokens": 50
+    }
+  },
+  "selected_probability": 0.59,
+  "auto_selected": false
+}

@@ -1,0 +1,81 @@
+name: ${TEMPLUX_PROJECT_NAME:-templux}
+
+x-database-environment: &database-environment
+  DATABASE_URL: ${DATABASE_URL:-postgresql://templux:templux-local-only@database:5432/templux}
+
+services:
+  database:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_DB: templux
+      POSTGRES_USER: templux
+      POSTGRES_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
+    volumes:
+      - database:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U templux -d templux"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      target: api
+    environment: *database-environment
+    ports:
+      - "127.0.0.1:${TEMPLUX_API_PORT:-31800}:8080"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 8s
+      retries: 10
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: web
+    environment:
+      API_INTERNAL_URL: http://api:8080
+    ports:
+      - "127.0.0.1:${TEMPLUX_HTTP_PORT:-31000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 8s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    image: ${TEMPLUX_PROJECT_NAME:-templux}-api
+    environment: *database-environment
+    profiles: ["tools"]
+    entrypoint: ["node", "apps/api/dist/migrate.js"]
+
+  management:
+    build:
+      context: .
+      target: management
+    environment:
+      <<: *database-environment
+      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-templux}
+      TEMPLUX_HTTP_PORT: ${TEMPLUX_HTTP_PORT:-31000}
+      TEMPLUX_API_PORT: ${TEMPLUX_API_PORT:-31800}
+      TEMPLUX_DB_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    profiles: ["tools"]
+
+  checks:
+    build:
+      context: .
+      target: checks
+    environment:
+      TEST_API_URL: http://api:8080
+      TEST_WEB_URL: http://web:3000
+    profiles: ["tools"]
+
+volumes:
+  database:

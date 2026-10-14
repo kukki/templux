@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板汇总三套项目，供新项目生成复用，也可独立Docker启动；前后端独立，共享版本包反哺升级。",
+      "confirmed": "默认简体中文，文案集中管理，新项目可替换，无用户语言切换。PostgreSQL默认，Compose可提供数据库也可配置外部数据库；pg参数化SQL及版本化SQL迁移。统一启动升级命令先在管理容器迁移校验，再启动应用，失败中止；维护通知不自行停服，运维控制服务停启。宿主只Docker、Compose、Shell，管理CLI容器内执行，人工菜单及Agent一行参数模式，变更须显式确认，支持JSON。升级提案由维护者审批后应用，已确认提供容器数据库备份恢复CLI，人工菜单及Agent一行，恢复显式确认；定时及异地存储部署环境负责，不内置定时服务。 已自动采用已有数据库存在待迁移项时默认自动备份，失败中止迁移，全新空库及无待迁移项跳过；外部备份可显式参考替代。 已自动采用外部备份显式替代并提供参考、写升级记录，操作者负责确认可恢复，模板不声称已验证任意外部快照。项目配置受版本管理，.env保存环境参数及凭据。 已自动采用内置备份仅数据库，代码配置版本库恢复、env部署环境单独妥善备份，文档说明兼容配置和必要密钥。 用户确认迁移前自动备份默认保留最近5份成功备份，新成功备份后才清理，数量可配，不清理手动及外部备份。会话与撤销存PostgreSQL，正常应用重启保留有效会话；角色变化使旧会话失效重登。 已自动采用数据库恢复后重新开放访问前旧会话全部失效，人员Agent重登；正常重启保留有效会话不变。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许需求摘要决策候选发到TypeSafe官方API。",
+      "scope": "仅决定恢复目标模式首版支持及是否存在默认，不实施恢复。原库恢复须暂停应用写入并明确确认；独立目标需要预先准备或具有创建权限，不假设外部数据库允许自动建库。"
+    },
+    "questions": {
+      "restore_target_mode": {
+        "type": "choice",
+        "instructions": "推荐轻量模板数据库恢复目标选择策略，兼顾现有数据库恢复及独立目标演练。CLI人工菜单不必记参数、非交互缺参失败已定。不能将隔离恢复自动当成切换生产目标，不足可needs_clarification。",
+        "criteria": {
+          "separate_target_default": "默认恢复到明确指定的独立数据库，校验后由操作者切换连接配置；原库覆盖作为显式可选模式。",
+          "inplace_default": "默认恢复当前部署数据库，停写并明确确认后覆盖；独立目标作为显式可选模式。",
+          "explicit_mode_no_default": "两种均支持，每次明确选择独立目标或原库恢复，不设隐式覆盖默认；人工菜单展示目标确认，Agent一行须提供模式与目标，缺少即失败。",
+          "needs_clarification": "需用户决定恢复模式支持及默认，现有部署范围不足。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "restore_target_mode": {
+        "type": "choice",
+        "choice": "explicit_mode_no_default",
+        "confidence": 0.37,
+        "probabilities": {
+          "separate_target_default": 0.02,
+          "inplace_default": 0.37,
+          "explicit_mode_no_default": 0.53,
+          "needs_clarification": 0.08
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1325,
+      "output_tokens": 64
+    }
+  },
+  "selected_probability": 0.53,
+  "auto_selected": false
+}

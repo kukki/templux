@@ -1,0 +1,61 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "模板元素按需复用，项目级配置样式与文案，不强制业务功能。分页默认10条、数量选项5/10/15/20/25/50、下拉跳页已确认。当前只确定成功查询但无匹配数据的默认提示形式。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/modules/supplier-po/ui/supplier-po-workspace.tsx:333-360",
+          "behavior": "正常无结果在结果区域显示标题没有符合条件的采购单及说明可尝试清除搜索词或切换状态；搜索筛选保留。载入中和错误分开分支。"
+        },
+        {
+          "project": "Skoope",
+          "path": "src/components/overview-table.tsx:144-178",
+          "behavior": "正常无结果显示一句此范围内无匹配的商品行；搜索筛选及分页保留。权限范围不足、数据源未接入各有独立分支，不视为普通无匹配。"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/catchouse-app.js:1020-1038",
+          "behavior": "看板正常无结果在桌面表格与移动列表区域均显示暂无匹配结果标题加尝试输入或调整筛选条件说明，搜索筛选保留。prototype代码参考，未证明生产接入。"
+        }
+      ],
+      "evidence_limits": "三个函数已图搜索、入向追踪、snippet读取（长函数截断部分直接源码补读），证据文件覆盖均metadata_match/no_recorded_issue；未运行浏览器验收，不概括全项目所有列表。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "只决定成功查询但无结果的默认文字层次：标题加简短说明或一句话。通用措辞不复制业务字段名，项目可覆盖文案与形式；不新增业务操作、插图、自动清空条件或重试。"
+    },
+    "questions": {
+      "empty_results_presentation": {
+        "type": "choice",
+        "instructions": "从实际来源选择可复用列表正常无匹配结果的默认提示层次。用户希望统一控件风格并由项目灵活配置，不按项目数量投票。缺乏偏好可需要澄清。",
+        "criteria": {
+          "title_and_hint": "Supplieroom和Catchouse看板：简短标题加一行调整搜索或筛选条件的提示，由项目覆盖文案。",
+          "single_sentence": "Skoope总览：一句无匹配结果文字，不默认附加说明，由项目覆盖文案。",
+          "needs_clarification": "两种形式均合理，需用户指定模板默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "empty_results_presentation": {
+        "type": "choice",
+        "choice": "title_and_hint",
+        "confidence": 0.77,
+        "probabilities": {
+          "title_and_hint": 0.85,
+          "single_sentence": 0.01,
+          "needs_clarification": 0.14
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1185,
+      "output_tokens": 51
+    }
+  },
+  "selected_probability": 0.85,
+  "auto_selected": true
+}

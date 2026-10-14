@@ -1,0 +1,47 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未明确多选筛选下拉应用选中条件的默认时机。",
+      "search_matching_decision": "用户已选择整段包含匹配，去除首尾空白并忽略大小写，任一指定字段命中；新项目可扩展。",
+      "timing_decision": "用户已确认停止输入后1秒内应用搜索条件并触发查询，结果返回时间由具体项目另行验收。",
+      "appearance_decision": "每个新项目使用既定主题并支持响应式，通过项目配置灵活调整网页元素样式与交互，不是用户切换主题。元素按需使用，不要求各项目固定包含。用户明确搜索规范：统一搜索，内嵌字段名称和提示、1秒内应用搜索、长度自适应、统一风格样式；使用搜索时新项目必需定义搜索字段；搜索按钮可选，默认不显示。其它网页元素同样定义统一规范、必填项、可选项。",
+      "confirmed_followup": "稳定通用能力通过版本化共享包分发，项目保有业务代码、配置和应用骨架；通用改进审查后反哺，升级自动生成提案由维护者确认应用。前后端通过API交互，独立构建发布并统一启动。首版服务内部员工及受邀合作方，独立组织各自部署，轻量账号管理，管理员及普通用户两个默认角色。"
+    },
+    "questions": {
+      "multiselect_apply_timing": {
+        "type": "choice",
+        "instructions": "为按需使用的多选筛选下拉选择默认应用筛选的时机。只讨论影响列表查询的多选筛选，不讨论表单保存或仅切换显示字段；这些可按项目扩展。权衡连续勾选便利、实时反馈、请求次数和可预测性。用户指定参考Skoope但尚未明确此交互；不能把统一文本搜索时限直接当成所有多选控件的要求。缺少依据时选needs_clarification。",
+        "criteria": {
+          "debounced_or_close": "勾选状态立即显示，停止勾选1秒后应用筛选；提前关闭下拉则立即应用，无需确认按钮。",
+          "close_only": "勾选时只更新草稿，关闭下拉后统一应用，不在面板打开时触发筛选，无需确认按钮。",
+          "every_change_immediate": "每次勾选立即应用筛选，显示状态和列表同步更新；连续勾选可触发多次查询。",
+          "needs_clarification": "用户未明确希望停顿应用、关闭应用还是每次勾选应用。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "multiselect_apply_timing": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.83,
+        "probabilities": {
+          "debounced_or_close": 0.11,
+          "close_only": 0.02,
+          "every_change_immediate": 0.0,
+          "needs_clarification": 0.87
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1226,
+      "output_tokens": 66
+    }
+  },
+  "selected_probability": 0.87,
+  "auto_selected": false
+}

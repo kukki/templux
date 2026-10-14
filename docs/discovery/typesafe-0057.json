@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "通用独立可运行模板，容器内管理CLI，人工交互菜单与Agent一行脚本共用逻辑。宿主只有Docker、Compose、基础Shell。",
+      "confirmed": "无参数且有终端进菜单；完整参数直接执行；显式非交互模式；非交互或无终端缺参快速失败、非零退出码，不等待输入。管理账号、角色、维护、启动迁移；Agent初始随机密码只写受限指定文件，普通输出不打印凭据。结构化运行日志及审计已确认。 用户已确认默认文本、显式JSON模式，JSON stdout仅结构化结果，诊断stderr。首次飞书登录Pending，必须通过CLI授权成为首个管理员；浏览器Agent身份独立且显式授权。 用户选择宿主运维授权即可执行管理CLI，不额外要求应用账号登录；管理变更保留审计，浏览器Agent账号不因此取得宿主权限。",
+      "delegation": "用户授权选项概率严格大于75%自动采用；需求摘要、决策、候选项可发官方API。",
+      "question_scope": "只决定现有账号禁用、角色更改、密码重置等管理变更的确认方式；不新增数据清空或删除命令，不设新的用户审批流程。"
+    },
+    "questions": {
+      "cli_change_confirmation": {
+        "type": "choice",
+        "instructions": "推荐管理CLI变更确认方式，兼顾人工菜单防止误操作与已授权Agent的一行执行。非交互绝不等待输入。仅选择确认交互规则，不改变宿主运维授权边界。",
+        "criteria": {
+          "interactive_confirm_script_explicit": "账号禁用、角色更改、密码重置等变更在人工交互时展示目标和变更摘要并确认；非交互要求显式确认参数，缺少时报错退出，有参数则一次执行。只读查询无确认。",
+          "interactive_confirm_script_direct": "人工交互展示摘要并确认；非交互完整指定命令及目标即视为确认，无需额外确认参数，只读无确认。",
+          "no_confirmation": "人工菜单与脚本均在参数校验通过后立即执行，不做二次确认。",
+          "needs_clarification": "现有约束不足以推荐是否要求额外确认参数，需要用户明确。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "cli_change_confirmation": {
+        "type": "choice",
+        "choice": "interactive_confirm_script_explicit",
+        "confidence": 0.44,
+        "probabilities": {
+          "interactive_confirm_script_explicit": 0.58,
+          "interactive_confirm_script_direct": 0.41,
+          "no_confirmation": 0.0,
+          "needs_clarification": 0.01
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 981,
+      "output_tokens": 63
+    }
+  },
+  "selected_probability": 0.58,
+  "auto_selected": false
+}

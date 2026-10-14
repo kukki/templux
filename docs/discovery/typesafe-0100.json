@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，独立组织分别部署，登录认证及轻量用户管理、Docker及容器CLI，基于三套项目取共通能力。",
+      "confirmed": "角色默认管理员普通用户，可扩展多角色，Agent独立授权身份复用服务端权限。用户明确参考Supplieroom增加心跳，权限变化与登录时不匹配强制退出重新登录；服务端独立校验。会话及撤销存PostgreSQL，正常重启保留有效会话；恢复DB使旧会话失效。业务范围由项目定义，通过模板统一失效接口接入，不实施通用范围模型。来源Supplieroom有周期授权快照对账，但未要求照搬其所有缓存和时序。用户现已明确选择每受保护请求核对最新PG会话撤销、账号状态及授权版本，变更提交后的新请求不按旧授权放行，不匹配重登。视觉验收已确认行为布局自动检查与截图审查，不以像素差异自动阻断。 已核对来源Supplieroom前端30秒心跳，用户现已确认可见在线页面默认30秒，env覆盖，恢复可见或网络立即校验。后台心跳不能作为用户操作延长10分钟闲置期限。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定服务端已确认会话失效后的前端呈现，不把普通网络故障等同会话失效，不处理权限不足但会话有效的业务拒绝。所有候选旧会话均立即失去服务端访问权限，未保存提醒不能阻挡退出。"
+    },
+    "questions": {
+      "invalid_session_ui": {
+        "type": "choice",
+        "instructions": "推荐权限变更等导致会话明确失效后的UI。用户说强制退出重新登录最简单直接，来源有60秒提示但未明确沿用。所有方案服务端立即拒绝旧会话，区别仅前端提示和跳转。偏好不足可needs_clarification。",
+        "criteria": {
+          "redirect_immediately_reason": "立即结束前端登录状态并返回登录页，在登录页持续显示本次失效原因，不等倒计时或确认；不将普通网络失败视为此情况。",
+          "blocking_notice_relogin_button": "清除业务视图显示阻断提示及重新登录按钮，用户点击后进入登录页，不保留可操作旧页面。",
+          "notice60_then_redirect": "显示60秒失效提示及立即重登按钮，到期自动去登录页；期间服务端仍拒绝旧会话。",
+          "needs_clarification": "需用户决定直接跳转还是先显示阻断提示或倒计时。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "invalid_session_ui": {
+        "type": "choice",
+        "choice": "redirect_immediately_reason",
+        "confidence": 0.43,
+        "probabilities": {
+          "redirect_immediately_reason": 0.57,
+          "blocking_notice_relogin_button": 0.06,
+          "notice60_then_redirect": 0.04,
+          "needs_clarification": 0.33
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1119,
+      "output_tokens": 68
+    }
+  },
+  "selected_probability": 0.57,
+  "auto_selected": false
+}

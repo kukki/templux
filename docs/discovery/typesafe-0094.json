@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板汇总三套项目，供新项目生成复用，也可独立Docker启动；前后端独立，共享版本包反哺升级。",
+      "confirmed": "默认简体中文，文案集中管理，新项目可替换，无用户语言切换。PostgreSQL默认，Compose可提供数据库也可配置外部数据库；pg参数化SQL及版本化SQL迁移。统一启动升级命令先在管理容器迁移校验，再启动应用，失败中止；维护通知不自行停服，运维控制服务停启。宿主只Docker、Compose、Shell，管理CLI容器内执行，人工菜单及Agent一行参数模式，变更须显式确认，支持JSON。升级提案由维护者审批后应用，已确认提供容器数据库备份恢复CLI，人工菜单及Agent一行，恢复显式确认；定时及异地存储部署环境负责，不内置定时服务。 已自动采用已有数据库存在待迁移项时默认自动备份，失败中止迁移，全新空库及无待迁移项跳过；外部备份可显式参考替代。 已自动采用外部备份显式替代并提供参考、写升级记录，操作者负责确认可恢复，模板不声称已验证任意外部快照。项目配置受版本管理，.env保存环境参数及凭据。 已自动采用内置备份仅数据库，代码配置版本库恢复、env部署环境单独妥善备份，文档说明兼容配置和必要密钥。 用户确认迁移前自动备份默认保留最近5份成功备份，新成功备份后才清理，数量可配，不清理手动及外部备份。会话与撤销存PostgreSQL，正常应用重启保留有效会话；角色变化使旧会话失效重登。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许需求摘要决策候选发到TypeSafe官方API。",
+      "scope": "只决定数据库备份恢复后已有会话如何处理，不更改正常重启保留会话的已定规则，不决定恢复时业务授权重审，也不在本轮恢复任何数据。"
+    },
+    "questions": {
+      "restore_session_policy": {
+        "type": "choice",
+        "instructions": "推荐数据库恢复后的会话策略。会话及撤销信息存在同一数据库，备份恢复可能回退撤销状态；正常重启保留会话已确认，不能混同恢复操作。用户强调权限变化旧会话失效。选择恢复后统一会话行为，不替项目审查业务数据。",
+        "criteria": {
+          "invalidate_restored_sessions": "恢复成功后，在重新开放访问前使恢复出来的全部旧会话失效，人员及Agent重新登录；不把备份里的旧会话重新视为有效，不改变普通重启保留会话。",
+          "preserve_valid_restored_sessions": "恢复后沿用备份中未过期且未标记撤销的会话，通过常规角色核验处理，与普通重启类似；备份后的撤销可能无法从恢复数据库识别。",
+          "needs_clarification": "需用户决定恢复是否必须统一退出。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "restore_session_policy": {
+        "type": "choice",
+        "choice": "invalidate_restored_sessions",
+        "confidence": 0.86,
+        "probabilities": {
+          "invalidate_restored_sessions": 0.91,
+          "preserve_valid_restored_sessions": 0.03,
+          "needs_clarification": 0.06
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1244,
+      "output_tokens": 55
+    }
+  },
+  "selected_probability": 0.91,
+  "auto_selected": true
+}

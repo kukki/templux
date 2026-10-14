@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，独立组织分别部署，登录认证及轻量用户管理、Docker及容器CLI，基于三套项目取共通能力。",
+      "confirmed": "角色默认管理员普通用户，可扩展多角色，Agent独立授权身份复用服务端权限。用户明确参考Supplieroom增加心跳，权限变化与登录时不匹配强制退出重新登录；服务端独立校验。会话及撤销存PostgreSQL，正常重启保留有效会话；恢复DB使旧会话失效。业务范围由项目定义，通过模板统一失效接口接入，不实施通用范围模型。来源Supplieroom有周期授权快照对账，但未要求照搬其所有缓存和时序。当前尚未决定模板请求校验新鲜度。视觉验收已确认行为布局自动检查与截图审查，不以像素差异自动阻断。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定受保护请求读取会话撤销、账号状态及授权版本的新鲜度。不重问角色模型、业务范围或前端提示，不承诺撤销已在执行请求或已产生效果。"
+    },
+    "questions": {
+      "authorization_request_freshness": {
+        "type": "choice",
+        "instructions": "推荐轻量模板服务端会话及授权版本核验时效。用户要权限变化旧会话失效重新登录，PG会话已定。选择每请求读取最新状态还是允许短时缓存；源项目机制仅参考，不能把前端心跳当服务端授权。不足可needs_clarification。",
+        "criteria": {
+          "database_each_request": "每次受保护请求核对数据库中最新会话撤销、账号状态和授权版本；权限变更提交后新发起请求不再按旧授权放行。版本不匹配拒绝并要求重登，不逐次读取项目业务范围字段。",
+          "bounded_cached_snapshot": "服务端使用有时限缓存授权快照，角色变更在缓存刷新后生效；需接受明确短暂延迟，具体上限另定，过期无法刷新不继续放行。",
+          "needs_clarification": "需用户决定每请求数据库核验成本和短暂旧权限窗口的取舍。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "authorization_request_freshness": {
+        "type": "choice",
+        "choice": "database_each_request",
+        "confidence": 0.3,
+        "probabilities": {
+          "database_each_request": 0.53,
+          "bounded_cached_snapshot": 0.03,
+          "needs_clarification": 0.44
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 976,
+      "output_tokens": 52
+    }
+  },
+  "selected_probability": 0.53,
+  "auto_selected": false
+}

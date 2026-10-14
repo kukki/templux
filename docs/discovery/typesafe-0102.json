@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，独立组织分别部署，登录认证及轻量用户管理、Docker及容器CLI，基于三套项目取共通能力。",
+      "confirmed": "角色默认管理员普通用户，可扩展多角色，Agent独立授权身份复用服务端权限。用户明确参考Supplieroom增加心跳，权限变化与登录时不匹配强制退出重新登录；服务端独立校验。会话及撤销存PostgreSQL，正常重启保留有效会话；恢复DB使旧会话失效。业务范围由项目定义，通过模板统一失效接口接入，不实施通用范围模型。来源Supplieroom有周期授权快照对账，但未要求照搬其所有缓存和时序。用户现已明确选择每受保护请求核对最新PG会话撤销、账号状态及授权版本，变更提交后的新请求不按旧授权放行，不匹配重登。视觉验收已确认行为布局自动检查与截图审查，不以像素差异自动阻断。 已核对来源Supplieroom前端30秒心跳，用户现已确认可见在线页面默认30秒，env覆盖，恢复可见或网络立即校验。后台心跳不能作为用户操作延长10分钟闲置期限。 用户已确认会话明确失效立即回登录页显示原因，不倒计时不等待确认，普通网络故障不当作失效。用户已确认同账号允许多个独立会话，分别超时，禁用或授权版本变化旧会话全失效。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定用户退出入口的默认范围，不新增设备列表或通用个人设置中心，退出全部只针对当前账号，不影响其他用户；关闭标签页不等同服务端退出。"
+    },
+    "questions": {
+      "logout_scope": {
+        "type": "choice",
+        "instructions": "为已允许同账号多会话的轻量模板推荐退出入口。用户会用多设备和独立Agent，退出应该可预测；不重问禁用和权限变更撤销所有会话。需求不足可needs_clarification。",
+        "criteria": {
+          "current_default_all_explicit": "普通退出按钮只撤销当前浏览器会话，另提供明确的退出全部会话入口；全部会话包括当前，不新增设备管理列表。",
+          "current_only": "首版只提供退出当前会话入口，全部撤销由管理员管理能力处理。",
+          "all_default": "普通退出按钮默认撤销该账号所有会话，无另分入口。",
+          "needs_clarification": "需用户决定是否提供退出全部及普通退出默认范围。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "logout_scope": {
+        "type": "choice",
+        "choice": "current_default_all_explicit",
+        "confidence": 0.8,
+        "probabilities": {
+          "current_default_all_explicit": 0.85,
+          "current_only": 0.08,
+          "all_default": 0.01,
+          "needs_clarification": 0.06
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1130,
+      "output_tokens": 60
+    }
+  },
+  "selected_probability": 0.85,
+  "auto_selected": true
+}

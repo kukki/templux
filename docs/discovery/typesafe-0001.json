@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未确认新项目是否需要持续接收模板升级；尚未审查来源项目代码；没有维护团队规模、升级频率或多租户要求。"
+    },
+    "questions": {
+      "template_lifecycle": {
+        "type": "choice",
+        "instructions": "根据用户目标，为第一版模板选择最合适的新项目复用与维护方式。权衡启动速度、后续自由定制、维护成本和升级便利性。不要把未说明的升级需求当成事实。如果现有事实不足以支持某一种方式，选择 needs_clarification。",
+        "criteria": {
+          "independent_copy": "新项目复制模板某个版本后独立演进；后续按需要挑选模板修复，不承诺自动同步。启动简单、定制自由，维护多个项目需要分别更新。",
+          "shared_versioned_core": "新项目依赖可发布的共享核心组件或包，升级版本获得公共修复；需要包发布、兼容性与扩展接口治理。",
+          "managed_template_updates": "新项目由生成器创建，模板后续变更由工具持续同步或迁移；需要处理生成文件所有权、冲突与迁移。",
+          "needs_clarification": "缺少升级和维护预期，无法充分确定以上哪一种适合用户。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "template_lifecycle": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.52,
+        "probabilities": {
+          "independent_copy": 0.36,
+          "shared_versioned_core": 0.0,
+          "managed_template_updates": 0.0,
+          "needs_clarification": 0.64
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 822,
+      "output_tokens": 66
+    }
+  },
+  "selected_probability": 0.64,
+  "auto_selected": false
+}

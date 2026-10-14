@@ -1,0 +1,63 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "项目按需启用排序，字段基础次序取数实现由项目提供，单字段改变回第一页。启用可排序表头时默认升序→降序→取消，已按授权采用，可配置变体。当前只定启用排序的通用表格默认入口组合。",
+      "source_evidence": [
+        {
+          "project": "Skoope",
+          "path": "src/components/overview-table.tsx:88-102,144-145,155-165",
+          "behavior": "独立排序下拉与可排序表头同时提供，共用同一sort状态，任一入口改变同步另一入口。"
+        },
+        {
+          "project": "Supplieroom",
+          "path": "src/modules/supplier-po/ui/supplier-po-workspace.tsx:282-295",
+          "behavior": "采购单卡片列表只通过独立下拉排序；可作为独立下拉交互参考，不能宣称该页面是表格。"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/catchouse-app.js:1029,1033,2001",
+          "behavior": "所查看板桌面通过可排序表头操作，无独立排序下拉；prototype参考，不宣称全项目或生产。"
+        }
+      ],
+      "evidence_limits": "已查源码、相关函数图定位及cycleTableSort入向与snippet，覆盖四文件均metadata_match/no_recorded_issue，长函数事件与渲染直接补读；无运行验收，不概括全项目。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "选择项目启用排序的通用表格默认入口组合，不要求所有列表必须排序；保留已定表头循环，字段及数据实现项目定义，项目可切换其它入口变体。不要捆绑原项目业务字段。"
+    },
+    "questions": {
+      "sort_control_entry": {
+        "type": "choice",
+        "instructions": "从现有来源入口组合选择通用表格启用排序后的默认形式，兼顾可发现性、界面密度与复用。Supplieroom卡片下拉仅提供独立控件参考，不算表格实证。不按项目数投票，偏好不足可需要澄清。",
+        "criteria": {
+          "both": "Skoope：排序下拉和可排序表头同时提供，状态同步。",
+          "header_only": "Catchouse看板桌面：仅可排序表头。",
+          "dropdown_only": "借用Supplieroom现有独立排序下拉：表格只提供下拉，不启用表头排序。",
+          "needs_clarification": "几种入口都有合理场景，需要用户指定模板默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "sort_control_entry": {
+        "type": "choice",
+        "choice": "both",
+        "confidence": 0.75,
+        "probabilities": {
+          "both": 0.81,
+          "header_only": 0.14,
+          "dropdown_only": 0.0,
+          "needs_clarification": 0.05
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1164,
+      "output_tokens": 53
+    }
+  },
+  "selected_probability": 0.81,
+  "auto_selected": true
+}

@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，控件按需复用；项目级配置风格和交互默认值，使用既定主题响应式，非用户主题切换。",
+      "confirmed": "普通顶部通知默认15秒，有进度条及手动关闭；鼠标悬停或键盘焦点进入时暂停，离开继续剩余时间；有上限堆叠，超出按顺序排队，每条实际显示时才计时。已确认桌面可见3条、窄屏1条，上限项目可配置。维护通知另行持续显示不可关闭，不占普通通知队列。独立浮动面板桌面窄屏均仅同时一个，替换保护编辑内容。 已自动采用可选显式去重键，同键同严重程度的活动通知合并并显示次数，无键不合并，已关闭过期不合并。 已自动采用重复合并只增加次数，保持剩余计时和暂停状态，不重置15秒，排队保留位置。 用户已选择等待队列满时淘汰最早等待通知，保留最新，并提示省略数量，不影响已显示通知。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送访谈摘要决策候选至TypeSafe官方API。",
+      "scope": "仅决定触屏阅读普通通知的暂停方式，不改变15秒剩余计时、关闭按钮、悬停键盘焦点暂停和维护通知规则。不讨论通知操作按钮内容。"
+    },
+    "questions": {
+      "toast_touch_pause": {
+        "type": "choice",
+        "instructions": "推荐触屏设备上暂停普通顶部通知供阅读的交互。已确认鼠标悬停或键盘焦点暂停，但触屏没有悬停。需可发现并避免点正文意外触发操作；偏好不明可needs_clarification。",
+        "criteria": {
+          "explicit_pause_resume": "提供明确暂停/继续控件，触屏用户可暂停阅读再恢复，暂停时有状态提示；关闭按钮独立。",
+          "tap_body_toggle": "点击通知非操作区域切换暂停/继续并显示状态，关闭和操作按钮不参与切换。",
+          "no_extra_touch_pause": "不增加触屏专门暂停交互，沿用15秒和手动关闭。",
+          "needs_clarification": "需要用户决定触屏阅读暂停的入口。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "toast_touch_pause": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.16,
+        "probabilities": {
+          "explicit_pause_resume": 0.33,
+          "tap_body_toggle": 0.27,
+          "no_extra_touch_pause": 0.03,
+          "needs_clarification": 0.37
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 986,
+      "output_tokens": 62
+    }
+  },
+  "selected_probability": 0.37,
+  "auto_selected": false
+}

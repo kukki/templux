@@ -1,0 +1,52 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未明确模板独立启动后的默认展示内容及是否要完整示例业务流程。",
+      "image_requirements": "网页元素按统一规范按需采用，各项目使用既定主题并支持响应式，变体面向项目配置。图片已确认关闭按钮、遮罩、Escape关闭，默认适应视口，首版提供可配置启用的缩放拖动变体。",
+      "standalone_requirements": "模板须可独立启动，供新项目直接套用。用户说模板内容可包括简单演示或控件示范，如表格、表单、选项、搜索、内联行、弹窗、浮动窗口及其他控件。汇总三套来源项目的通用能力与规范，不代表已要求继承采购、SKU或仓库等业务。已确认认证、轻量用户管理、CLI、日志和Docker等基础能力。尚未明确是否要完整示例业务。",
+      "pagination_decision": "用户已确认默认完整分页，允许项目按规范隐藏可选部分；窄屏显示上一页、当前页/总页数、下一页，其余放入展开区域。",
+      "notification_requirements": "普通顶部提示默认15秒、有进度条、手动关闭、阅读暂停、有上限堆叠与排队。维护通知持续显示倒计时，到点继续提醒，不自动改变业务访问或停止容器；实际停服重启由运维命令执行。维护通知不可关闭或收起，管理员取消或结束后移除。已确认计划停服期间保留入口，由入口提供统一维护页。",
+      "multiselect_decisions": "已确认列表多选筛选停止勾选1秒后应用，提前关闭立即应用；可点击选项整行，一次点击只切换一次。默认全选表示不额外限制列表，全部取消表示无匹配结果。全选当前结果只作用于下拉内搜索结果，保留未显示选项原选择。",
+      "search_matching_decision": "用户已选择整段包含匹配，去除首尾空白并忽略大小写，任一指定字段命中；新项目可扩展。",
+      "timing_decision": "用户已确认停止输入后1秒内应用搜索条件并触发查询，结果返回时间由具体项目另行验收。",
+      "appearance_decision": "每个新项目使用既定主题并支持响应式，通过项目配置灵活调整网页元素样式与交互，不是用户切换主题。元素按需使用，不要求各项目固定包含。用户明确搜索规范：统一搜索，内嵌字段名称和提示、1秒内应用搜索、长度自适应、统一风格样式；使用搜索时新项目必需定义搜索字段；搜索按钮可选，默认不显示。其它网页元素同样定义统一规范、必填项、可选项。",
+      "confirmed_followup": "稳定通用能力通过版本化共享包分发，项目保有业务代码、配置和应用骨架；通用改进审查后反哺，升级自动生成提案由维护者确认应用。前后端通过API交互，独立构建发布并统一启动。首版服务内部员工及受邀合作方，独立组织各自部署，轻量账号管理，管理员及普通用户两个默认角色。"
+    },
+    "questions": {
+      "standalone_demo_scope": {
+        "type": "choice",
+        "instructions": "为首版模板独立启动后的演示内容选择范围。所有方案保留已确认认证、用户管理与运维基础。只决定控件示范还是另加完整示例业务，不选择具体业务题材、技术栈或样例数据量。演示使用模板自带样例数据，不要求读取真实来源业务数据。兼顾独立可运行、复用学习与模板范围轻量，信息不足可选needs_clarification。",
+        "criteria": {
+          "management_and_component_examples": "默认提供登录、账号管理与控件示范，展示表格、表单、搜索、多选、分页、通知、图片等规范和可选变体；不额外实现完整业务流程。",
+          "examples_plus_complete_sample_workflow": "在控件示范和账号管理之外，增加一个独立的简单示例业务流程，让列表、编辑、权限与日志形成端到端示范；需要维护示例领域和数据。",
+          "minimal_starter_without_gallery": "默认只提供基础应用骨架和账号管理，不建设控件示范页面，控件通过文档或代码示例介绍。",
+          "needs_clarification": "用户只说可包括演示，尚不能确定控件示范是否足够或还需完整示例业务。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "standalone_demo_scope": {
+        "type": "choice",
+        "choice": "management_and_component_examples",
+        "confidence": 0.47,
+        "probabilities": {
+          "management_and_component_examples": 0.6,
+          "examples_plus_complete_sample_workflow": 0.0,
+          "minimal_starter_without_gallery": 0.0,
+          "needs_clarification": 0.4
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1858,
+      "output_tokens": 68
+    }
+  },
+  "selected_probability": 0.6,
+  "auto_selected": false
+}

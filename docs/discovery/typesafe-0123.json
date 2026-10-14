@@ -1,0 +1,66 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "来源三项目提取轻量可配置网页控件规范，默认固定项目风格响应式，控件按需用，不固化业务。",
+      "confirmed": "用户已选图片失败自动备选然后占位，无有效源禁用预览，图片组可选。通用代码值复制共通规则直接采用：空值无可用按钮、复制完整值非截断、成功才原按钮短暂check确认、按钮可识别。普通顶部通知另有15秒规范，不必每个局部反馈都进顶部队列。 已按83%采用复制失败控件本地状态及按钮提示辅助反馈，不交页面统一错误。成功原按钮短暂check确认的共通已定，精确默认时长待选择。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/shared/ui/copy-button.tsx:12-20",
+          "duration": "成功check状态setTimeout 1500ms恢复"
+        },
+        {
+          "project": "Skoope",
+          "paths": [
+            "src/components/sku-detail-interactions.tsx:11-17",
+            "src/components/overview-product-identity.tsx:21-29"
+          ],
+          "duration": "成功状态1800ms后恢复"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/catchouse-app.js:2027-2040",
+          "duration": "copiedUntil=now+900ms，950ms定时器清理；约1秒，prototype参考，不承诺精确可见时间"
+        }
+      ],
+      "evidence_limits": "图及源码精确核对，文件覆盖metadata_match无报告问题，未浏览器权限测试；只普通代码值复制，不涵盖其它业务和凭据复制，不发送源码数据。",
+      "delegation": "用户要求共通直接提取，明显来源分歧TypeSafe，实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选官方API。",
+      "scope": "只选成功按钮确认状态的默认持续时长，项目可配置，不改变15秒顶部通知或失败反馈，不声称浏览器后台精确计时。"
+    },
+    "questions": {
+      "copy_success_feedback_duration": {
+        "type": "choice",
+        "instructions": "从三来源已有默认中选择普通代码值复制成功按钮确认的统一时长。三者均短暂且项目可配置，不改变其它通知。需要用户偏好可needs_clarification，不按项目数量投票。",
+        "criteria": {
+          "milliseconds1500": "采用Supplieroom默认约1.5秒。",
+          "milliseconds1800": "采用Skoope默认约1.8秒。",
+          "about_one_second": "采用Catchouse约1秒的成功状态。",
+          "needs_clarification": "来源时长均合理，缺乏用户偏好无法确定精确默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "copy_success_feedback_duration": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.91,
+        "probabilities": {
+          "milliseconds1500": 0.04,
+          "milliseconds1800": 0.01,
+          "about_one_second": 0.02,
+          "needs_clarification": 0.9299999999999999
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1132,
+      "output_tokens": 66
+    }
+  },
+  "selected_probability": 0.9299999999999999,
+  "auto_selected": false
+}

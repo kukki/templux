@@ -1,0 +1,50 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未明确多条普通顶部通知同时到达时的展示策略。",
+      "pagination_decision": "用户已确认默认完整分页，允许项目按规范隐藏可选部分；窄屏显示上一页、当前页/总页数、下一页，其余放入展开区域。",
+      "notification_requirements": "用户原始要求包括15秒顶部通知和停服固定通知。已确认普通顶部提示默认15秒，显示进度条、可手动关闭，鼠标悬停或键盘焦点进入时暂停、离开后继续剩余时间。维护通知另行定义。尚未决定多条普通提示到达时如何展示。",
+      "multiselect_decisions": "已确认列表多选筛选停止勾选1秒后应用，提前关闭立即应用；可点击选项整行，一次点击只切换一次。默认全选表示不额外限制列表，全部取消表示无匹配结果。全选当前结果只作用于下拉内搜索结果，保留未显示选项原选择。",
+      "search_matching_decision": "用户已选择整段包含匹配，去除首尾空白并忽略大小写，任一指定字段命中；新项目可扩展。",
+      "timing_decision": "用户已确认停止输入后1秒内应用搜索条件并触发查询，结果返回时间由具体项目另行验收。",
+      "appearance_decision": "每个新项目使用既定主题并支持响应式，通过项目配置灵活调整网页元素样式与交互，不是用户切换主题。元素按需使用，不要求各项目固定包含。用户明确搜索规范：统一搜索，内嵌字段名称和提示、1秒内应用搜索、长度自适应、统一风格样式；使用搜索时新项目必需定义搜索字段；搜索按钮可选，默认不显示。其它网页元素同样定义统一规范、必填项、可选项。",
+      "confirmed_followup": "稳定通用能力通过版本化共享包分发，项目保有业务代码、配置和应用骨架；通用改进审查后反哺，升级自动生成提案由维护者确认应用。前后端通过API交互，独立构建发布并统一启动。首版服务内部员工及受邀合作方，独立组织各自部署，轻量账号管理，管理员及普通用户两个默认角色。"
+    },
+    "questions": {
+      "transient_notice_concurrency": {
+        "type": "choice",
+        "instructions": "选择多条普通顶部提示的默认并发展示策略。每条实际显示时才开始自己的15秒计时，已确认的阅读暂停规则保留。只决定展示与排队，不决定通知去重、严重程度、保存历史或队列满时处理。权衡消息及时可见、遮挡页面与等待时间。用户未指定并发策略时可选择needs_clarification。",
+        "criteria": {
+          "bounded_stack_with_queue": "同时显示少量通知，超过可见上限的通知排队，出现空位后按顺序显示；上限可由项目配置。默认上限另定。",
+          "single_fifo": "一次只显示一条，其余按先到先出排队；界面清爽，但后续提示等待较长。",
+          "latest_replaces_current": "只显示最新一条，新通知替换旧通知且不排队；消息及时，但旧通知可能未读完。",
+          "needs_clarification": "用户未明确希望并排堆叠、单条排队还是最新替换。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "transient_notice_concurrency": {
+        "type": "choice",
+        "choice": "bounded_stack_with_queue",
+        "confidence": 0.36,
+        "probabilities": {
+          "bounded_stack_with_queue": 0.52,
+          "single_fifo": 0.03,
+          "latest_replaces_current": 0.01,
+          "needs_clarification": 0.44
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1498,
+      "output_tokens": 65
+    }
+  },
+  "selected_probability": 0.52,
+  "auto_selected": false
+}

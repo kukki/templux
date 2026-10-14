@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从Supplieroom、Skoope、Catchouse整合通用模板，供新项目套用及作为独立项目启动；认证、轻量账号、日志、容器CLI、统一控件规范。",
+      "confirmed": "模板独立启动默认提供登录、账号管理与控件示例，使用自带样例数据，不增加完整样例业务。网页元素按需采用，不要求新项目固定包含全部控件。风格及交互默认由项目配置；新项目保有业务、配置及骨架，共享版本包分发公共能力，改进可审查反哺。触屏普通通知不增加专门暂停交互。 已按授权采用新项目保留独立可移除示例目录，开发测试默认启用、生产默认关闭，项目可配置启用并明确访问规则。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选到TypeSafe官方API。",
+      "scope": "仅决定控件演示数据与操作是否经过后端和持久化，不影响真实登录、账号管理、审计的已确认后端与数据库能力；示例不得操作真实业务数据，不新增完整示例业务。"
+    },
+    "questions": {
+      "component_demo_data_mode": {
+        "type": "choice",
+        "instructions": "推荐轻量模板控件示例的数据和模拟操作实现范围，已有自带样例数据且不需要完整示例业务。用户要求数据与代码分离、前后端分离，不能据此认定每个纯控件示例必须持久化；不足可needs_clarification。",
+        "criteria": {
+          "fixtures_in_memory": "样例数据独立文件提供，控件查询编辑在浏览器内存模拟，刷新或重置恢复；不为控件示例增加数据库表或业务API，真实登录账号管理仍走正常后端。",
+          "demo_backend_persistence": "控件示例也经专用后端示例API读写，隔离样例数据持久化并支持重置，不触碰真实业务数据。",
+          "needs_clarification": "需要用户决定示例只展示控件交互还是也需要示例API持久化。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "component_demo_data_mode": {
+        "type": "choice",
+        "choice": "fixtures_in_memory",
+        "confidence": 0.55,
+        "probabilities": {
+          "fixtures_in_memory": 0.7,
+          "demo_backend_persistence": 0.01,
+          "needs_clarification": 0.29
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 928,
+      "output_tokens": 54
+    }
+  },
+  "selected_probability": 0.7,
+  "auto_selected": false
+}

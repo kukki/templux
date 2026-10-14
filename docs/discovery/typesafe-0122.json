@@ -1,0 +1,66 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "来源三项目提取轻量可配置网页控件规范，默认固定项目风格响应式，控件按需用，不固化业务。",
+      "confirmed": "用户已选图片失败自动备选然后占位，无有效源禁用预览，图片组可选。通用代码值复制共通规则直接采用：空值无可用按钮、复制完整值非截断、成功才原按钮短暂check确认、按钮可识别。普通顶部通知另有15秒规范，不必每个局部反馈都进顶部队列。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/shared/ui/copy-button.tsx:7-37",
+          "failure": "复制异常catch后return，不设置错误提示，不显示成功"
+        },
+        {
+          "project": "Skoope",
+          "paths": [
+            "src/components/sku-detail-interactions.tsx:8-25",
+            "src/components/overview-product-identity.tsx:21-34,55"
+          ],
+          "failure": "本地error状态，按钮title或aria-live告知复制失败，请重试，不是可见错误弹窗"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/catchouse-app.js:2027-2040,2130附近",
+          "failure": "看板按钮await copyText错误交外层统一catch，setError(friendlyError)并重绘页面；prototype参考未验证生产挂载"
+        }
+      ],
+      "evidence_limits": "图及源码精确核对，文件覆盖metadata_match无报告问题，未浏览器权限测试；只普通代码值复制，不涵盖其它业务和凭据复制，不发送源码数据。",
+      "delegation": "用户要求共通直接提取，明显来源分歧TypeSafe，实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选官方API。",
+      "scope": "只选普通复制失败的反馈范围，不决定底层Clipboard API兼容、不新增来源未有的失败模态弹窗，不改变复制内容或凭据交付。"
+    },
+    "questions": {
+      "copy_failure_feedback": {
+        "type": "choice",
+        "instructions": "从三种现有普通代码值复制失败处理选择模板默认。用户重视统一明确的控件规范及轻量交互，保持成功本地确认。Skoope证据为title和辅助状态，不应夸大为可见错误框；Catchouse交全页面统一错误。无法选择可needs_clarification。",
+        "criteria": {
+          "silent_failure": "采用Supplieroom所查复制按钮：失败静默结束，不显示已复制，不加错误反馈。",
+          "control_local_feedback": "采用Skoope：在控件本地状态及按钮提示/辅助反馈告知复制失败，可再次点击尝试。",
+          "page_error_handler": "采用Catchouse看板路径：交页面统一错误处理呈现，用户仍可手动重试复制。",
+          "needs_clarification": "需用户决定复制失败反馈范围，来源方案各有体验取舍。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "copy_failure_feedback": {
+        "type": "choice",
+        "choice": "control_local_feedback",
+        "confidence": 0.77,
+        "probabilities": {
+          "silent_failure": 0.01,
+          "control_local_feedback": 0.83,
+          "page_error_handler": 0.0,
+          "needs_clarification": 0.16
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1193,
+      "output_tokens": 58
+    }
+  },
+  "selected_probability": 0.83,
+  "auto_selected": true
+}

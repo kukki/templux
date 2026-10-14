@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板汇总三套项目，供新项目生成复用，也可独立Docker启动；前后端独立，共享版本包反哺升级。",
+      "confirmed": "默认简体中文，文案集中管理，新项目可替换，无用户语言切换。PostgreSQL默认，Compose可提供数据库也可配置外部数据库；pg参数化SQL及版本化SQL迁移。统一启动升级命令先在管理容器迁移校验，再启动应用，失败中止；维护通知不自行停服，运维控制服务停启。宿主只Docker、Compose、Shell，管理CLI容器内执行，人工菜单及Agent一行参数模式，变更须显式确认，支持JSON。升级提案由维护者审批后应用，已确认提供容器数据库备份恢复CLI，人工菜单及Agent一行，恢复显式确认；定时及异地存储部署环境负责，不内置定时服务。 已自动采用已有数据库存在待迁移项时默认自动备份，失败中止迁移，全新空库及无待迁移项跳过；外部备份替代机制未定。 已自动采用外部备份显式替代并提供参考、写升级记录，操作者负责确认可恢复，模板不声称已验证任意外部快照。项目配置受版本管理，.env保存环境参数及凭据。 已自动采用内置备份仅数据库，代码配置版本库恢复、env部署环境单独妥善备份，文档说明兼容配置和必要密钥。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许需求摘要决策候选发到TypeSafe官方API。",
+      "scope": "只决定模板自己管理的迁移前自动备份默认保留数量，不清理操作者手动指定的备份或外部快照，不引入定时服务。按数量清理必须在新的备份成功后，不能用失败或未完成的备份替代旧备份；数量项目可配置。"
+    },
+    "questions": {
+      "premigration_backup_retention": {
+        "type": "choice",
+        "instructions": "推荐模板迁移前自动备份的默认留存，数据库大小和升级频率未确定。仅清理模板管理自动备份，手动及外部备份不清理。权衡磁盘增长和回溯版本；需要用户偏好可needs_clarification。",
+        "criteria": {
+          "keep5": "默认保留最近5份成功的迁移前自动备份，新的备份成功后才清理超出部分，数量可配置。",
+          "keep10": "默认保留最近10份成功的迁移前自动备份，新的备份成功后才清理超出部分，数量可配置。",
+          "manual_cleanup": "默认不自动删除迁移前备份，提供人工清理入口，由操作者负责空间及保留策略。",
+          "needs_clarification": "没有数据库规模与回溯要求，需要用户决定默认数量或是否自动清理。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "premigration_backup_retention": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.39,
+        "probabilities": {
+          "keep5": 0.43,
+          "keep10": 0.02,
+          "manual_cleanup": 0.01,
+          "needs_clarification": 0.54
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1183,
+      "output_tokens": 63
+    }
+  },
+  "selected_probability": 0.54,
+  "auto_selected": false
+}

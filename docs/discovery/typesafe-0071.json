@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse的通用模板，可独立启动，认证、轻量账号、日志、Docker、CLI、统一网页元素风格行为规范；元素按需使用，不固化业务。",
+      "confirmed": "项目配置风格布局及控件默认值，使用既定主题响应式，默认浅色背景蓝色强调。默认纵向导航可收为图标，允许用户临时收起并浏览器按项目账号记忆；窄屏菜单按钮打开文字侧边抽屉，选目的页关闭。表单列入控件示例。业务字段和校验规则属于各新项目，模板只定义共通交互及承接字段错误的能力。 已自动采用表单首次失焦校验、提交全量校验、错误字段修改后及时复查，服务端最终校验，字段错误就近显示。用户已明确统一搜索内嵌字段名称与提示，普通表单则已选择字段名称在控件上方持续显示，提示及错误就近放置。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，并允许发送访谈摘要、已定决策及候选到TypeSafe官方API。",
+      "scope": "只决定存在未保存编辑时离开页面或关闭表单的默认提醒行为，不自动保存、不定义业务数据边界、不阻止权限失效强制退出；浏览器刷新关闭只能用浏览器支持的提醒能力，不能承诺一定拦截。搜索筛选不作为未保存编辑。"
+    },
+    "questions": {
+      "unsaved_edit_guard": {
+        "type": "choice",
+        "instructions": "推荐普通编辑表单有未保存修改时的默认离开行为。模板只提供共通交互，新项目接入dirty状态并可配置变体。不引入草稿自动保存或业务恢复机制；不足以推荐则needs_clarification。",
+        "criteria": {
+          "confirm_discard_dirty": "仅有实际未保存编辑时，应用内导航或关闭编辑弹窗先确认放弃；无修改、已保存、仅搜索筛选不提醒。刷新关页用浏览器允许的原生提醒，不保证所有场景弹出；权限失效强制退出不被此确认阻挡。",
+          "leave_without_guard": "首版不内置未保存离开提醒，由新项目按需加入；编辑表单关闭或离开直接进行。",
+          "needs_clarification": "需用户决定是否提供模板级未保存提醒。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "unsaved_edit_guard": {
+        "type": "choice",
+        "choice": "confirm_discard_dirty",
+        "confidence": 0.8,
+        "probabilities": {
+          "confirm_discard_dirty": 0.87,
+          "leave_without_guard": 0.01,
+          "needs_clarification": 0.12
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1028,
+      "output_tokens": 53
+    }
+  },
+  "selected_probability": 0.87,
+  "auto_selected": true
+}

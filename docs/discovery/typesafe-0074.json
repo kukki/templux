@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse的通用模板，可独立启动，认证、轻量账号、日志、Docker、CLI、统一网页元素风格行为规范；元素按需使用，不固化业务。",
+      "confirmed": "项目配置风格布局及控件默认值，使用既定主题响应式，默认浅色背景蓝色强调。默认纵向导航可收为图标，允许用户临时收起并浏览器按项目账号记忆；窄屏菜单按钮打开文字侧边抽屉，选目的页关闭。表单列入控件示例。业务字段和校验规则属于各新项目，模板只定义共通交互及承接字段错误的能力。 已自动采用表单首次失焦校验、提交全量校验、错误字段修改后及时复查，服务端最终校验，字段错误就近显示。用户已明确统一搜索内嵌字段名称与提示，普通表单则已选择字段名称在控件上方持续显示，提示及错误就近放置。 已自动采用未保存编辑时应用内离开或关闭编辑表单提醒，无修改已保存及仅筛选不提醒，不阻挡权限失效强制退出。用户要求表格控件示例及响应式，已确认窄屏保留全部列仅表格区域横向滚动，页面不整体溢出。 用户确认表格默认只读不提供编辑；项目显式启用内联编辑后按行编辑、保存取消，显式保存才提交。图片预览已确认关闭按钮、遮罩、Escape关闭，图片自身不关闭。普通编辑表单有未保存修改时关闭须先提醒。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，并允许发送访谈摘要、已定决策及候选到TypeSafe官方API。",
+      "scope": "仅决定编辑表单弹窗默认关闭触发方式，不更改图片预览已定行为；本题讨论未在提交中的编辑状态，保存中关闭及请求完成问题另行细化，项目可配置变体。"
+    },
+    "questions": {
+      "edit_dialog_dismissal": {
+        "type": "choice",
+        "instructions": "为通用编辑表单弹窗推荐关闭方式。图片预览已允许遮罩和Escape关闭，但编辑弹窗有输入状态，已有未保存确认能力。只选择默认触发，不改变业务保存规则。无法推荐可needs_clarification。",
+        "criteria": {
+          "buttons_escape_no_backdrop": "关闭按钮、取消按钮或Escape可发起关闭，点击遮罩不关闭；存在未保存编辑时仍先确认放弃。",
+          "buttons_escape_backdrop": "关闭按钮、取消按钮、Escape或点击遮罩均可发起关闭；存在未保存编辑时先确认放弃。",
+          "buttons_only": "仅关闭或取消按钮可发起关闭，Escape与遮罩均不关闭；有未保存编辑仍确认。",
+          "needs_clarification": "编辑弹窗关闭偏好需用户明确。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "edit_dialog_dismissal": {
+        "type": "choice",
+        "choice": "buttons_escape_backdrop",
+        "confidence": 0.35,
+        "probabilities": {
+          "buttons_escape_no_backdrop": 0.32,
+          "buttons_escape_backdrop": 0.51,
+          "buttons_only": 0.08,
+          "needs_clarification": 0.09
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1192,
+      "output_tokens": 68
+    }
+  },
+  "selected_probability": 0.51,
+  "auto_selected": false
+}

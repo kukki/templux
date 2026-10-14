@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse建立轻量通用模板，可独立启动，登录认证、轻量账号管理、日志、Docker、CLI、统一网页元素规范；新项目按需采用并反哺通用能力。",
+      "confirmed": "运行日志结构化；关键操作审计覆盖认证、账号、授权撤销、Agent操作、维护管理。管理员和普通用户两种默认角色可扩展。网页日志查询是否首版提供尚未决定。管理CLI容器执行，人工菜单与Agent一行脚本，默认文本可选JSON，宿主运维授权，变更须人工确认或非交互显式确认参数。前端Next.js独立后端Fastify/TS，PostgreSQL，参数化SQL，不引入ORM。 已按授权采用管理员审计网页查询，运行日志通过Docker/CLI查看，不部署必需的外部日志平台。",
+      "delegation": "用户授权选项概率严格大于75%自动采用，允许向TypeSafe官方API发送访谈需求摘要、决策及候选。",
+      "scope": "只决定默认留存与自动清理策略，不讨论法规合规义务或具体Docker配置API；模板服务不同组织，项目可配置覆盖。"
+    },
+    "questions": {
+      "log_retention_default": {
+        "type": "choice",
+        "instructions": "为轻量可独立部署的通用模板推荐日志留存默认。需要可配置且避免无限增长；目前没有明确调查回溯周期。只在足以推荐合理默认时选择具体方案，否则needs_clarification。",
+        "criteria": {
+          "audit90_runtime14": "审计默认90天自动清理，可配置；运行日志采用容量轮转并限制总量，以约14天为目标，容量先到时可能更早淘汰，不承诺完整保留14天。",
+          "audit180_runtime30": "审计默认180天自动清理，可配置；运行日志容量轮转并限总量，以约30天为目标，容量先到可能更早淘汰。",
+          "manual_audit_bounded_runtime": "审计首版不自动按时间清理，提供人工清理命令；运行日志容量轮转并限制总量。",
+          "needs_clarification": "尚不清楚所需回溯周期或自动清理意愿，需要用户决定默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "log_retention_default": {
+        "type": "choice",
+        "choice": "audit90_runtime14",
+        "confidence": 0.23,
+        "probabilities": {
+          "audit90_runtime14": 0.42,
+          "audit180_runtime30": 0.1,
+          "manual_audit_bounded_runtime": 0.1,
+          "needs_clarification": 0.38
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 990,
+      "output_tokens": 75
+    }
+  },
+  "selected_probability": 0.42,
+  "auto_selected": false
+}

@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，独立组织分别部署，登录认证及轻量用户管理、Docker及容器CLI，基于三套项目取共通能力。",
+      "confirmed": "角色默认管理员普通用户，可扩展多角色，Agent独立授权身份复用服务端权限。用户明确参考Supplieroom增加心跳，权限变化与登录时不匹配强制退出重新登录；服务端独立校验。会话及撤销存PostgreSQL，正常重启保留有效会话；恢复DB使旧会话失效。业务范围由项目定义，通过模板统一失效接口接入，不实施通用范围模型。来源Supplieroom有周期授权快照对账，但未要求照搬其所有缓存和时序。用户现已明确选择每受保护请求核对最新PG会话撤销、账号状态及授权版本，变更提交后的新请求不按旧授权放行，不匹配重登。视觉验收已确认行为布局自动检查与截图审查，不以像素差异自动阻断。 已核对来源Supplieroom前端30秒心跳，用户现已确认可见在线页面默认30秒，env覆盖，恢复可见或网络立即校验。后台心跳不能作为用户操作延长10分钟闲置期限。 用户已确认会话明确失效立即回登录页显示原因，不倒计时不等待确认，普通网络故障不当作失效。尚未明确同账号多设备多浏览器同时会话策略。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定人员及Agent账号默认是否允许多个独立会话，新项目可调整策略；同一浏览器共享Cookie的标签页不被误称独立设备会话，不决定退出当前/全部的按钮或最大会话数。"
+    },
+    "questions": {
+      "concurrent_login_policy": {
+        "type": "choice",
+        "instructions": "为轻量通用模板推荐同账号并发会话默认，可能多设备人员使用及授权Agent浏览器测试。已有闲置最长会话、禁用及权限变化失效；不能推断这些要求已强制单会话。不足可needs_clarification。",
+        "criteria": {
+          "allow_multiple": "默认允许不同设备或独立浏览器会话同时登录，各会话分别超时；禁用或权限版本变化使该账号旧会话全部失效。",
+          "new_login_revokes_old": "默认仅一个独立会话，新登录成功使旧会话失效；人员与Agent同样规则，项目可扩展。",
+          "needs_clarification": "需要用户决定多设备便利与单会话限制的默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "concurrent_login_policy": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.59,
+        "probabilities": {
+          "allow_multiple": 0.26,
+          "new_login_revokes_old": 0.01,
+          "needs_clarification": 0.73
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1106,
+      "output_tokens": 55
+    }
+  },
+  "selected_probability": 0.73,
+  "auto_selected": false
+}

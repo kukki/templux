@@ -1,0 +1,64 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "默认每页10条；数量选项5、10、15、20、25、50已由用户确认。完整分页含页码按钮和跳页，窄屏其它控制收纳可展开。项目可配置。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/shared/ui/list-pagination.tsx:29-42",
+          "behavior": "列出全部合法页码的select，选择立即调用onPage。"
+        },
+        {
+          "project": "Skoope",
+          "path": "src/components/overview-pagination.tsx:23-28",
+          "behavior": "页码数字输入，按Enter或点击跳转按钮提交；输入有min/max。不能据此宣称所有回调路径都有服务端校验。"
+        },
+        {
+          "project": "Catchouse",
+          "paths": [
+            "prototype/list-ui.js:12-16",
+            "prototype/catchouse-app.js:1013-1019"
+          ],
+          "behavior": "列出全部页码的select，作为prototype已有交互参考，不宣称生产接入。"
+        }
+      ],
+      "evidence_limits": "图及源码、覆盖核对metadata_match无问题，未运行分页验收，不以单一场景代表全项目；Catchouse为prototype参考不宣称生产挂载。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "只选择通用分页默认跳页交互，不改变完整分页、默认每页数和大小选项，也不合成来源不存在的自适应方案。项目可配置其它变体。"
+    },
+    "questions": {
+      "pagination_jump_control": {
+        "type": "choice",
+        "instructions": "在已有的下拉选页和数字输入提交两种交互中，选择通用模板默认跳页形式。用户需要复用且可配置的控件，没有最大页数约束。不要按来源数量投票，依据通用性判断，不足可需要澄清。",
+        "criteria": {
+          "number_input": "Skoope：输入页码，按Enter或点击跳转按钮提交。",
+          "page_select": "Supplieroom及Catchouse prototype：下拉列出合法页码，选择后直接跳转。",
+          "needs_clarification": "两种来源交互均合理，尚需用户指定默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "pagination_jump_control": {
+        "type": "choice",
+        "choice": "page_select",
+        "confidence": 0.34,
+        "probabilities": {
+          "number_input": 0.25,
+          "page_select": 0.56,
+          "needs_clarification": 0.19
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1034,
+      "output_tokens": 47
+    }
+  },
+  "selected_probability": 0.56,
+  "auto_selected": false
+}

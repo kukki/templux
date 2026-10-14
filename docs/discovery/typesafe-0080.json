@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，控件按需复用；项目级配置风格和交互默认值，使用既定主题响应式，非用户主题切换。",
+      "confirmed": "普通顶部通知默认15秒，有进度条及手动关闭；鼠标悬停或键盘焦点进入时暂停，离开继续剩余时间；有上限堆叠，超出按顺序排队，每条实际显示时才计时。项目可配置可见上限，具体默认未定。维护通知另行持续显示不可关闭，不占普通通知队列。独立浮动面板桌面窄屏均仅同时一个，替换保护编辑内容。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送访谈摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定普通通知可见数量默认，不改变FIFO排队及15秒计时，不决定总队列容量、去重或错误优先级。"
+    },
+    "questions": {
+      "toast_visible_limit_default": {
+        "type": "choice",
+        "instructions": "推荐普通顶部通知响应式可见数量默认，兼顾连续反馈可见性和窄屏内容空间。上限由新项目配置覆盖，已有FIFO排队，缺乏偏好可needs_clarification。",
+        "criteria": {
+          "desktop3_mobile1": "桌面最多同时显示3条，窄屏最多1条，其余按顺序排队，实际显示后才计时。",
+          "three_all": "桌面窄屏均最多3条，保持统一堆叠。",
+          "one_all": "桌面窄屏均最多1条，其余排队，最少占用页面空间。",
+          "needs_clarification": "需要用户决定默认堆叠数量。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "toast_visible_limit_default": {
+        "type": "choice",
+        "choice": "desktop3_mobile1",
+        "confidence": 0.59,
+        "probabilities": {
+          "desktop3_mobile1": 0.69,
+          "three_all": 0.01,
+          "one_all": 0.03,
+          "needs_clarification": 0.27
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 796,
+      "output_tokens": 60
+    }
+  },
+  "selected_probability": 0.69,
+  "auto_selected": false
+}

@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse的通用模板，可独立启动，认证、轻量账号、日志、Docker、CLI、统一网页元素风格行为规范；元素按需使用，不固化业务。",
+      "confirmed": "项目配置风格布局及控件默认值，使用既定主题响应式，默认浅色背景蓝色强调。默认纵向导航可收为图标，允许用户临时收起并浏览器按项目账号记忆；窄屏菜单按钮打开文字侧边抽屉，选目的页关闭。表单列入控件示例，尚未定义校验反馈时机。业务字段和校验规则属于各新项目，模板只定义共通交互及承接字段错误的能力。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，并允许发送访谈摘要、已定决策及候选到TypeSafe官方API。",
+      "scope": "仅决定表单字段校验反馈默认时机，不决定业务规则、必填字段、具体校验库或数据提交协议。所有候选服务端均做最终校验，错误在字段附近显示，无法归属字段的错误在表单级显示；项目可配置变体。"
+    },
+    "questions": {
+      "form_validation_timing": {
+        "type": "choice",
+        "instructions": "推荐通用表单控件默认校验反馈时机。表单用于账号管理及新项目业务扩展，需要清晰提示又避免首次输入即报错。选择默认交互，不替新项目制定业务校验规则；缺乏偏好可needs_clarification。",
+        "criteria": {
+          "blur_submit_then_correct": "字段首次失焦后校验，提交时校验全部；已有错误的字段修改时及时复查，使纠正反馈及时。错误在对应字段附近显示，无法归属的错误显示在表单级。",
+          "submit_only": "只在提交时显示字段或表单校验错误，再次提交时更新，不在失焦或输入时提示。",
+          "input_immediate": "首次输入起即持续校验显示错误，提交时仍校验全部。",
+          "needs_clarification": "需用户明确校验时机，现有要求无法推荐默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "form_validation_timing": {
+        "type": "choice",
+        "choice": "blur_submit_then_correct",
+        "confidence": 0.97,
+        "probabilities": {
+          "blur_submit_then_correct": 0.98,
+          "submit_only": 0.0,
+          "input_immediate": 0.0,
+          "needs_clarification": 0.02
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 946,
+      "output_tokens": 62
+    }
+  },
+  "selected_probability": 0.98,
+  "auto_selected": true
+}

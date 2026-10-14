@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板汇总三套项目，供新项目生成复用，也可独立Docker启动；前后端独立，共享版本包反哺升级。",
+      "confirmed": "默认简体中文，文案集中管理，新项目可替换，无用户语言切换。PostgreSQL默认，Compose可提供数据库也可配置外部数据库；pg参数化SQL及版本化SQL迁移。统一启动升级命令先在管理容器迁移校验，再启动应用，失败中止；维护通知不自行停服，运维控制服务停启。宿主只Docker、Compose、Shell，管理CLI容器内执行，人工菜单及Agent一行参数模式，变更须显式确认，支持JSON。升级提案由维护者审批后应用，已确认提供容器数据库备份恢复CLI，人工菜单及Agent一行，恢复显式确认；定时及异地存储部署环境负责，不内置定时服务。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许需求摘要决策候选发到TypeSafe官方API。",
+      "scope": "仅决定已有数据库存在待执行迁移时升级命令是否默认自动备份；全新空库初始化及无待执行迁移不用做此前置备份。不决定定时备份、恢复或配置跳过的具体机制。"
+    },
+    "questions": {
+      "premigration_backup_default": {
+        "type": "choice",
+        "instructions": "推荐已有数据库升级执行待迁移前的备份默认。已确认管理容器迁移及备份CLI，尚未决定自动串联；数据库可能外部管理。权衡默认可恢复与部署耗时及备份权限，不足可needs_clarification。",
+        "criteria": {
+          "automatic_before_pending_migration": "默认先完成数据库备份，备份失败就中止本次迁移；仅已有数据库且存在待执行迁移时触发，全新空库和无迁移跳过。外部备份设施或项目特殊策略的替代机制另行明确。",
+          "operator_managed_backup": "升级命令不自动备份，操作者在升级前通过CLI或外部设施自行完成备份，升级命令只迁移校验；文档明确操作顺序。",
+          "needs_clarification": "需要用户决定是否接受迁移前自动备份的耗时及权限要求。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "premigration_backup_default": {
+        "type": "choice",
+        "choice": "automatic_before_pending_migration",
+        "confidence": 0.64,
+        "probabilities": {
+          "automatic_before_pending_migration": 0.76,
+          "operator_managed_backup": 0.08,
+          "needs_clarification": 0.16
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 975,
+      "output_tokens": 59
+    }
+  },
+  "selected_probability": 0.76,
+  "auto_selected": true
+}

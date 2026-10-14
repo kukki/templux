@@ -1,0 +1,50 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未明确固定维护通知是否允许用户关闭及何时消失。",
+      "pagination_decision": "用户已确认默认完整分页，允许项目按规范隐藏可选部分；窄屏显示上一页、当前页/总页数、下一页，其余放入展开区域。",
+      "notification_requirements": "用户原始要求包括15秒顶部通知和停服固定通知。普通顶部提示已确认默认15秒、进度条、手动关闭、悬停或键盘焦点暂停；有上限堆叠，超出按顺序排队，实际显示开始计时。维护通知负责持续提醒和倒计时，到点继续即将维护提示，不自动改变业务访问或停止容器；实际停服重启由运维命令执行。尚未决定维护通知是否可由用户关闭、如何结束。",
+      "multiselect_decisions": "已确认列表多选筛选停止勾选1秒后应用，提前关闭立即应用；可点击选项整行，一次点击只切换一次。默认全选表示不额外限制列表，全部取消表示无匹配结果。全选当前结果只作用于下拉内搜索结果，保留未显示选项原选择。",
+      "search_matching_decision": "用户已选择整段包含匹配，去除首尾空白并忽略大小写，任一指定字段命中；新项目可扩展。",
+      "timing_decision": "用户已确认停止输入后1秒内应用搜索条件并触发查询，结果返回时间由具体项目另行验收。",
+      "appearance_decision": "每个新项目使用既定主题并支持响应式，通过项目配置灵活调整网页元素样式与交互，不是用户切换主题。元素按需使用，不要求各项目固定包含。用户明确搜索规范：统一搜索，内嵌字段名称和提示、1秒内应用搜索、长度自适应、统一风格样式；使用搜索时新项目必需定义搜索字段；搜索按钮可选，默认不显示。其它网页元素同样定义统一规范、必填项、可选项。",
+      "confirmed_followup": "稳定通用能力通过版本化共享包分发，项目保有业务代码、配置和应用骨架；通用改进审查后反哺，升级自动生成提案由维护者确认应用。前后端通过API交互，独立构建发布并统一启动。首版服务内部员工及受邀合作方，独立组织各自部署，轻量账号管理，管理员及普通用户两个默认角色。"
+    },
+    "questions": {
+      "maintenance_banner_dismissal": {
+        "type": "choice",
+        "instructions": "选择固定维护通知的用户关闭与消失规则。已明确倒计时到点继续提醒，不得选到点自动消失。只决定用户能否关闭或收起，以及维护取消/结束时移除；不决定实际停服页面、状态持久化技术或管理员CLI参数。权衡重要提醒持续可见与页面占用，用户说固定并未明确关闭规则时可选needs_clarification。",
+        "criteria": {
+          "persistent_not_dismissible": "普通用户不能关闭或收起维护通知；维护有效期间持续显示，管理员明确取消或结束维护状态后才移除，页面刷新与导航不视为取消。",
+          "collapsible_indicator": "用户可收起完整维护通知，但保留固定的维护状态标记与倒计时，可再次展开；管理员取消或结束维护后移除。",
+          "dismissible_until_next_notice": "用户可在当前浏览器关闭此次维护通知，直到产生新通知或维护结束，页面可不保留状态标记。",
+          "needs_clarification": "用户未明确固定通知是否不可关闭，或是否可以收起。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "maintenance_banner_dismissal": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.61,
+        "probabilities": {
+          "persistent_not_dismissible": 0.2,
+          "collapsible_indicator": 0.09,
+          "dismissible_until_next_notice": 0.0,
+          "needs_clarification": 0.71
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1602,
+      "output_tokens": 72
+    }
+  },
+  "selected_probability": 0.71,
+  "auto_selected": false
+}

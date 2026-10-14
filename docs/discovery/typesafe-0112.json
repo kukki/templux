@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量可独立运行的通用模板，服务不同组织独立部署，登录认证与账号管理、容器CLI、统一UI规范，项目可扩展。",
+      "confirmed": "默认管理员、普通用户两个预定义角色，可多角色并集，新项目可扩展角色与授权。首次飞书登录Pending，CLI授权为管理员，不自动首用户管理员。人员同账号可飞书密码关联，管理员发起验证，Agent独立显式授权。宿主管理CLI不要求应用账号登录，运维权限为边界，人工菜单变更确认和Agent显式确认参数；可禁用账号和变更角色，关键变更可靠审计保存失败不提交。权限变化旧会话全部失效，每请求PG核验。最新稳定版公共修复、累计提案与骨架三方候选已按授权采用。最后一个有效管理员的管理操作边界尚未定。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选至TypeSafe官方API。",
+      "scope": "仅决定已有管理员建立后的常规停用、降权是否可造成零有效管理员，不影响首次bootstrap允许Pending零管理员，不定义新项目业务规则或紧急恢复的具体机制。"
+    },
+    "questions": {
+      "last_active_admin_guard": {
+        "type": "choice",
+        "instructions": "推荐轻量用户管理对最后一个有效管理员的保护规则。用户已有可信宿主CLI可恢复授权，首启明确CLIbootstrap。不能把零管理员初始化当违规。权衡常规误操作防护与有意清空管理员角色，不足可needs_clarification。",
+        "criteria": {
+          "prevent_last_admin_removal": "已有管理员后，常规网页及CLI管理拒绝停用或降权最后一个有效管理员，需先建立另一个有效管理员；初始bootstrap不受影响，紧急恢复机制另定。",
+          "allow_explicit_confirm": "允许明确确认后停用或降权最后一个管理员，提示将只剩宿主CLI重新授权的恢复入口；不强制保留有效管理员。",
+          "needs_clarification": "需用户决定是否通过常规操作允许零管理员状态。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "last_active_admin_guard": {
+        "type": "choice",
+        "choice": "prevent_last_admin_removal",
+        "confidence": 0.28,
+        "probabilities": {
+          "prevent_last_admin_removal": 0.52,
+          "allow_explicit_confirm": 0.26,
+          "needs_clarification": 0.22
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 958,
+      "output_tokens": 56
+    }
+  },
+  "selected_probability": 0.52,
+  "auto_selected": false
+}

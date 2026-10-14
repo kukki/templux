@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，独立组织分别部署，登录认证及轻量用户管理、Docker及容器CLI，基于三套项目取共通能力。",
+      "confirmed": "角色默认管理员普通用户，可扩展多角色，Agent独立授权身份复用服务端权限。用户明确参考Supplieroom增加心跳，权限变化与登录时不匹配强制退出重新登录；服务端独立校验。会话及撤销存PostgreSQL，正常重启保留有效会话；恢复DB使旧会话失效。业务范围由项目定义，通过模板统一失效接口接入，不实施通用范围模型。来源Supplieroom有周期授权快照对账，但未要求照搬其所有缓存和时序。用户现已明确选择每受保护请求核对最新PG会话撤销、账号状态及授权版本，变更提交后的新请求不按旧授权放行，不匹配重登。视觉验收已确认行为布局自动检查与截图审查，不以像素差异自动阻断。 已核对来源Supplieroom前端30秒心跳，但模板默认间隔尚未确认。后台心跳不能作为用户操作延长10分钟闲置期限。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选至TypeSafe官方API。",
+      "scope": "仅决定前端页面可见且在线时心跳默认间隔，允许.env覆盖；页面恢复可见或网络恢复时立即校验作为各候选共同规则，不承诺后台浏览器按精确周期调度。服务端每请求最新核验独立执行。"
+    },
+    "questions": {
+      "heartbeat_interval_default": {
+        "type": "choice",
+        "instructions": "为轻量模板可见在线页面推荐前端心跳间隔。权限已由服务端每请求最新核验，心跳用于主动发现失效并引导登录，后台不算操作。可参考已核对来源30秒，但不强制照搬。需求不足可needs_clarification。",
+        "criteria": {
+          "seconds30": "默认30秒，.env可覆盖，恢复可见或网络恢复时立即校验。",
+          "seconds15": "默认15秒，.env可覆盖，恢复可见或网络恢复时立即校验。",
+          "seconds60": "默认60秒，.env可覆盖，恢复可见或网络恢复时立即校验。",
+          "needs_clarification": "需用户明确主动发现失效的默认间隔。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "heartbeat_interval_default": {
+        "type": "choice",
+        "choice": "seconds30",
+        "confidence": 0.37,
+        "probabilities": {
+          "seconds30": 0.53,
+          "seconds15": 0.02,
+          "seconds60": 0.14,
+          "needs_clarification": 0.31
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1028,
+      "output_tokens": 59
+    }
+  },
+  "selected_probability": 0.53,
+  "auto_selected": false
+}

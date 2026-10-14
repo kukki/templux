@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，控件按需复用；项目级配置风格和交互默认值，使用既定主题响应式，非用户主题切换。",
+      "confirmed": "普通顶部通知默认15秒，有进度条及手动关闭；鼠标悬停或键盘焦点进入时暂停，离开继续剩余时间；有上限堆叠，超出按顺序排队，每条实际显示时才计时。已确认桌面可见3条、窄屏1条，上限项目可配置。维护通知另行持续显示不可关闭，不占普通通知队列。独立浮动面板桌面窄屏均仅同时一个，替换保护编辑内容。 已自动采用可选显式去重键，同键同严重程度的活动通知合并并显示次数，无键不合并，已关闭过期不合并。 已自动采用重复合并只增加次数，保持剩余计时和暂停状态，不重置15秒，排队保留位置。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送访谈摘要决策候选至TypeSafe官方API。",
+      "scope": "仅决定普通通知等待队列达到配置上限时的溢出处理，具体容量另定；不移除正在显示的通知，不改变未溢出时FIFO。队列不是审计或持久消息中心，不能保证浏览器关闭后可回看。"
+    },
+    "questions": {
+      "toast_queue_overflow": {
+        "type": "choice",
+        "instructions": "推荐轻量模板普通通知等待队列达到有限容量时的处理，避免无限增长或无提示丢消息。已确认正常FIFO、可见上限桌面3窄屏1、15秒、显式键合并。不足可needs_clarification。",
+        "criteria": {
+          "keep_latest_summary": "淘汰最早的等待通知，为最新通知留位置；记录被淘汰数量，并用单独的溢出摘要提醒用户，不静默丢弃。正在显示的不受影响。",
+          "keep_old_reject_new_summary": "保留原等待通知，不再加入新通知；累计未入队数量，并用单独溢出摘要提醒用户。正在显示的不受影响。",
+          "unbounded_queue": "不限制等待队列容量，全部按顺序显示，避免丢通知但可能很久才看到最新提示。",
+          "needs_clarification": "需用户决定溢出时优先保留较新还是较早的通知。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "toast_queue_overflow": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.19,
+        "probabilities": {
+          "keep_latest_summary": 0.29,
+          "keep_old_reject_new_summary": 0.3,
+          "unbounded_queue": 0.02,
+          "needs_clarification": 0.39
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1025,
+      "output_tokens": 68
+    }
+  },
+  "selected_probability": 0.39,
+  "auto_selected": false
+}

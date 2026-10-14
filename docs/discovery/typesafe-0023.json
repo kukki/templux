@@ -1,0 +1,48 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未明确统一分页控件的默认控件组合。",
+      "multiselect_decisions": "已确认列表多选筛选停止勾选1秒后应用，提前关闭立即应用；可点击选项整行，一次点击只切换一次。默认全选表示不额外限制列表，全部取消表示无匹配结果。全选当前结果只作用于下拉内搜索结果，保留未显示选项原选择。",
+      "search_matching_decision": "用户已选择整段包含匹配，去除首尾空白并忽略大小写，任一指定字段命中；新项目可扩展。",
+      "timing_decision": "用户已确认停止输入后1秒内应用搜索条件并触发查询，结果返回时间由具体项目另行验收。",
+      "appearance_decision": "每个新项目使用既定主题并支持响应式，通过项目配置灵活调整网页元素样式与交互，不是用户切换主题。元素按需使用，不要求各项目固定包含。用户明确搜索规范：统一搜索，内嵌字段名称和提示、1秒内应用搜索、长度自适应、统一风格样式；使用搜索时新项目必需定义搜索字段；搜索按钮可选，默认不显示。其它网页元素同样定义统一规范、必填项、可选项。",
+      "confirmed_followup": "稳定通用能力通过版本化共享包分发，项目保有业务代码、配置和应用骨架；通用改进审查后反哺，升级自动生成提案由维护者确认应用。前后端通过API交互，独立构建发布并统一启动。首版服务内部员工及受邀合作方，独立组织各自部署，轻量账号管理，管理员及普通用户两个默认角色。"
+    },
+    "questions": {
+      "pagination_default_controls": {
+        "type": "choice",
+        "instructions": "为按需采用的统一分页网页元素选择默认控件组合。用户要求提取现有项目共通规范，明确举例Skoope分页按钮组；项目需要时使用，不是所有页面必须分页。只决定默认呈现的组合，不决定每页数值、页码窗口、窄屏布局、后端分页实现或配置格式。候选都允许新项目通过明确可选项调整，不开放无规则的随意拼接。缺少偏好时可选needs_clarification。",
+        "criteria": {
+          "full_pagination_group": "默认显示总记录数、每页数量、第几页/总页数、首页/上一页/页码按钮组/下一页/末页与跳页；项目可按规范隐藏可选部分，响应式布局另定。",
+          "compact_pagination_group": "默认显示每页数量、页数摘要和上一页/下一页；项目需要时再开启页码按钮、首页末页、跳页和总数等选项。",
+          "project_required_no_default": "模板提供统一样式的分页子控件，但每个项目必须明确选择组合，不提供默认组合。",
+          "needs_clarification": "用户举例分页按钮组但未确定默认完整还是精简组合，应确认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "pagination_default_controls": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.73,
+        "probabilities": {
+          "full_pagination_group": 0.1,
+          "compact_pagination_group": 0.08,
+          "project_required_no_default": 0.02,
+          "needs_clarification": 0.8
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1386,
+      "output_tokens": 66
+    }
+  },
+  "selected_probability": 0.8,
+  "auto_selected": false
+}

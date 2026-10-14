@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "通用模板汇总Supplieroom、Skoope、Catchouse，规范页头页脚等网页元素，控件按需采用，模板可独立启动。",
+      "confirmed": "风格和布局变体由新项目配置，主题及导航方向只是例子，不是用户自行切换主题。各项目使用既定主题并支持响应式，样式与代码分离。已有项目配置值调整后重启生效，不需重建镜像。顶部普通通知15秒有限堆叠队列，维护通知持续显示；窄屏分页保留关键控制。首版审计页查询筛选分页，不导出。 用户明确选择页头页脚默认均随页面滚动，固定或吸附仅为项目可选变体。 已自动采用页头项目名称、可选Logo、账号退出入口；页脚版本与可配置版权，区域项目可隐藏替换。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送需求摘要、决策、候选到TypeSafe官方API。",
+      "scope": "仅决定模板独立启动时桌面导航默认方向，横向与纵向首版均支持且新项目通过配置切换；不决定移动端交互，也不引入用户个人导航切换。"
+    },
+    "questions": {
+      "desktop_navigation_default": {
+        "type": "choice",
+        "instructions": "为模板独立启动时的桌面导航推荐默认方向，主要页面为账号管理、控件示例、管理员审计，业务模块由新项目添加。横向与纵向都支持，只选默认；缺乏偏好可needs_clarification。",
+        "criteria": {
+          "horizontal": "默认横向导航，适合首版少量入口；新项目可配置纵向。",
+          "vertical": "默认纵向侧栏导航，适合管理系统及后续业务入口扩展；新项目可配置横向。",
+          "needs_clarification": "两种均满足要求，需用户决定模板展示的默认方向。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "desktop_navigation_default": {
+        "type": "choice",
+        "choice": "vertical",
+        "confidence": 0.55,
+        "probabilities": {
+          "horizontal": 0.09,
+          "vertical": 0.7,
+          "needs_clarification": 0.21
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 872,
+      "output_tokens": 44
+    }
+  },
+  "selected_probability": 0.7,
+  "auto_selected": false
+}

@@ -1,0 +1,44 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未审查来源项目代码；没有维护团队规模、升级频率或多租户要求。",
+      "confirmed_followup": "首版面向内部员工及受邀合作方，不开放公众注册。不同组织独立部署，飞书认证通过.env配置应用凭据与允许组织，另支持管理员授权的密码登录。默认管理员、普通用户两个预定义角色，新项目可扩展或调整角色及授权方式。首次启动飞书登录进入Pending，经CLI更新角色，可授予管理员；CLI也支持创建Agent账号用于真实界面测试。Agent有独立身份和责任人，复用人员业务角色，默认无业务权限，管理员明确授予角色及数据范围，授权长期有效直到撤销或禁用。DEV/UAT支持Agent登录，PROD默认关闭可显式启用。用户最初要求CLI命令行兼容，但尚未指定CLI要交互菜单、带参数单行命令或两者兼有。"
+    },
+    "questions": {
+      "cli_interaction": {
+        "type": "choice",
+        "instructions": "为首版模板选择CLI交互形式。只决定交互菜单和带参数命令是否支持，不决定主机依赖、具体参数或敏感信息传递方式。权衡首次管理员授权便利、Agent自动化测试与轻量维护。真实界面测试需求不等于用户明确要求所有运维自动化；信息不足时可选needs_clarification。",
+        "criteria": {
+          "interactive_and_arguments": "无参数时提供交互菜单；带完整参数时直接执行，支持脚本与自动化，底层复用相同命令逻辑。需维护两种入口但无需两套规则。",
+          "arguments_only": "只支持带参数的命令与help，便于自动化且实现较轻；人工操作需要查阅命令。",
+          "interactive_only": "只提供交互菜单，适合人工运维；无完整非交互入口，自动化调用受限。",
+          "needs_clarification": "用户对人工操作与自动化入口的偏好不足以确定是否提供菜单。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "cli_interaction": {
+        "type": "choice",
+        "choice": "interactive_and_arguments",
+        "confidence": 0.83,
+        "probabilities": {
+          "interactive_and_arguments": 0.87,
+          "arguments_only": 0.03,
+          "interactive_only": 0.01,
+          "needs_clarification": 0.09
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1062,
+      "output_tokens": 59
+    }
+  },
+  "selected_probability": 0.87,
+  "auto_selected": true
+}

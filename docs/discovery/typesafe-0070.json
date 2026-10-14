@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse的通用模板，可独立启动，认证、轻量账号、日志、Docker、CLI、统一网页元素风格行为规范；元素按需使用，不固化业务。",
+      "confirmed": "项目配置风格布局及控件默认值，使用既定主题响应式，默认浅色背景蓝色强调。默认纵向导航可收为图标，允许用户临时收起并浏览器按项目账号记忆；窄屏菜单按钮打开文字侧边抽屉，选目的页关闭。表单列入控件示例，尚未定义校验反馈时机。业务字段和校验规则属于各新项目，模板只定义共通交互及承接字段错误的能力。 已自动采用表单首次失焦校验、提交全量校验、错误字段修改后及时复查，服务端最终校验，字段错误就近显示。用户已明确统一搜索内嵌字段名称与提示，但尚未规定普通表单标签布局。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，并允许发送访谈摘要、已定决策及候选到TypeSafe官方API。",
+      "scope": "仅决定普通表单默认字段标签布局，不更改统一搜索内嵌名称提示的既定规范。标签在有值、聚焦时始终可识别，不能只用输入后消失的placeholder。其它布局保留项目级变体。"
+    },
+    "questions": {
+      "form_label_layout": {
+        "type": "choice",
+        "instructions": "为普通表单推荐字段名称默认布局。统一搜索已有内嵌名称提示要求，但普通编辑表单尚未规定；可依据一致性或长标签可读性推荐，偏好不明则needs_clarification。",
+        "criteria": {
+          "above_input": "普通表单字段名称默认在控件上方持续显示，提示与错误就近放置；搜索仍使用已定内嵌名称。",
+          "embedded_persistent": "普通表单也默认在控件内嵌持续可见字段名称，与搜索一致；输入值、提示、标签保持不重叠，不能仅用placeholder。",
+          "needs_clarification": "标签布局偏好尚不明确，需要用户决定默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "form_label_layout": {
+        "type": "choice",
+        "choice": "above_input",
+        "confidence": 0.53,
+        "probabilities": {
+          "above_input": 0.69,
+          "embedded_persistent": 0.09,
+          "needs_clarification": 0.22
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 966,
+      "output_tokens": 49
+    }
+  },
+  "selected_probability": 0.69,
+  "auto_selected": false
+}

@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从Supplieroom、Skoope、Catchouse整合通用模板，供新项目套用及作为独立项目启动；认证、轻量账号、日志、容器CLI、统一控件规范。",
+      "confirmed": "模板独立启动默认提供登录、账号管理与控件示例，使用自带样例数据，不增加完整样例业务。网页元素按需采用，不要求新项目固定包含全部控件。风格及交互默认由项目配置；新项目保有业务、配置及骨架，共享版本包分发公共能力，改进可审查反哺。触屏普通通知不增加专门暂停交互。 已按授权采用新项目保留独立可移除示例目录，开发测试默认启用、生产默认关闭，项目可配置启用并明确访问规则。 用户已确认控件示例使用独立样例文件，浏览器内存模拟操作，刷新或重置恢复，不增示例API及表；真实登录账号审计仍正常后端。账号首登飞书为Pending，经CLI授权有角色后才能进入。默认管理员与普通用户，Agent独立身份也要授权。",
+      "delegation": "用户授权选项实际概率严格大于75%自动采用，允许发送摘要决策候选到TypeSafe官方API。",
+      "scope": "只决定示例页在已启用的环境中的默认访问角色，生产默认关闭的既定规则不变；匿名及Pending不开放。示例权限不赋予真实账号管理或审计权限，项目可调整访问规则。"
+    },
+    "questions": {
+      "component_demo_access": {
+        "type": "choice",
+        "instructions": "为启用时的纯控件示例页推荐默认访问角色。示例数据内存模拟，无真实业务或账号变更；模板独立启动也供展示通用控件，所有账号须经批准有角色。无法判断角色偏好可needs_clarification。",
+        "criteria": {
+          "all_active_authorized": "已批准且有角色的正常账号可访问，包括管理员、普通用户及获授权Agent；不开放匿名和Pending，不赋予其它管理权限。",
+          "admins_only": "只有管理员可访问，普通用户与非管理员Agent不可访问；项目可配置放宽。",
+          "needs_clarification": "需要用户决定示例页是否只开放管理员。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "component_demo_access": {
+        "type": "choice",
+        "choice": "all_active_authorized",
+        "confidence": 0.77,
+        "probabilities": {
+          "all_active_authorized": 0.85,
+          "admins_only": 0.03,
+          "needs_clarification": 0.12
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 993,
+      "output_tokens": 55
+    }
+  },
+  "selected_probability": 0.85,
+  "auto_selected": true
+}

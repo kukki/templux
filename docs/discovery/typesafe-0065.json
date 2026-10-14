@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "通用模板汇总Supplieroom、Skoope、Catchouse，规范页头页脚等网页元素，控件按需采用，模板可独立启动。",
+      "confirmed": "风格和布局变体由新项目配置，主题及导航方向只是例子，不是用户自行切换主题。各项目使用既定主题并支持响应式，样式与代码分离。已有项目配置值调整后重启生效，不需重建镜像。顶部普通通知15秒有限堆叠队列，维护通知持续显示；窄屏分页保留关键控制。首版审计页查询筛选分页，不导出。 用户明确选择页头页脚默认均随页面滚动，固定或吸附仅为项目可选变体。 已自动采用页头项目名称、可选Logo、账号退出入口；页脚版本与可配置版权，区域项目可隐藏替换。 用户选择桌面默认纵向侧栏，并补充纵向时可隐藏文字仅显示图标。用户此前明确风格及导航方向是新项目配置，不是终端用户切换；但未明确是否允许用户临时收起侧栏。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送需求摘要、决策、候选到TypeSafe官方API。",
+      "scope": "仅澄清纵向侧栏图标模式是否提供终端用户临时展开收起操作，不决定默认展开状态、跨设备偏好持久化或移动端抽屉。项目配置始终可调整默认状态；主题和导航方向仍不由用户切换。"
+    },
+    "questions": {
+      "sidebar_collapse_control": {
+        "type": "choice",
+        "instructions": "结合用户强调项目级变体和新增纵向仅图标模式，判断应提供何种收起控制。不得将主题和导航方向切换混入临时侧栏展开收起；用户意图未明确可needs_clarification。",
+        "criteria": {
+          "project_default_user_toggle": "项目配置决定默认展开或仅图标，并可启用用户临时展开/收起按钮；按钮不改变主题或导航方向。",
+          "project_only": "仅由项目配置决定显示文字还是仅图标，首版不提供用户展开/收起按钮。",
+          "needs_clarification": "需用户明确仅图标是固定项目配置，还是也要用户临时展开收起。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "sidebar_collapse_control": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.56,
+        "probabilities": {
+          "project_default_user_toggle": 0.24,
+          "project_only": 0.05,
+          "needs_clarification": 0.71
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 992,
+      "output_tokens": 53
+    }
+  },
+  "selected_probability": 0.71,
+  "auto_selected": false
+}

@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "轻量通用模板，控件按需复用；项目级配置风格和交互默认值，使用既定主题响应式，非用户主题切换。",
+      "confirmed": "普通顶部通知默认15秒，有进度条及手动关闭；鼠标悬停或键盘焦点进入时暂停，离开继续剩余时间；有上限堆叠，超出按顺序排队，每条实际显示时才计时。已确认桌面可见3条、窄屏1条，上限项目可配置。维护通知另行持续显示不可关闭，不占普通通知队列。独立浮动面板桌面窄屏均仅同时一个，替换保护编辑内容。 已自动采用可选显式去重键，同键同严重程度的活动通知合并并显示次数，无键不合并，已关闭过期不合并。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送访谈摘要决策候选至TypeSafe官方API。",
+      "scope": "只决定已显示通知被合并重复事件后的倒计时，不改变悬停或焦点暂停规则。仍在队列的通知本来尚未计时；合并应保留队列位置，不由本题重排。"
+    },
+    "questions": {
+      "toast_merge_timer": {
+        "type": "choice",
+        "instructions": "为已确认通知去重推荐合并后的倒计时行为。普通默认15秒，重复事件可能连续发生；兼顾重复信息可见与不会长期占位。不足可needs_clarification。",
+        "criteria": {
+          "keep_remaining": "已显示通知重复合并时只更新重复次数，保持剩余倒计时及暂停状态，不重新计时；排队通知保留位置，实际显示时才开始计时。",
+          "restart_duration": "每次重复合并都重新给予完整15秒，若原来暂停仍暂停；排队通知保留位置，实际显示时才计时。",
+          "needs_clarification": "需用户决定重复事件是否延长已显示通知时长。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "toast_merge_timer": {
+        "type": "choice",
+        "choice": "keep_remaining",
+        "confidence": 0.66,
+        "probabilities": {
+          "keep_remaining": 0.77,
+          "restart_duration": 0.17,
+          "needs_clarification": 0.06
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 883,
+      "output_tokens": 47
+    }
+  },
+  "selected_probability": 0.77,
+  "auto_selected": true
+}

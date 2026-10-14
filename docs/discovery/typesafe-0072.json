@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse的通用模板，可独立启动，认证、轻量账号、日志、Docker、CLI、统一网页元素风格行为规范；元素按需使用，不固化业务。",
+      "confirmed": "项目配置风格布局及控件默认值，使用既定主题响应式，默认浅色背景蓝色强调。默认纵向导航可收为图标，允许用户临时收起并浏览器按项目账号记忆；窄屏菜单按钮打开文字侧边抽屉，选目的页关闭。表单列入控件示例。业务字段和校验规则属于各新项目，模板只定义共通交互及承接字段错误的能力。 已自动采用表单首次失焦校验、提交全量校验、错误字段修改后及时复查，服务端最终校验，字段错误就近显示。用户已明确统一搜索内嵌字段名称与提示，普通表单则已选择字段名称在控件上方持续显示，提示及错误就近放置。 已自动采用未保存编辑时应用内离开或关闭编辑表单提醒，无修改已保存及仅筛选不提醒，不阻挡权限失效强制退出。用户要求表格控件示例及响应式，尚未决定表格窄屏默认。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，并允许发送访谈摘要、已定决策及候选到TypeSafe官方API。",
+      "scope": "仅决定通用数据表格在窄屏默认呈现，不决定业务字段、列权限、排序或导出；新项目可配置不同变体。默认不得无说明丢失列信息。"
+    },
+    "questions": {
+      "responsive_table_default": {
+        "type": "choice",
+        "instructions": "为轻量内部软件通用数据表格推荐窄屏默认呈现，表格可能含多列和行操作，新项目定义字段。需要保留可用性及可配置变体，无法判断可needs_clarification。",
+        "criteria": {
+          "contained_horizontal_scroll": "保持表格结构，窄屏只在表格容器内横向滚动，页面整体不横向溢出，保留全部列；卡片等作为项目可选变体。",
+          "row_cards": "窄屏每行转成带字段名称的卡片，保留字段与操作，桌面仍表格。",
+          "priority_columns_details": "窄屏只显示项目指定优先列，其余字段通过行详情展开查看；项目须定义优先级及详情内容。",
+          "needs_clarification": "字段密度与移动端使用方式不明确，需要用户决定默认。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "responsive_table_default": {
+        "type": "choice",
+        "choice": "contained_horizontal_scroll",
+        "confidence": 0.33,
+        "probabilities": {
+          "contained_horizontal_scroll": 0.5,
+          "row_cards": 0.06,
+          "priority_columns_details": 0.19,
+          "needs_clarification": 0.25
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1074,
+      "output_tokens": 58
+    }
+  },
+  "selected_probability": 0.5,
+  "auto_selected": false
+}

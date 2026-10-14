@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "整合Supplieroom、Skoope、Catchouse创建通用模板，供后续新项目套用加快开发上线，也能独立启动。",
+      "confirmed": "稳定共通能力通过版本化共享包分发；新项目保有业务代码、项目配置和骨架，通用改进审查后反哺，升级生成提案及检查由维护者确认应用。风格布局通过独立项目配置管理，env参数凭据分离，已有配置改值重启无需构建。运行及管理命令在Docker内，宿主只DockerComposeShell，不依赖npmJava等；人工菜单与Agent一行参数方式共用逻辑。新项目保留可移除控件样例，开发测试默认开、生产默认关，内存样例不连接业务。退出默认当前会话，另有退出全部已自动采用。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许摘要决策候选发TypeSafe官方API。",
+      "scope": "只决定首版创建新项目的默认入口，不选择代码托管或包仓库，不强制宿主额外Git或应用运行环境，不执行创建新项目。"
+    },
+    "questions": {
+      "new_project_creation_entry": {
+        "type": "choice",
+        "instructions": "推荐首版从模板创建新项目的默认入口，用户重视快速复用，模板可独立运行且已有容器CLI。两方案初始化均容器执行，人工菜单Agent一行支持，避免不必要构建复杂度。需求不足可needs_clarification。",
+        "criteria": {
+          "copy_then_container_init": "先复制模板源码目录或获取源码包，再运行容器初始化入口设置项目名称、品牌配置和env样例；不另做直接生成目录的脚手架生成器。",
+          "container_scaffolder": "提供容器脚手架命令，直接指定新目录与项目参数生成骨架、配置和启动脚本，支持交互菜单与一行调用，不覆盖已有非空目录。",
+          "needs_clarification": "需用户决定首版是复制后初始化，还是直接提供新项目目录生成器。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "new_project_creation_entry": {
+        "type": "choice",
+        "choice": "container_scaffolder",
+        "confidence": 0.33,
+        "probabilities": {
+          "copy_then_container_init": 0.3,
+          "container_scaffolder": 0.55,
+          "needs_clarification": 0.15
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 919,
+      "output_tokens": 56
+    }
+  },
+  "selected_probability": 0.55,
+  "auto_selected": false
+}

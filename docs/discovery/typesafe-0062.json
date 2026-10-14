@@ -1,0 +1,45 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "通用模板汇总Supplieroom、Skoope、Catchouse，规范页头页脚等网页元素，控件按需采用，模板可独立启动。",
+      "confirmed": "风格和布局变体由新项目配置，主题及导航方向只是例子，不是用户自行切换主题。各项目使用既定主题并支持响应式，样式与代码分离。已有项目配置值调整后重启生效，不需重建镜像。顶部普通通知15秒有限堆叠队列，维护通知持续显示；窄屏分页保留关键控制。首版审计页查询筛选分页，不导出。",
+      "delegation": "用户授权实际选项概率严格大于75%自动采用，允许发送需求摘要、决策、候选到TypeSafe官方API。",
+      "scope": "只决定已登录页面默认页头页脚滚动行为，其它行为作为项目级可选变体；不决定内容、具体尺寸或登录页布局。不声称任何来源项目已有此行为。"
+    },
+    "questions": {
+      "shell_scroll_default": {
+        "type": "choice",
+        "instructions": "为响应式内部软件模板推荐已登录页面页头页脚的默认滚动行为，保持可配置变体，不把所有新项目锁定同布局。若缺乏用户偏好不能推荐则needs_clarification。",
+        "criteria": {
+          "sticky_header_flow_footer": "页头滚动时保持可见，页脚在内容末尾随页面滚动；短页面页脚靠底，通过布局占位避免遮住内容。",
+          "both_fixed": "页头页脚均始终固定可见，内容区预留相应空间；窄屏也保留页脚。",
+          "both_flow": "页头页脚默认均随页面内容滚动，不固定占据屏幕。",
+          "needs_clarification": "需要用户决定页头页脚是否持续可见。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "shell_scroll_default": {
+        "type": "choice",
+        "choice": "sticky_header_flow_footer",
+        "confidence": 0.57,
+        "probabilities": {
+          "sticky_header_flow_footer": 0.68,
+          "both_fixed": 0.01,
+          "both_flow": 0.04,
+          "needs_clarification": 0.27
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 835,
+      "output_tokens": 59
+    }
+  },
+  "selected_probability": 0.68,
+  "auto_selected": false
+}

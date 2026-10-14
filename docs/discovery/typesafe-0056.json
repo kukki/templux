@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "通用独立可运行模板，容器内管理CLI，人工交互菜单与Agent一行脚本共用逻辑。宿主只有Docker、Compose、基础Shell。",
+      "confirmed": "无参数且有终端进菜单；完整参数直接执行；显式非交互模式；非交互或无终端缺参快速失败、非零退出码，不等待输入。管理账号、角色、维护、启动迁移；Agent初始随机密码只写受限指定文件，普通输出不打印凭据。结构化运行日志及审计已确认。 用户已确认默认文本、显式JSON模式，JSON stdout仅结构化结果，诊断stderr。首次飞书登录Pending，必须通过CLI授权成为首个管理员；浏览器Agent身份独立且显式授权。",
+      "delegation": "用户授权选项概率严格大于75%自动采用；需求摘要、决策、候选项可发官方API。",
+      "question_scope": "只决定宿主管理CLI是否要求应用管理员登录，不决定远程管理API、业务数据范围或破坏性操作确认。"
+    },
+    "questions": {
+      "cli_authorization_boundary": {
+        "type": "choice",
+        "instructions": "为可信宿主上容器管理CLI选择授权边界。需要支持首次无应用管理员时授予角色及服务尚未运行时初始化；不要把浏览器Agent账号自动视作宿主运维授权。此决策涉及权限边界，若不足以推断用户意愿则选择needs_clarification。",
+        "criteria": {
+          "host_operator": "将获准在部署宿主执行管理容器并访问部署凭据的操作者视作运维管理员，CLI不额外要求应用账号登录；管理变更记录CLI来源、目标及结果，操作者标识的真实性取决于宿主身份机制；浏览器Agent账号不因此获得宿主权限。",
+          "application_admin": "除首次初始化或恢复的受控例外，日常账号角色等管理CLI要求有效应用管理员身份；启动迁移等纯运维命令使用宿主权限。",
+          "needs_clarification": "需要用户明确宿主管理权是否足够，无法自动选定应用管理员登录门槛。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "cli_authorization_boundary": {
+        "type": "choice",
+        "choice": "application_admin",
+        "confidence": 0.49,
+        "probabilities": {
+          "host_operator": 0.25,
+          "application_admin": 0.66,
+          "needs_clarification": 0.09
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 940,
+      "output_tokens": 50
+    }
+  },
+  "selected_probability": 0.66,
+  "auto_selected": false
+}

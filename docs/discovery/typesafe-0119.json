@@ -1,0 +1,64 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "汇总Supplieroom、Skoope、Catchouse的共通模板UI规范，轻量管理、审计页及控件示例，默认中文，固定项目主题响应式，变体由项目配置。",
+      "confirmed": "密码登录成功审计单独失败仍允许登录记录运行错误，管理变更审计必须可靠写入。通用管理/审计时间控件参考三项目代码默认显式Asia/Hong_Kong，项目可更改，不增个人时区设置，不改变存储精度或业务日期。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/modules/audit/ui/audit-log-workspace.tsx:349-355",
+          "format": "zh-CN，Asia/Hong_Kong，dateStyle medium，timeStyle medium，显示到秒",
+          "use": "AuditLogWorkspace时间列"
+        },
+        {
+          "project": "Skoope",
+          "path": "src/components/admin-console.tsx:31-33",
+          "format": "zh-CN，Asia/Hong_Kong，年月日时分，无秒字段",
+          "use": "AdminConsole审计行"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/operations-admin.js:4",
+          "format": "zh-CN，Asia/Hong_Kong，dateStyle short，timeStyle medium，hour12 false，显示到秒",
+          "use": "现存prototype管理控件render和runTable，未验证生产挂载"
+        }
+      ],
+      "evidence_limits": "图定位追踪精确读取覆盖metadata_match无报告问题；只管理控件，不宣称全项目格式一致，Catchouse明确prototype参考，不发送源码数据。",
+      "delegation": "用户要求来源共通直接提取，明显分歧交TypeSafe，实际选项概率严格大于75%自动采用，否则用户选择，允许摘要决策候选发官方API。",
+      "scope": "仅选择管理审计时间默认显示精度，底层时间不截断，项目可选变体，日期样式和分隔符另定，不将业务日期换成时间戳。"
+    },
+    "questions": {
+      "administrative_time_precision": {
+        "type": "choice",
+        "instructions": "在来源现有秒或分钟方案中推荐通用管理审计时间默认显示精度。轻量与清晰可比都重要，不按项目数投票；底层数据精度不因此改变，项目可配置。证据不足或偏好不明可needs_clarification。",
+        "criteria": {
+          "seconds": "采用Supplieroom/Catchouse控件方式，默认显示到秒。",
+          "minutes": "采用Skoope管理审计方式，默认显示到分钟。",
+          "needs_clarification": "两种来源都满足已定要求，需要用户决定显示精度。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "administrative_time_precision": {
+        "type": "choice",
+        "choice": "seconds",
+        "confidence": 0.16,
+        "probabilities": {
+          "seconds": 0.44,
+          "minutes": 0.37,
+          "needs_clarification": 0.19
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1090,
+      "output_tokens": 47
+    }
+  },
+  "selected_probability": 0.44,
+  "auto_selected": false
+}

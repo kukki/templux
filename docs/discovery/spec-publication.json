@@ -1,0 +1,17 @@
+{
+  "issue_url": "https://gitea.whynots.top/Swython/Templux/issues/1",
+  "owner": "Swython",
+  "repo": "Templux",
+  "issue_number": 1,
+  "title": "Templux 首版规格：可复用模板、统一网页元素及受控升级",
+  "label": "ready-for-agent",
+  "label_id": 25,
+  "local_spec": "docs/specs/templux-v1-prd.md",
+  "sha256": "9ed6e5b74c140ffa01abd5cf15c27e38cc16150f121a24c9c2cc169365789092",
+  "verification": {
+    "remote_body_matches_local": true,
+    "label_present": true,
+    "test_boundary_user_confirmed": true
+  },
+  "scope": "Specification publication only; no application implementation, commit, push or deployment."
+}

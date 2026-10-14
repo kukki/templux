@@ -1,0 +1,61 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从Supplieroom、Skoope、Catchouse提取可复用模板网页元素规范；元素项目按需使用，项目级配置变体，默认固定主题响应式。",
+      "confirmed": "图片预览默认保持比例适应视口，关闭按钮遮罩Escape关闭，点击图片自身不关闭，首版有项目可配置缩放平移变体。三所查控件关闭后恢复打开控件焦点，直接采用。业务图片来源上传留存属于项目，不固化。管理审计时间用户已选默认到秒。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "path": "src/shared/ui/image-preview-dialog.tsx:6-56",
+          "pattern": "单src/alt预览，无用户前后图片切换"
+        },
+        {
+          "project": "Skoope",
+          "path": "src/components/sku-detail-interactions.tsx:27-51",
+          "pattern": "单产品图primary失败可fallback，非用户可翻图库"
+        },
+        {
+          "project": "Catchouse",
+          "path": "prototype/catchouse-app.js:479-510",
+          "pattern": "现存图库items/index，上一张下一张及当前总数，边界禁用，切图重置缩放平移；prototype参考，本轮未验证生产挂载"
+        }
+      ],
+      "evidence_limits": "图追踪精确源码及覆盖检查metadata_match无问题，未运行浏览器，不宣称全项目所有入口一致，不发送源码数据。",
+      "delegation": "用户要求共通直接采用，明显来源分歧交TypeSafe，实际选项概率严格大于75%自动采用，否则用户选，允许摘要候选发送官方API。",
+      "scope": "只决定首版纳入单图与可选图片组还是只有单图，不改变已有关闭及缩放默认，不复制业务照片组模型。图片组若启用需项目提供列表，未提供不显示切换控件。"
+    },
+    "questions": {
+      "image_gallery_scope": {
+        "type": "choice",
+        "instructions": "从来源单图和Catchouse图片组能力选择模板首版范围。用户要控件规范及灵活项目变体，图片组未明确要求，但已有真实代码参考。保持单图可用，不能强制每项目用图库或照搬业务。需求不足可needs_clarification。",
+        "criteria": {
+          "single_plus_optional_gallery": "单图默认保持，纳入Catchouse图片组切换作为可选变体；项目提供列表并启用时才显示上一下一及当前总数，按边界禁用，不循环。",
+          "single_only_first_release": "首版仅单图，如Supplieroom/Skoope所查控件；图片组由项目后续扩展，首版不维护图库切换。",
+          "needs_clarification": "需用户决定是否将来源图库切换纳入模板首版可选能力。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "image_gallery_scope": {
+        "type": "choice",
+        "choice": "single_plus_optional_gallery",
+        "confidence": 0.89,
+        "probabilities": {
+          "single_plus_optional_gallery": 0.93,
+          "single_only_first_release": 0.05,
+          "needs_clarification": 0.02
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1126,
+      "output_tokens": 53
+    }
+  },
+  "selected_probability": 0.93,
+  "auto_selected": true
+}

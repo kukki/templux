@@ -1,0 +1,102 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "分页默认每页10条已由用户确认，项目可配置；完整分页及窄屏布局已定，修改每页数量回第一页，边界禁用。现在只选默认下拉选项集合，不更改默认10。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "scenario": "采购单",
+          "paths": [
+            "src/modules/supplier-po/ui/supplier-po-workspace.tsx:140,363-373",
+            "src/shared/ui/list-pagination.tsx:14-71"
+          ],
+          "default_page_size": 10,
+          "options": [
+            10,
+            20,
+            50
+          ]
+        },
+        {
+          "project": "Skoope",
+          "scenario": "总览",
+          "paths": [
+            "src/components/overview-table.tsx:111,130",
+            "src/components/overview-pagination.tsx:30-33"
+          ],
+          "default_page_size": 15,
+          "options": [
+            5,
+            10,
+            15,
+            20,
+            25,
+            50
+          ]
+        },
+        {
+          "project": "Catchouse",
+          "scenario": "通用列表",
+          "path": "prototype/list-ui.js:2-10",
+          "default_page_size": 20,
+          "options": [
+            15,
+            20,
+            50
+          ]
+        },
+        {
+          "project": "Catchouse",
+          "scenario": "看板",
+          "path": "prototype/catchouse-app.js:1013-1019",
+          "default_page_size": 10,
+          "options": [
+            5,
+            10,
+            15,
+            20
+          ]
+        }
+      ],
+      "evidence_limits": "图及源码、覆盖核对metadata_match无问题，未运行分页验收，不以单一场景代表全项目；Catchouse为prototype参考不宣称生产挂载。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "选择包含10的现存集合为模板默认；项目可共同覆盖默认数量及选项集合且默认必须属于集合，不发明混合集合。Catchouse通用列表[15,20,50]不含已确认10，不能原样作为此次默认候选；其证据仍保留。"
+    },
+    "questions": {
+      "pagination_size_options": {
+        "type": "choice",
+        "instructions": "从三个现存且包含已确认默认10的集合中选择通用模板默认。只比较选项集合，不引入原场景默认数量，不按来源数量投票。项目可配置，缺少明确偏好可needs_clarification。",
+        "criteria": {
+          "supplieroom": "Supplieroom采购单：[10,20,50]。",
+          "skoope": "Skoope总览：[5,10,15,20,25,50]。",
+          "catchouse_dashboard": "Catchouse看板prototype：[5,10,15,20]。",
+          "needs_clarification": "几组都有合理场景，缺少足以确定默认选项密度的依据，需要用户选择。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "pagination_size_options": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.69,
+        "probabilities": {
+          "supplieroom": 0.03,
+          "skoope": 0.19,
+          "catchouse_dashboard": 0.01,
+          "needs_clarification": 0.77
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1210,
+      "output_tokens": 62
+    }
+  },
+  "selected_probability": 0.77,
+  "auto_selected": false
+}

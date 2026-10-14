@@ -1,0 +1,102 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "goal": "从三项目提取通用网页元素规范，元素按需复用，项目级配置默认与样式，模板独立有控件示例，固定主题响应式。",
+      "confirmed": "分页默认完整组合，含总数、每页数、页码组、首页上页下页末页及跳转，项目可隐藏可选部分；窄屏保留上一页当前总页下一页，其它展开。共通修改每页数量回第一页及边界禁用已直接采用。复制成功默认1.5秒用户已确认。",
+      "source_evidence": [
+        {
+          "project": "Supplieroom",
+          "scenario": "采购单",
+          "paths": [
+            "src/modules/supplier-po/ui/supplier-po-workspace.tsx:140,363-373",
+            "src/shared/ui/list-pagination.tsx:14-71"
+          ],
+          "default_page_size": 10,
+          "options": [
+            10,
+            20,
+            50
+          ]
+        },
+        {
+          "project": "Skoope",
+          "scenario": "总览",
+          "paths": [
+            "src/components/overview-table.tsx:111,130",
+            "src/components/overview-pagination.tsx:30-33"
+          ],
+          "default_page_size": 15,
+          "options": [
+            5,
+            10,
+            15,
+            20,
+            25,
+            50
+          ]
+        },
+        {
+          "project": "Catchouse",
+          "scenario": "通用列表",
+          "path": "prototype/list-ui.js:2-10",
+          "default_page_size": 20,
+          "options": [
+            15,
+            20,
+            50
+          ]
+        },
+        {
+          "project": "Catchouse",
+          "scenario": "看板",
+          "path": "prototype/catchouse-app.js:1013-1019",
+          "default_page_size": 10,
+          "options": [
+            5,
+            10,
+            15,
+            20
+          ]
+        }
+      ],
+      "evidence_limits": "图及源码、覆盖核对metadata_match无问题，未运行分页验收，不以单一场景代表全项目；Catchouse为prototype参考不宣称生产挂载。",
+      "delegation": "先共通直接采用，明显来源分歧TypeSafe；实际选项概率严格大于75%自动采用，否则用户选择，允许摘要候选发官方API。",
+      "scope": "只决定模板默认每页数量，项目可配置，选项集合另定；不改变已定完整分页或窄屏，不定义业务数据或性能SLA。"
+    },
+    "questions": {
+      "pagination_default_page_size": {
+        "type": "choice",
+        "instructions": "从已核对场景现有10、15、20三种默认选择模板通用分页默认。用户重点是统一控件规范和项目可配置，没有业务数据密度约束；不按项目数量投票，不将大小对应选项集合一起带入。不足可needs_clarification。",
+        "criteria": {
+          "rows10": "默认10条，来源Supplieroom采购单及Catchouse看板。",
+          "rows15": "默认15条，来源Skoope总览。",
+          "rows20": "默认20条，来源Catchouse通用列表控件。",
+          "needs_clarification": "来源场景均合理，缺乏模板默认数据密度偏好，需要用户选择。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "pagination_default_page_size": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.87,
+        "probabilities": {
+          "rows10": 0.07,
+          "rows15": 0.02,
+          "rows20": 0.01,
+          "needs_clarification": 0.9
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1197,
+      "output_tokens": 62
+    }
+  },
+  "selected_probability": 0.9,
+  "auto_selected": false
+}

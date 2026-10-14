@@ -1,0 +1,44 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未审查来源项目代码；没有维护团队规模、升级频率或多租户要求。",
+      "confirmed_followup": "通用改进须经审查后反哺模板，业务内容和数据留在项目内；模板更新后自动生成升级提案及检查结果，由项目维护者确认后应用。首版面向内部员工及受邀合作方，管理员创建、邀请或审批账号，不开放公众注册。不同组织独立部署，飞书认证通过.env配置应用凭据与允许组织。保留授权密码登录，内部用户与合作方都可使用。AI Coding Agent以独立身份执行真实界面测试，关联责任人，可单独授权、禁用和追踪操作，走真实认证与权限流程。DEV/UAT支持Agent登录，PROD默认关闭，可由部署管理员显式启用。已确认Agent复用人员业务角色与服务端权限检查，默认无业务权限，由管理员明确授予测试需要的角色及适用数据范围。账号身份、业务授权、登录凭据和会话是不同概念，授权有效期尚未决定。"
+    },
+    "questions": {
+      "agent_grant_lifetime": {
+        "type": "choice",
+        "instructions": "为Agent业务访问授权选择有效期策略。只决定角色和数据范围授权是否必须到期，不决定账号身份保留期限、凭据技术或浏览器会话时长。权衡重复测试便利、首版轻量实现、回收可控性与定时CI测试需要。不要捏造合规要求或固定时长；无法判断维护偏好时可选择needs_clarification。",
+        "criteria": {
+          "expiring_grants": "Agent身份可长期保留，每次业务授权须设到期时间，可提前撤销；到期后不能继续使用该授权，后续测试重新授权。默认和最大时长另定。",
+          "revocable_persistent_grants": "Agent业务授权长期有效，直到管理员撤销或禁用；便于重复与定时测试，但依赖人工回收。登录凭据和会话有效期仍需另设。",
+          "configurable_expiry_or_persistent": "同时支持有期限和长期有效的Agent业务授权，由管理员为每个授权选择；灵活性更高，也增加配置与维护分支。",
+          "needs_clarification": "用户尚未说明重复测试及授权维护习惯，无法确定是否要求每次授权到期。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "agent_grant_lifetime": {
+        "type": "choice",
+        "choice": "revocable_persistent_grants",
+        "confidence": 0.21,
+        "probabilities": {
+          "expiring_grants": 0.18,
+          "revocable_persistent_grants": 0.41000000000000003,
+          "configurable_expiry_or_persistent": 0.11,
+          "needs_clarification": 0.3
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1176,
+      "output_tokens": 80
+    }
+  },
+  "selected_probability": 0.41000000000000003,
+  "auto_selected": false
+}

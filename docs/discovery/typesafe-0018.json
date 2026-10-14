@@ -1,0 +1,43 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未明确搜索时限的计时口径、性能验收负载与网络条件。",
+      "appearance_decision": "每个新项目使用既定主题并支持响应式，通过项目配置灵活调整网页元素样式与交互，不是用户切换主题。元素按需使用，不要求各项目固定包含。用户明确搜索规范：统一搜索，内嵌字段名称和提示、1秒内应用搜索、长度自适应、统一风格样式；使用搜索时新项目必需定义搜索字段；搜索按钮可选，默认不显示。其它网页元素同样定义统一规范、必填项、可选项。",
+      "confirmed_followup": "稳定通用能力通过版本化共享包分发，项目保有业务代码、配置和应用骨架；通用改进审查后反哺，升级自动生成提案由维护者确认应用。前后端通过API交互，独立构建发布并统一启动。首版服务内部员工及受邀合作方，独立组织各自部署，轻量账号管理，管理员及普通用户两个默认角色。"
+    },
+    "questions": {
+      "search_timing_contract": {
+        "type": "choice",
+        "instructions": "明确用户所说1秒内应用搜索的验收含义。仅决定时限覆盖到应用条件/触发查询还是结果显示完成，不决定实现延迟数值、搜索算法或服务端SLA。用户未明确的性能条件不得虚构，也不能悄悄将结果完成时限降格为触发时限。需要澄清时选择needs_clarification。",
+        "criteria": {
+          "apply_and_trigger_within_one_second": "用户停止输入后1秒内应用搜索条件并触发查询；结果返回时间依具体项目数据量与网络另行验收。",
+          "display_results_within_one_second": "用户停止输入后1秒内必须完成查询并显示结果；该要求包含前端等待、接口与渲染，需要另定验收数据量和网络条件。",
+          "needs_clarification": "1秒内应用搜索未明确是触发还是完成，不能替用户确定验收口径。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "search_timing_contract": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.73,
+        "probabilities": {
+          "apply_and_trigger_within_one_second": 0.14,
+          "display_results_within_one_second": 0.04,
+          "needs_clarification": 0.82
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1077,
+      "output_tokens": 62
+    }
+  },
+  "selected_probability": 0.82,
+  "auto_selected": false
+}

@@ -1,0 +1,46 @@
+{
+  "request": {
+    "model": "jev-latest",
+    "state": {
+      "user_requirements": "创建一个可独立启动的通用模板项目，汇总 Supplieroom、Skoope、Catchouse 三至四套项目，供后续新软件项目直接套用，加快开发上线。包括认证、轻量用户管理、日志、Docker、CLI兼容、统一界面规范、组件示例、多个配色主题和横纵导航。实现代码与风格、数据与代码、前后端分离。用户授权实际选项概率严格大于75%时自动选择。",
+      "known_limits": "尚未明确多字段与多关键词的默认匹配语义。",
+      "timing_decision": "用户已确认停止输入后1秒内应用搜索条件并触发查询，结果返回时间由具体项目另行验收。",
+      "appearance_decision": "每个新项目使用既定主题并支持响应式，通过项目配置灵活调整网页元素样式与交互，不是用户切换主题。元素按需使用，不要求各项目固定包含。用户明确搜索规范：统一搜索，内嵌字段名称和提示、1秒内应用搜索、长度自适应、统一风格样式；使用搜索时新项目必需定义搜索字段；搜索按钮可选，默认不显示。其它网页元素同样定义统一规范、必填项、可选项。",
+      "confirmed_followup": "稳定通用能力通过版本化共享包分发，项目保有业务代码、配置和应用骨架；通用改进审查后反哺，升级自动生成提案由维护者确认应用。前后端通过API交互，独立构建发布并统一启动。首版服务内部员工及受邀合作方，独立组织各自部署，轻量账号管理，管理员及普通用户两个默认角色。"
+    },
+    "questions": {
+      "search_matching_default": {
+        "type": "choice",
+        "instructions": "选择统一搜索的默认多字段匹配语义。字段由项目必填，以下规则只针对项目指定且用户有权搜索的字段，不搜索所有数据库列；具体查询执行在项目适配层实现，不绑定前端内存或数据库技术。权衡可预测性、简单可复用、多关键词便利及业务差异。不推断用户已经选择拆词；缺少偏好时选择needs_clarification。",
+        "criteria": {
+          "whole_query_any_field": "去除输入首尾空白并忽略大小写，将整段输入作为一个关键词，只要任一指定字段包含它即匹配；不按空格拆词。项目可显式扩展匹配规则。",
+          "all_tokens_across_fields": "去除首尾空白，按空白拆成多个关键词并忽略大小写；每个词须在至少一个指定字段出现，多个词可分散在不同字段。项目可显式扩展。",
+          "project_required_no_default": "模板只规定统一搜索交互和字段配置，每个新项目必须另行定义匹配语义，模板不提供默认规则。",
+          "needs_clarification": "用户尚未说明整段输入还是拆词匹配的预期，无法确定默认语义。"
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "search_matching_default": {
+        "type": "choice",
+        "choice": "needs_clarification",
+        "confidence": 0.57,
+        "probabilities": {
+          "whole_query_any_field": 0.06,
+          "all_tokens_across_fields": 0.13,
+          "project_required_no_default": 0.13,
+          "needs_clarification": 0.68
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 1216,
+      "output_tokens": 65
+    }
+  },
+  "selected_probability": 0.68,
+  "auto_selected": false
+}
