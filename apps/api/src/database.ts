@@ -50,12 +50,16 @@ function validateHistory(applied: AppliedMigration[], expected: Migration[]): vo
   }
 }
 
-export async function schemaVersion(pool: pg.Pool, expected: Migration[]): Promise<string> {
+export async function schemaVersion(pool: pg.Pool | pg.PoolClient, expected: Migration[]): Promise<string> {
   const result = await pool.query<AppliedMigration>(
     'SELECT version, checksum FROM public.templux_migrations ORDER BY version',
   );
   validateHistory(result.rows, expected);
   if (result.rows.length !== expected.length) throw new OperationError('数据库存在待执行迁移。');
+  const structure = await pool.query<{ schema_exists: boolean }>(
+    'SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = $1) AS schema_exists', ['templux'],
+  );
+  if (structure.rows[0]?.schema_exists !== true) throw new OperationError('应用数据库结构缺失，部署已中止。');
   return result.rows.at(-1)!.version;
 }
 
@@ -92,7 +96,7 @@ export async function migrate(pool: pg.Pool): Promise<{ schemaVersion: string; a
         throw error;
       }
     }
-    return { schemaVersion: expected.at(-1)!.version, applied: appliedCount };
+    return { schemaVersion: await schemaVersion(client, expected), applied: appliedCount };
   } finally {
     try {
       if (locked) await client.query("SELECT pg_advisory_unlock(hashtext('templux:migrations'))");

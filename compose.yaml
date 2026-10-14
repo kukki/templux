@@ -5,7 +5,7 @@ x-database-environment: &database-environment
 
 services:
   database:
-    image: postgres:18-bookworm
+    image: postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
     environment:
       POSTGRES_DB: templux
       POSTGRES_USER: templux

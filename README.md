@@ -49,6 +49,8 @@ docker compose up -d --wait database
 
 故障演练后须恢复数据库。浏览器截图及测试临时产物写在忽略的测试结果目录。跨平台完整验收、真实飞书和全首版矩阵由后续任务完成，不以本次本机 Docker 验证替代。
 
+`./tests/schema-drift.sh` 在自动清理的独立 Compose 项目中验证应用 schema 丢失会被公开迁移检查拒绝，不修改当前数据库。当前测试的 PostgreSQL 为18.6，Compose 同时锁定镜像摘要。
+
 ## 项目文档
 
 - [首版规格](docs/specs/templux-v1-prd.md) / [父规格 Issue #1](https://gitea.whynots.top/Swython/Templux/issues/1)
