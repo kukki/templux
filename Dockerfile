@@ -50,6 +50,7 @@ CMD ["npm", "run", "start", "--workspace", "@templux/web"]
 
 FROM docker:29.8.2-cli AS docker-client
 FROM api AS management
+ENV TEMPLUX_REQUIRE_AUTH_PROJECTION=1
 USER root
 COPY --from=docker-client /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=docker-client /usr/local/libexec/docker/cli-plugins/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose

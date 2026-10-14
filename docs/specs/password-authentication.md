@@ -46,3 +46,13 @@ T04只创建独立人员密码账号，没有启用现有飞书账号密码或�
 ## 官方文档
 
 Context7先resolve Node.js，再读取v24当前文档，采用[crypto.scrypt/timingSafeEqual](https://nodejs.org/docs/latest-v24.x/api/crypto.html)及[fs exclusive open/fchmod/fchown/fsync](https://nodejs.org/docs/latest-v24.x/api/fs.html)。没有增加第三方密码库或ORM。
+
+## T04 F1：有效认证方法与管理员保护
+
+仅有历史飞书identity不能作为有效管理员的备用。飞书计数须由 `readAuthConfig` 的完整部署配置校验得到非空身份域，且数据库身份的App ID/tenant_key精确匹配；未配置、缺失或空白Secret均不计入，null不通配历史身份。密码enabled、Agent环境与active人员责任人的既有条件保持独立。
+
+管理容器仍不接收FEISHU_APP_SECRET。宿主 `./templux` 在同一Compose项目、同一auth-environment锚点下运行一次性auth-config-probe（API镜像、无Web/DB依赖），由共享auth-config校验完整认证/会话配置，只输出版本化的非秘密投影：feishu身份域或null、agentEnabled。包装脚本只转交投影，管理代码检查版本/字段/身份域与Agent策略一致；没有提供可手填的“飞书已启用”配置开关。投影缺失、无效、冲突或探针失败时授权变更拒绝；其它运维修复命令仍可执行。一次性探针与管理容器自动删除。
+
+管理镜像要求此投影，直接 `docker compose run management authorize` 不会假定缺Secret意味着飞书永远关闭；须使用宿主入口（或等价的受控探针及转交流程）。API内部/同进程服务调用从当前完整配置派生同一可用身份域。外部操作者已经具有Docker/数据库运维权限，投影是该受信任入口产生的配置合同，不声称防止宿主管理员自行改SQL或伪造环境；普通浏览器/Agent账号不能提供投影。
+
+探针反映本次Compose加载的部署配置；配置变更仍须重启对应API后使用，不声称热更新运行服务。完整配置校验不等于飞书凭据已向官方验证成功，真实组织验收仍另列。空值/别名冲突、回调/公开地址及会话策略使用与API相同的校验，失败不输出Secret。没有新增SQL迁移或浏览器流程。

@@ -23,6 +23,11 @@ test('Feishu OAuth, authorization and audit use real isolated PostgreSQL', async
   t.after(() => pool.end());
   await migrate(pool);
   await pool.query('TRUNCATE templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+  const authKeys=['FEISHU_APP_ID','FEISHU_APP_SECRET','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','APP_PUBLIC_URL'];
+  const original=Object.fromEntries(authKeys.map(key=>[key,process.env[key]]));
+  Object.assign(process.env,{FEISHU_APP_ID:config.appId,FEISHU_APP_SECRET:config.appSecret,FEISHU_TENANT_KEY:config.tenantKey,APP_PUBLIC_URL:config.publicOrigin});
+  delete process.env.FEISHU_ALLOWED_TENANT_KEY;
+  t.after(()=>{for(const key of authKeys) {if(original[key]===undefined) delete process.env[key];else process.env[key]=original[key];}});
   const directory = mkdtempSync(join(tmpdir(),'templux-auth-'));
   t.after(() => rmSync(directory,{recursive:true,force:true}));
   const rolePath = join(directory,'roles.json');

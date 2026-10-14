@@ -75,6 +75,14 @@ services:
     profiles: ["tools"]
     entrypoint: ["node", "apps/api/dist/migrate.js"]
 
+  auth-config-probe:
+    build:
+      context: .
+      target: api
+    environment: *auth-environment
+    profiles: ["tools"]
+    entrypoint: ["node", "apps/api/dist/auth-config-probe.js"]
+
   management:
     build:
       context: .

@@ -1,9 +1,9 @@
 import type pg from 'pg';
 import { OperationError } from './database.js';
-import { readRoles, readAuthRealm, readSessionConfig, type AuthRealm, type Roles } from './auth-config.js';
+import { readRoles, availableAuthRealm, readSessionConfig, type AuthRealm, type Roles } from './auth-config.js';
 import { audit, authorizationLock, transaction } from './auth-store.js';
 export type AuthorizationChange = { accountId: string; roles: string[]; state: 'active' | 'disabled' };
-export async function setAuthorization(pool: pg.Pool, change: AuthorizationChange, actor: string, definitions: Roles = readRoles(), realm: AuthRealm | null = readAuthRealm()) {
+export async function setAuthorization(pool: pg.Pool, change: AuthorizationChange, actor: string, definitions: Roles = readRoles(), realm: AuthRealm | null = availableAuthRealm()) {
   if (!/^[1-9][0-9]{0,18}$/.test(change.accountId) || !['active', 'disabled'].includes(change.state)
     || change.roles.some(key => !Object.hasOwn(definitions, key)) || new Set(change.roles).size !== change.roles.length) {
     throw new OperationError('账号ID、状态或预定义角色无效。');
@@ -20,7 +20,7 @@ export async function setAuthorization(pool: pg.Pool, change: AuthorizationChang
          WHERE a.state='active' AND r.role_key='admin'
          AND (a.kind='person' OR ($3 AND EXISTS(SELECT 1 FROM templux.accounts o WHERE o.id=a.responsible_person_id AND o.kind='person' AND o.state='active')))
          AND (EXISTS(SELECT 1 FROM templux.password_credentials p WHERE p.account_id=a.id AND p.enabled)
-          OR EXISTS(SELECT 1 FROM templux.identities i WHERE i.account_id=a.id AND i.provider='feishu' AND ($1::text IS NULL OR (i.app_id=$1 AND i.tenant_key=$2))))`,
+          OR EXISTS(SELECT 1 FROM templux.identities i WHERE i.account_id=a.id AND i.provider='feishu' AND i.app_id=$1 AND i.tenant_key=$2))`,
         [realm?.appId ?? null, realm?.tenantKey ?? null, settings.agentEnabled])).rows[0]?.count ?? 0);
       const beforeAdmins = await effectiveAdmins();
       await client.query('DELETE FROM templux.account_roles WHERE account_id=$1', [account.id]);

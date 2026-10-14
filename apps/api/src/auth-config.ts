@@ -69,3 +69,27 @@ export function readRoles(): Roles {
     return value.roles;
   } catch { throw new OperationError('预定义角色配置无效，须保留 admin/user 及管理员必要权限。'); }
 }
+
+export type AuthenticationAvailability = { schemaVersion: 1; feishu: AuthRealm | null; agentEnabled: boolean };
+export function authenticationAvailability(): AuthenticationAvailability {
+  const config = readAuthConfig();
+  return { schemaVersion: 1, feishu: config ? { appId: config.appId, tenantKey: config.tenantKey } : null,
+    agentEnabled: readSessionConfig().agentEnabled };
+}
+export function availableAuthRealm(): AuthRealm | null {
+  const projection = process.env.TEMPLUX_AUTH_AVAILABILITY_JSON;
+  if (projection === undefined) {
+    if (process.env.TEMPLUX_REQUIRE_AUTH_PROJECTION === '1') throw new OperationError('缺少部署认证可用性信息，请通过宿主 templux 入口执行授权。');
+    return authenticationAvailability().feishu;
+  }
+  try {
+    const value = JSON.parse(projection) as AuthenticationAvailability;
+    const realm = readAuthRealm();
+    if (!value || Object.keys(value).some(key => !['schemaVersion', 'feishu', 'agentEnabled'].includes(key))
+      || value.schemaVersion !== 1 || typeof value.agentEnabled !== 'boolean' || value.agentEnabled !== readSessionConfig().agentEnabled
+      || (value.feishu !== null && (!value.feishu || Object.keys(value.feishu).some(key => !['appId', 'tenantKey'].includes(key))
+        || typeof value.feishu.appId !== 'string' || typeof value.feishu.tenantKey !== 'string'
+        || !realm || value.feishu.appId !== realm.appId || value.feishu.tenantKey !== realm.tenantKey))) throw new Error();
+    return value.feishu;
+  } catch { throw new OperationError('部署认证可用性信息无效或与管理配置冲突，请重新通过宿主入口执行。'); }
+}
