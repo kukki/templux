@@ -5,7 +5,8 @@ T02_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 mkdir -p "$T02_ROOT/test-results"
 T02_COPY=$(mktemp -d "$T02_ROOT/test-results/t02-project.XXXXXX")
 T02_NAME="templux-t02-$(date +%s)-$$"
-export TEMPLUX_PROJECT_NAME="$T02_NAME" TEMPLUX_HTTP_PORT=31010 TEMPLUX_API_PORT=31810
+export TEMPLUX_PROJECT_NAME="$T02_NAME"
+export TEMPLUX_HTTP_PORT="${TEMPLUX_HTTP_PORT:-31010}" TEMPLUX_API_PORT="${TEMPLUX_API_PORT:-31810}"
 cleanup() {
   docker compose --project-directory "$T02_COPY" -f "$T02_COPY/compose.yaml" down -v --remove-orphans >&2 || true
   if [ "${T02_KEEP_COPY:-0}" != 1 ]; then rm -rf "$T02_COPY"; fi

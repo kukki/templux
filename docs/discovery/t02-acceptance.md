@@ -47,12 +47,14 @@ Ego-browser 已成功读取真实 DOM与计算样式，但两种截图调用出�
 - `test-results/t02-dark-yellow-desktop.png`、`test-results/t02-dark-yellow-narrow.png`
 - `test-results/t02-hidden-regions-narrow.png`、`test-results/t02-scroll-narrow.png`
 
+TL补充要求后，另执行 `TEMPLUX_HTTP_PORT=31020 TEMPLUX_API_PORT=31820 ./tests/presentation-installation.sh`，完整流程退出0，实际页面URL为 `http://localhost:31020`，自有资源清理完成。该次重启前后API镜像为 `6d590f5b1f299b2c7eaaa213dcaf90b90ec940efc34028b2367c177a0bbc65fa`，Web镜像为 `e8d83ff80c998d50a41271413f23bc5354418e0d01d668acc30e74f49c608155`；记录在 `test-results/t02-installation-alternate-ports.out` / `.log`。不同隔离构建的Web构建ID可不同；每次断言比较的是本次配置重启前后的同一个镜像。
+
 完整命令日志：`test-results/t02-start.json` / `.log`、`t02-test.json` / `.log`、`t02-typecheck.json` / `.log`、`t02-installation.out` / `.log`。配色截图环境的自有容器及卷已清理，原默认安装保持健康。
 
 ## 范围与局限
 
 - 本次环境是 macOS + Docker Desktop + Chromium；Linux宿主文件属主/组/权限合同在Linux容器中验证，未执行完整Linux/WSL2宿主矩阵或实体移动设备验收。
-- 之前的最终脚本重跑曾因截图环境占用31010失败；已清理该环境并最终退出0。脚本需要31010/31810空闲，失败与清理有明确结果。此环境冲突不是产品通过证据。
+- 之前的最终脚本重跑曾因截图环境占用31010失败；已清理该环境并最终退出0。脚本默认需要31010/31810空闲，支持现有 `TEMPLUX_HTTP_PORT` / `TEMPLUX_API_PORT` 环境入口覆盖，失败与清理有明确结果。此环境冲突不是产品通过证据。
 - 截图供人工审查，没有像素差门禁；没有使用生产或来源项目数据。自定义配色对比度由项目维护者负责。
 - Impeccable机械检查报告一项既有的圆角面板上边框装饰警告；T02沿用基线状态页布局并将原色值变量化，没有在此票扩大为整体视觉重设计。
 - codebase-memory 初始及最终已索引，使用图定位管理入口/状态页并追踪管理调用。相关实现及测试文件覆盖检查无已记录问题；TS配置曾标记not_tracked并直接读取。覆盖为best-effort信号，不宣称图证明全仓库完整。
