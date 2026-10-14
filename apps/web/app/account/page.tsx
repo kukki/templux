@@ -1,0 +1,18 @@
+import { connection } from 'next/server';
+import { presentation } from '../../../../shared/presentation.mjs';
+import ProjectShell from '../components/project-shell';
+import { authCopy } from '../components/auth-copy';
+import { profile } from '../components/session';
+import Logout from '../components/logout';
+export default async function AccountPage() {
+  await connection(); const config=presentation(); const copy=authCopy(); const account=await profile();
+  const pending=account.state==='pending';
+  return <ProjectShell config={config}><h1>{pending?copy.pendingTitle:copy.activeTitle}</h1>
+    <p className="intro">{pending?copy.pendingIntro:account.roles.length?'':copy.zeroRoles}</p>
+    <section className="status-panel"><h2>{copy.accountTitle}</h2><dl>
+      <div><dt>{copy.accountId}</dt><dd>{account.id}</dd></div><div><dt>{copy.accountName}</dt><dd>{account.name}</dd></div>
+      <div><dt>{copy.accountRoles}</dt><dd>{account.roles.join(', ')||'—'}</dd></div></dl></section>
+    <div className="auth-actions">{account.state==='active'&&account.permissions.includes('application:read')&&<a className="action" href="/protected">{copy.protectedAction}</a>}
+      <a className="text-link" href="/login">{copy.relogin}</a><Logout label={copy.logout} failed={copy.logoutFailed}/></div>
+  </ProjectShell>;
+}

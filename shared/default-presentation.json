@@ -20,7 +20,7 @@
     "schemaVersion": "数据库结构版本", "version": "应用版本", "checkedAt": "检查时间",
     "readyNote": "容器启动与数据库结构校验已通过。",
     "unavailableNote": "后端或数据库暂时不可用，请检查容器状态。",
-    "scopeNote": "认证、账号管理与控件示例将随对应任务接入。当前页面仅展示公开运行状态。"
+    "scopeNote": "通过飞书登录查看账号状态；账号管理与控件示例将随对应任务接入。"
   },
   "navigation": { "orientation": "vertical", "initialExpanded": true, "allowCollapse": true },
   "elements": {

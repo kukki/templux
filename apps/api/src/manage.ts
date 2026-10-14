@@ -3,10 +3,11 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stderr } from 'node:process';
 import { isAbsolute } from 'node:path';
 import { OperationError } from './database.js';
+import { authorizationCommand } from './auth-cli.js';
 import { initialize } from './initialize.js';
 import { loadPresentation, PresentationError } from '../../../shared/presentation.mjs';
 
-const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check'] as const;
+const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check', 'users', 'authorize'] as const;
 type Command = typeof commands[number];
 
 function isCommand(value: string | undefined): value is Command {
@@ -49,7 +50,7 @@ async function main(): Promise<Record<string, unknown>> {
   const options = new Map<string, string>();
   const positional: string[] = [];
   const flagNames = ['--json', '--non-interactive', '--interactive', '--confirm', '--overwrite'];
-  const valueNames = ['--name', '--brand', '--theme', '--version', '--copyright', '--config'];
+  const valueNames = ['--name', '--brand', '--theme', '--version', '--copyright', '--config', '--account', '--roles', '--state'];
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]!;
     if (flagNames.includes(arg)) {
@@ -66,17 +67,22 @@ async function main(): Promise<Record<string, unknown>> {
   let command = positional[0];
   if (!command) {
     if (nonInteractive || !stdin.isTTY || !stderr.isTTY || json) {
-      throw new OperationError('缺少管理命令：start、status、stop、logs、typecheck、test、init 或 config-check。');
+      throw new OperationError('缺少管理命令：start、status、stop、logs、typecheck、test、init、config-check、users 或 authorize。');
     }
     const prompt = createInterface({ input: stdin, output: stderr });
     try {
-      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n7. 初始化项目\n8. 校验呈现配置\n');
-      const selection = await prompt.question('请选择 1–8：');
+      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n7. 初始化项目\n8. 校验呈现配置\n9. 查看账号\n10. 授权账号\n');
+      const selection = await prompt.question('请选择 1–10：');
       command = commands[Number(selection.trim()) - 1];
     } finally { prompt.close(); }
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
+  if (command === 'users' || command === 'authorize') {
+    if ([...options.keys()].some(key => !['--account', '--roles', '--state'].includes(key)) || flags.has('--overwrite') || (command === 'users' && options.size)) throw new OperationError('账号管理参数无效。');
+    return authorizationCommand(command, options, flags, (interactive || positional.length === 0) && !nonInteractive && !json && !!stdin.isTTY && !!stderr.isTTY);
+  }
   if (command !== 'init' && (options.size > 0 || flags.has('--overwrite'))) throw new OperationError('品牌参数与 --overwrite 只适用于 init。');
+  if (command === 'init' && [...options.keys()].some(key => ['--account', '--roles', '--state'].includes(key))) throw new OperationError('init 参数无效。');
   if (command === 'init') return initialize(options, flags,
     (interactive || positional.length === 0) && !nonInteractive && !json && !!stdin.isTTY && !!stderr.isTTY);
   if (command === 'config-check') { loadPresentation(); return { ok: true, command }; }
@@ -102,6 +108,7 @@ async function main(): Promise<Record<string, unknown>> {
   if (command === 'logs') await compose(['logs', '--no-color', '--tail', '100', 'api', 'web', 'database']);
   if (command === 'test' || command === 'typecheck') {
     await compose(['build', 'checks']);
+    if (command === 'test') await compose(['up', '-d', '--wait', 'auth-database']);
     await compose(['run', '--rm', '--no-deps', 'checks', 'npm', 'run', command]);
   }
   return { ok: true, command };

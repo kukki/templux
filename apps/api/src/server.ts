@@ -1,34 +1,13 @@
-import Fastify from 'fastify';
-import { presentation, PresentationError } from '../../../shared/presentation.mjs';
-
-let config;
-try { config = presentation(); } catch (error) {
-  console.error(JSON.stringify({ event: 'presentation_invalid', message: error instanceof PresentationError ? error.message : '呈现配置加载失败。' }));
-  process.exit(1);
-}
-import { databasePool, migrations, schemaVersion } from './database.js';
-
+import { databasePool } from './database.js';
+import { createApplication } from './application.js';
 const pool = databasePool();
-const expected = await migrations();
-const server = Fastify({
-  logger: { level: 'info', stream: process.stderr, redact: ['req.headers.authorization', 'req.headers.cookie'] },
-  disableRequestLogging: true,
-});
-pool.on('error', () => server.log.error({ event: 'database_pool_error' }, '数据库连接失效。'));
-
-server.get('/health/live', async () => ({ status: 'alive' }));
-server.get('/api/status', async (_request, reply) => {
-  reply.header('Cache-Control', 'no-store');
-  try {
-    const version = await schemaVersion(pool, expected);
-    return { name: config.project.name, version: config.project.version, status: 'ready', database: 'connected', schemaVersion: version };
-  } catch {
-    server.log.error({ event: 'readiness_failed' }, '数据库连接或结构校验失败。');
-    return reply.code(503).send({ name: config.project.name, status: 'unavailable' });
-  }
-});
-server.addHook('onClose', async () => { await pool.end(); });
-for (const signal of ['SIGTERM', 'SIGINT']) {
-  process.once(signal, () => { void server.close().catch(() => { process.exitCode = 1; }); });
+try {
+  const server = await createApplication(pool);
+  pool.on('error', () => server.log.error({ event: 'database_pool_error' }, '数据库连接失效。'));
+  server.addHook('onClose', async () => { await pool.end(); });
+  for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { void server.close().catch(() => { process.exitCode = 1; }); });
+  await server.listen({ host: '0.0.0.0', port: 8080 });
+} catch {
+  console.error(JSON.stringify({ event: 'application_start_failed', message: '应用配置或启动失败。' }));
+  await pool.end(); process.exitCode = 1;
 }
-await server.listen({ host: '0.0.0.0', port: 8080 });

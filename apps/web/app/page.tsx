@@ -1,4 +1,6 @@
 import { connection } from 'next/server';
+import ProjectShell from './components/project-shell';
+import { authCopy } from './components/auth-copy';
 import { presentation, formatManagementTime } from '../../../shared/presentation.mjs';
 
 async function readStatus() {
@@ -19,15 +21,7 @@ export default async function Page() {
   const copy = config.copy;
   const status = await readStatus();
   const checkedAt = new Date().toISOString();
-  return <div className="shell">
-    {config.header.visible && <header>
-      {config.header.showBrand && <a className="wordmark" href="/" aria-label={`${config.project.name} ${copy.home}`}>
-        {config.brand.logo ? <img className="logo" src={config.brand.logo} alt="" />
-          : config.brand.mark && <span className="mark" aria-hidden="true">{config.brand.mark}</span>}
-        {config.brand.wordmark}</a>}
-      {config.header.note && <span className="header-note">{config.header.note}</span>}
-    </header>}
-    <main>
+  return <ProjectShell config={config}>
       {copy.eyebrow && <p className="eyebrow">{config.project.name} / {copy.eyebrow}</p>}
       <h1>{copy.heading}</h1>
       <p className="intro">{copy.intro}</p>
@@ -40,8 +34,6 @@ export default async function Page() {
         <p className="panel-note">{status ? copy.readyNote : copy.unavailableNote}</p>
       </section>
       {copy.scopeNote && <p className="scope-note">{copy.scopeNote}</p>}
-    </main>
-    {config.footer.visible && <footer><span>{config.footer.text}{config.footer.copyright && <span className="copyright">{config.footer.copyright}</span>}</span>
-      {config.footer.showVersion && <span>{copy.version} {config.project.version}</span>}</footer>}
-  </div>;
+      <p><a className="text-link" href="/login">{authCopy().loginAction}</a></p>
+  </ProjectShell>;
 }

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "roles": {
+    "admin": { "label": "管理员", "permissions": ["application:read", "accounts:manage", "audit:read"] },
+    "user": { "label": "普通用户", "permissions": ["application:read"] }
+  }
+}

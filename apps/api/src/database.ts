@@ -60,6 +60,11 @@ export async function schemaVersion(pool: pg.Pool | pg.PoolClient, expected: Mig
     'SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = $1) AS schema_exists', ['templux'],
   );
   if (structure.rows[0]?.schema_exists !== true) throw new OperationError('应用数据库结构缺失，部署已中止。');
+  if (expected.some(item => item.version === '0002')) {
+    const tables = ['accounts', 'identities', 'account_roles', 'auth_sessions', 'oauth_requests', 'audit_events'].map(name => `templux.${name}`);
+    const check = await pool.query<{ complete: boolean }>('SELECT bool_and(to_regclass(name) IS NOT NULL) AS complete FROM unnest($1::text[]) AS name', [tables]);
+    if (check.rows[0]?.complete !== true) throw new OperationError('认证数据库结构缺失，部署已中止。');
+  }
   return result.rows.at(-1)!.version;
 }
 

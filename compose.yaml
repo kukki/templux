@@ -1,5 +1,15 @@
 name: ${TEMPLUX_PROJECT_NAME:-templux}
 
+x-auth-environment: &auth-environment
+  FEISHU_APP_ID: ${FEISHU_APP_ID:-}
+  FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
+  FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
+  FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
+  FEISHU_REDIRECT_URI: ${FEISHU_REDIRECT_URI:-}
+  APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:31000}
+  PERSON_IDLE_TIMEOUT_SECONDS: ${PERSON_IDLE_TIMEOUT_SECONDS:-600}
+  PERSON_SESSION_MAX_SECONDS: ${PERSON_SESSION_MAX_SECONDS:-43200}
+
 x-database-environment: &database-environment
   DATABASE_URL: ${DATABASE_URL:-postgresql://templux:templux-local-only@database:5432/templux}
 
@@ -24,7 +34,7 @@ services:
       context: .
       target: api
     environment:
-      <<: *database-environment
+      <<: [*database-environment, *auth-environment]
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
       - ./config:/opt/templux/config:ro
@@ -67,6 +77,9 @@ services:
       target: management
     environment:
       <<: *database-environment
+      FEISHU_APP_ID: ${FEISHU_APP_ID:-}
+      FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
+      FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
       TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-templux}
       TEMPLUX_HTTP_PORT: ${TEMPLUX_HTTP_PORT:-31000}
@@ -83,10 +96,47 @@ services:
       target: checks
     environment:
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
+      TEST_AUTH_DATABASE_URL: postgresql://templux_test:isolated-test-only@auth-database:5432/templux_auth_test
       TEST_API_URL: http://api:8080
       TEST_WEB_URL: http://web:3000
     volumes:
       - ./config:/opt/templux/config:ro
+    profiles: ["tools"]
+
+  auth-database:
+    image: postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+    environment:
+      POSTGRES_DB: templux_auth_test
+      POSTGRES_USER: templux_test
+      POSTGRES_PASSWORD: isolated-test-only
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U templux_test -d templux_auth_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    profiles: ["tools"]
+
+  auth-browser:
+    image: ${TEMPLUX_PROJECT_NAME:-templux}-checks
+    environment:
+      DATABASE_URL: postgresql://templux_test:isolated-test-only@auth-database:5432/templux_auth_test
+      TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
+    entrypoint: ["node", "tests/fixtures/auth-browser-server.mjs"]
+    volumes:
+      - ./config:/opt/templux/config:ro
+    profiles: ["tools"]
+
+  auth-web:
+    image: ${TEMPLUX_PROJECT_NAME:-templux}-web
+    environment:
+      API_INTERNAL_URL: http://auth-browser:8080
+      TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
+    volumes:
+      - ./config:/opt/templux/config:ro
+    ports:
+      - "127.0.0.1:31030:3000"
     profiles: ["tools"]
 
 volumes:

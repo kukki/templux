@@ -2,7 +2,7 @@
 
 供新项目复用、也可独立启动的通用模板项目。基于 Supplieroom、Skoope、Catchouse 提取共通能力，业务与数据由各项目保有。
 
-首版规格与29项实施任务已发布。当前实现为 **T01：容器启动与真实状态页**及 **T02：项目品牌与呈现配置**，认证、账号管理、导航及控件示例尚在后续任务中，不能视为完整首版。
+首版规格与29项实施任务已发布。当前实现为 **T01：容器启动与真实状态页**、**T02：项目品牌与呈现配置**及 **T03：飞书首登Pending与CLI授权**，密码登录、网页账号管理、导航及控件示例尚在后续任务中，不能视为完整首版。
 
 ## 启动
 
@@ -40,6 +40,17 @@ JSON 模式 stdout 仅一个结果对象，构建进度及诊断不混入结果�
 
 也可从无参数菜单选择7，查看目标并确认写入。修改 `config/presentation.json` 中已有公开呈现值后，执行 `docker compose restart api web` 即可生效。Logo 新资产与源码改动需重新构建。配色、页头页脚、版权版本、集中文案及管理显示时区的合同与覆盖规则见 [项目呈现配置](docs/specs/project-presentation.md)。`.env` 保存部署环境与秘密，与公开呈现配置隔离。
 
+## 飞书登录与首位授权
+
+登录入口为 `/login`。配置 `FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_TENANT_KEY`，在飞书自建应用登记 `http://localhost:31000/api/auth/feishu/callback`；其它部署通过 `APP_PUBLIC_URL` 与可选 `FEISHU_REDIRECT_URI` 设置同源回调，生产使用HTTPS。本人完成允许组织的真实飞书授权后为Pending，宿主操作者可通过菜单9/10或完整命令查看并授予角色：
+
+```sh
+./templux users --non-interactive --json
+./templux authorize --account 1 --roles admin --confirm --non-interactive --json
+```
+
+初始管理员不会自动授予；CLI与审计同事务，最后有效管理员受到保护，授权变化使旧会话失效，须重新登录。当前预定义角色及认证文案分别在 `config/roles.json`、`config/auth-copy.json`。协议、配置命名、权限边界与真实验收步骤见 [飞书认证合同](docs/specs/feishu-authentication.md)。
+
 ## 当前开发配置
 
 可复制 `.env.example` 为 `.env`，修改项目名和端口，或配置外部 PostgreSQL 的完整 `DATABASE_URL`。内置数据库默认凭据仅用于本机开发；更改内置密码时须同步完整连接地址，已有数据库卷的密码不会因修改环境变量自动变化。外部连接配置不会自动迁移已有数据。
@@ -48,7 +59,7 @@ JSON 模式 stdout 仅一个结果对象，构建进度及诊断不混入结果�
 
 ## 验证
 
-`typecheck` 和 `test` 在容器内执行，使用真实 HTTP 与管理 CLI 边界，不要求宿主 Node、npm 或数据库客户端。普通测试前先启动当前开发安装；不要将开发验收入口当作生产测试调度。
+`typecheck` 和 `test` 在容器内执行，使用真实 HTTP 与管理 CLI 边界，不要求宿主 Node、npm 或数据库客户端。普通测试前先启动当前开发安装；test自动启动隔离auth-database（tmpfs），不得将测试指向部署数据库，用后可 `docker compose rm -s -f auth-web auth-browser auth-database` 清理工具服务；不要将开发验收入口当作生产测试调度。
 
 数据库不可用场景另在隔离验收环境暂停数据库后执行：
 

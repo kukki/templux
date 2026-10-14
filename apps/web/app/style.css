@@ -29,3 +29,10 @@ footer { border-top: 1px solid var(--border); }
 .copyright { display: block; margin-top: 6px; }
 .wordmark, .header-note, footer span, h1, p, dd { overflow-wrap: anywhere; min-width: 0; }
 header, footer, .panel-heading { flex-wrap: wrap; }
+
+.action, button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 18px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: var(--accentText); font: inherit; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.text-link { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.auth-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; margin-top: 28px; }
+.auth-message { border: 1px solid var(--border); padding: 16px; border-radius: 6px; line-height: 1.8; }

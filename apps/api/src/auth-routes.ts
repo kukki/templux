@@ -1,0 +1,68 @@
+import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type pg from 'pg';
+import { AuthError, readAuthConfig, readRoles, type AuthConfig } from './auth-config.js';
+import { authorizeEndpoint, exchangeIdentity, type Transport } from './feishu.js';
+import { beginOAuth, consumeOAuth, digest, readSession, registerSession, requirePermission } from './auth-store.js';
+export function requestCookie(request: FastifyRequest, name: string): string | undefined {
+  const values = (request.headers.cookie ?? '').split(';').map(part => part.trim()).filter(part => part.startsWith(`${name}=`));
+  if (values.length !== 1) return undefined;
+  return values[0]!.slice(name.length + 1);
+}
+function cookie(name: string, value: string, seconds: number, secure: boolean): string {
+  return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
+}
+export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, config: AuthConfig | null = readAuthConfig(), transport: Transport = fetch) {
+  const roles = readRoles();
+  function configured(): AuthConfig { if (!config) throw new AuthError('authentication_unconfigured', 503); return config; }
+  server.setErrorHandler((error, _request, reply) => {
+    const reason = error instanceof AuthError ? error.reason : 'service_unavailable';
+    if (!(error instanceof AuthError)) server.log.error({ event: 'authentication_request_failed' }, '认证或服务操作失败。');
+    void reply.code(error instanceof AuthError ? error.status : 503).send({ ok: false, error: reason });
+  });
+  server.addHook('onSend', async (_request, reply, payload) => { reply.header('Cache-Control', 'no-store'); reply.header('Referrer-Policy', 'no-referrer'); return payload; });
+  server.get('/api/auth/config', async () => ({ enabled: config !== null }));
+  server.get('/api/auth/feishu/start', async (_request, reply) => {
+    const settings = configured(); const flow = await beginOAuth(pool);
+    const url = new URL(authorizeEndpoint);
+    url.search = new URLSearchParams({ client_id: settings.appId, response_type: 'code', redirect_uri: settings.redirectUri,
+      state: flow.state }).toString();
+    reply.header('Set-Cookie', cookie('templux_oauth', flow.browser, 600, settings.secure));
+    return reply.redirect(url.href);
+  });
+  server.get('/api/auth/feishu/callback', async (request, reply) => {
+    const settings = configured();
+    try {
+      const query = request.query as Record<string, unknown>;
+      const state = typeof query.state === 'string' ? query.state : '';
+      const browser = requestCookie(request, 'templux_oauth') ?? '';
+      await consumeOAuth(pool, state, browser);
+      reply.header('Set-Cookie', cookie('templux_oauth', '', 0, settings.secure));
+      if (query.error !== undefined) throw new AuthError('login_cancelled', 400);
+      if (typeof query.code !== 'string' || !query.code || query.code.length > 4096) throw new AuthError('provider_invalid', 400);
+      const identity = await exchangeIdentity(settings, query.code, transport);
+      const result = await registerSession(pool, identity, settings, () => server.log.error({ event: 'login_audit_failed' }, '登录成功审计未保存。'));
+      reply.header('Set-Cookie', cookie('templux_session', result.token, settings.maximumSeconds, settings.secure));
+      return reply.redirect('/account');
+    } catch (error) {
+      const reason = error instanceof AuthError ? error.reason : 'service_unavailable';
+      if (error instanceof AuthError && error.diagnosis) server.log.warn({ event: 'feishu_protocol_rejected', ...error.diagnosis }, '飞书协议请求被拒绝。');
+      if (!(error instanceof AuthError)) server.log.error({ event: 'login_registration_failed' }, '登录或初始账号保存失败。');
+      reply.header('Set-Cookie', cookie('templux_oauth', '', 0, settings.secure));
+      return reply.redirect(`/login?reason=${reason}`);
+    }
+  });
+  server.get('/api/auth/session', async request => ({ ok: true, account: await readSession(pool, requestCookie(request, 'templux_session'), configured(), roles) }));
+  server.get('/api/protected', async request => {
+    const account = await readSession(pool, requestCookie(request, 'templux_session'), configured(), roles, true);
+    requirePermission(account, 'application:read');
+    return { ok: true, account };
+  });
+  server.post('/api/auth/logout', async (request, reply) => {
+    const settings = configured();
+    if (request.headers.origin !== settings.publicOrigin) throw new AuthError('origin_denied', 403);
+    const token = requestCookie(request, 'templux_session');
+    if (token && /^[A-Za-z0-9_-]{43}$/.test(token)) await pool.query("UPDATE templux.auth_sessions SET revoked_reason='logout' WHERE token_hash=$1", [digest(token)]);
+    reply.header('Set-Cookie', cookie('templux_session', '', 0, settings.secure));
+    return { ok: true };
+  });
+}
