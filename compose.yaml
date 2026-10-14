@@ -1,6 +1,12 @@
 name: ${TEMPLUX_PROJECT_NAME:-templux}
 
 x-auth-environment: &auth-environment
+  AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS:-90}
+  AUDIT_CLEANUP_BATCH_SIZE: ${AUDIT_CLEANUP_BATCH_SIZE:-1000}
+  AUDIT_CLEANUP_MAX_BATCHES: ${AUDIT_CLEANUP_MAX_BATCHES:-10}
+  AUDIT_CLEANUP_INTERVAL_SECONDS: ${AUDIT_CLEANUP_INTERVAL_SECONDS:-3600}
+  RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES:-10485760}
+  RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES:-10}
   PASSWORD_PROXY_HOSTS: ${PASSWORD_PROXY_HOSTS-web}
   FEISHU_APP_ID: ${FEISHU_APP_ID:-}
   FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
@@ -19,8 +25,16 @@ x-auth-environment: &auth-environment
 x-database-environment: &database-environment
   DATABASE_URL: ${DATABASE_URL:-postgresql://templux:templux-local-only@database:5432/templux}
 
+x-runtime-logging: &runtime-logging
+  driver: json-file
+  options:
+    max-size: "${RUNTIME_LOG_MAX_BYTES:-10485760}"
+    max-file: "${RUNTIME_LOG_MAX_FILES:-10}"
+    compress: "false"
+
 services:
   database:
+    logging: *runtime-logging
     image: postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
     environment:
       POSTGRES_DB: templux
@@ -36,6 +50,7 @@ services:
     restart: unless-stopped
 
   api:
+    logging: *runtime-logging
     build:
       context: .
       target: api
@@ -54,11 +69,14 @@ services:
     restart: unless-stopped
 
   web:
+    logging: *runtime-logging
     build:
       context: .
       target: web
     environment:
       API_INTERNAL_URL: http://api:8080
+      RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES:-10485760}
+      RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES:-10}
       WEB_TRUSTED_PROXY_CIDRS: ${WEB_TRUSTED_PROXY_CIDRS:-}
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
@@ -73,12 +91,14 @@ services:
     restart: unless-stopped
 
   migrate:
+    logging: *runtime-logging
     image: ${TEMPLUX_PROJECT_NAME:-templux}-api
     environment: *database-environment
     profiles: ["tools"]
     entrypoint: ["node", "apps/api/dist/migrate.js"]
 
   auth-config-probe:
+    logging: *runtime-logging
     build:
       context: .
       target: api
@@ -87,6 +107,7 @@ services:
     entrypoint: ["node", "apps/api/dist/auth-config-probe.js"]
 
   management:
+    logging: *runtime-logging
     build:
       context: .
       target: management
@@ -94,6 +115,8 @@ services:
       <<: *database-environment
       DEPLOYMENT_ENV: ${DEPLOYMENT_ENV:-PROD}
       AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
+      RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES:-10485760}
+      RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES:-10}
       TEMPLUX_CREDENTIAL_DIR: /opt/templux/credentials
       FEISHU_APP_ID: ${FEISHU_APP_ID:-}
       FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
@@ -110,6 +133,7 @@ services:
     profiles: ["tools"]
 
   checks:
+    logging: *runtime-logging
     build:
       context: .
       target: checks
@@ -124,6 +148,7 @@ services:
     profiles: ["tools"]
 
   auth-database:
+    logging: *runtime-logging
     image: postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
     environment:
       POSTGRES_DB: templux_auth_test
@@ -139,6 +164,7 @@ services:
     profiles: ["tools"]
 
   auth-browser:
+    logging: *runtime-logging
     image: ${TEMPLUX_PROJECT_NAME:-templux}-checks
     environment:
       PASSWORD_PROXY_HOSTS: auth-web
@@ -150,6 +176,7 @@ services:
     profiles: ["tools"]
 
   auth-web:
+    logging: *runtime-logging
     image: ${TEMPLUX_PROJECT_NAME:-templux}-web
     environment:
       API_INTERNAL_URL: http://auth-browser:8080
@@ -161,6 +188,7 @@ services:
     profiles: ["tools"]
 
   password-api:
+    logging: *runtime-logging
     image: ${TEMPLUX_PROJECT_NAME:-templux}-api
     environment:
       DATABASE_URL: postgresql://templux_test:isolated-test-only@auth-database:5432/templux_auth_test
@@ -175,6 +203,7 @@ services:
     profiles: ["tools"]
 
   password-web:
+    logging: *runtime-logging
     image: ${TEMPLUX_PROJECT_NAME:-templux}-web
     environment:
       API_INTERNAL_URL: http://password-api:8080
@@ -187,11 +216,13 @@ services:
     profiles: ["tools"]
 
   ssr-body-api:
+    logging: *runtime-logging
     image: ${TEMPLUX_PROJECT_NAME:-templux}-checks
     entrypoint: ["node", "tests/fixtures/ssr-body-server.mjs"]
     profiles: ["tools"]
 
   ssr-body-web:
+    logging: *runtime-logging
     image: ${TEMPLUX_PROJECT_NAME:-templux}-web
     environment:
       API_INTERNAL_URL: http://ssr-body-api:8080

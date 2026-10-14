@@ -2,7 +2,7 @@
 
 供新项目复用、也可独立启动的通用模板项目。基于 Supplieroom、Skoope、Catchouse 提取共通能力，业务与数据由各项目保有。
 
-首版规格与29项实施任务已发布。当前已实现 T01–T08：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制及验证关联/管理员密码重置。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
+首版规格与29项实施任务已发布。当前已实现 T01–T09：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置及审计查询/日志留存。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
 
 ## 启动
 
@@ -104,3 +104,12 @@ docker compose up -d --wait database
 管理员从人员编辑区发起请求，目标本人正常重新登录并验证后再由管理员最终确认。请求15分钟有效，身份验证须在正常登录5分钟内；姓名/邮箱不合并，身份/用户名占用拒绝。人员飞书与密码共享账号状态、角色及版本，关联或重置使所有旧方式会话失效，不清除T07失败限制。Agent仍独立，通过CLI受限文件重置。
 
 网页他人随机密码只在本次no-store响应请求下载，请确认私有目录保存完成再受控交付；取消/丢失不能复取，需要再次明确重置。本人密码变更使用 `./templux reset-person --account <ID> --credential-file 新文件.json --confirm --non-interactive`，防止会话失效抢先丢掉密码。菜单14–17及关联命令见 [登录方式合同](docs/specs/login-methods.md)；隔离0006/0007、SQL/HTTP/CLI/网页证据见 [T08验收](docs/discovery/t08-acceptance.md)。原真人授权环境仍0004，升级须另行备份与安排；T03真实组织人工验收仍未完成。
+
+
+### 审计查询与日志留存（T09）
+
+管理员从账号管理页进入 /audit，查询真实认证与管理事件，按事件/操作者、来源、目标账号、结果和含时区时间筛选，分页查看。人员/Agent责任快照、应用身份、宿主CLI声明与历史未知身份分别显示；后端要求账号管理及审计读取权限，页面只读、不提供导出或运行日志浏览器。
+
+审计默认保留90天，由API启动及每小时执行有界清理；清理删除与摘要审计同事务。AUDIT_RETENTION_DAYS、AUDIT_CLEANUP_INTERVAL_SECONDS、AUDIT_CLEANUP_BATCH_SIZE、AUDIT_CLEANUP_MAX_BATCHES可覆盖。API/Web运行日志仅保留安全结构化诊断；Docker每容器默认10MiB×10份，三长期服务约300MiB预算，约14天为目标，容量先到可更早淘汰。RUNTIME_LOG_MAX_BYTES与RUNTIME_LOG_MAX_FILES控制轮转，工具容器另有自身预算。
+
+通过 ./templux logs --json --non-interactive 或 Docker Compose日志查看；JSON结果在stdout，日志/诊断在stderr。具体字段、脱敏、逐类故障行为与配置范围见 [审计与运行日志合同](docs/specs/audit-and-runtime-implementation.md)，隔离0008、真实轮转及查询证据见 [T09验收](docs/discovery/t09-acceptance.md)。原真人环境仍0004，未应用本票迁移或重建日志配置；正式升级须另行备份、安排。

@@ -1,3 +1,4 @@
+import {writeAudit} from './audit-store.js';
 import { createHash, randomBytes } from 'node:crypto';
 import type pg from 'pg';
 import { OperationError } from './database.js';
@@ -29,8 +30,7 @@ export async function authorizationLock(client: pg.PoolClient): Promise<void> {
   await client.query("SELECT pg_advisory_xact_lock(hashtext('templux:authorization'))");
 }
 export async function audit(client: pg.Pool | pg.PoolClient, source: 'cli' | 'feishu' | 'password', actor: string, event: string, accountId: string, details: object): Promise<void> {
-  await client.query('INSERT INTO templux.audit_events(source,actor,event,account_id,details) VALUES($1,$2,$3,$4,$5::jsonb)',
-    [source, actor, event, accountId, JSON.stringify(details)]);
+  await writeAudit(client,source,actor,event,accountId,details);
 }
 export async function beginOAuth(pool: pg.Pool) {
   const state = opaqueToken(); const browser = opaqueToken();
@@ -63,14 +63,14 @@ export async function registerSession(pool: pg.Pool, identity: Identity, config:
         'INSERT INTO templux.accounts(display_name) VALUES($1) RETURNING id,state,auth_version', [identity.name])).rows[0]!;
       await client.query("INSERT INTO templux.identities(account_id,provider,app_id,tenant_key,subject) VALUES($1,'feishu',$2,$3,$4)",
         [account.id, identity.appId, identity.tenantKey, identity.subject]);
-      await audit(client, 'feishu', 'verified_feishu_identity', 'account_registered', account.id, { state: 'pending' });
+      await audit(client, 'feishu', `account:${account.id}`, 'account_registered', account.id, { state: 'pending' });
     }
     if (account.state === 'disabled') throw new AuthError('account_disabled', 403);
     await client.query('INSERT INTO templux.auth_sessions(token_hash,account_id,auth_version,expires_at) VALUES($1,$2,$3,now()+$4*interval \'1 second\')',
       [digest(token), account.id, account.auth_version, config.maximumSeconds]);
     return account.id;
   });
-  try { await audit(pool, 'feishu', 'verified_feishu_identity', 'login_succeeded', accountId, {}); } catch { logFailure(); }
+  try { await audit(pool, 'feishu', `account:${accountId}`, 'login_succeeded', accountId, {}); } catch { logFailure(); }
   return { token, accountId };
 }
 export async function loadSession(client: pg.PoolClient, token: string | undefined, config: AuthConfig | null, definitions: Roles, touch = false): Promise<Account> {

@@ -18,7 +18,7 @@ RUN npm run build --workspace @templux/api
 
 FROM node:24.21.0-bookworm-slim AS api
 WORKDIR /opt/templux
-ENV NODE_ENV=production
+ENV NODE_ENV=production NODE_OPTIONS=--no-warnings
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
@@ -35,7 +35,7 @@ RUN npm run build --workspace @templux/web
 
 FROM node:24.21.0-bookworm-slim AS web
 WORKDIR /opt/templux
-ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--no-warnings
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
@@ -47,7 +47,7 @@ COPY apps/web/public apps/web/public
 COPY shared shared
 COPY config config
 USER node
-CMD ["npm", "run", "start", "--workspace", "@templux/web"]
+CMD ["node", "apps/web/server.mjs"]
 
 FROM docker:29.8.2-cli AS docker-client
 FROM api AS management

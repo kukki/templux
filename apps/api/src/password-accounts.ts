@@ -101,6 +101,6 @@ export async function passwordLogin(pool: pg.Pool, usernameValue: unknown, passw
   });
   // Failed attempts commit their counters before returning an error; throwing inside work would roll them back.
   if('error' in result){if(result.error==='login_limited')throw new PasswordLimited(result.seconds!);throw new AuthError('invalid_credentials');}
-  try { await audit(pool,'password','verified_password','login_succeeded',result.accountId,{}); } catch { logFailure(); }
+  try { await audit(pool,'password',`account:${result.accountId}`,'login_succeeded',result.accountId,{}); } catch { logFailure(); }
   return {token,maximumSeconds:result.kind==='agent'?config.agentMaximumSeconds:config.maximumSeconds};
 }

@@ -1,0 +1,3 @@
+import {OperationError} from './database.js';
+function integer(name:string,fallback:number,min:number,max:number){const value=process.env[name]??String(fallback);if(!/^[1-9][0-9]*$/.test(value)||!Number.isSafeInteger(Number(value))||Number(value)<min||Number(value)>max)throw new OperationError('审计留存配置无效。');return Number(value);}
+export function auditSettings(){return {days:integer('AUDIT_RETENTION_DAYS',90,1,3650),batchSize:integer('AUDIT_CLEANUP_BATCH_SIZE',1000,1,10000),maximumBatches:integer('AUDIT_CLEANUP_MAX_BATCHES',10,1,100),intervalSeconds:integer('AUDIT_CLEANUP_INTERVAL_SECONDS',3600,10,86400)};}

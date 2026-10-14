@@ -1,3 +1,5 @@
+import {recordOperation} from './operational-audit.js';
+import {runtimePolicy,runtimeRecord} from '../../../shared/runtime-log.mjs';
 import {loginMethodCommand} from './login-method-cli.js';
 import { passwordCommand } from './password-cli.js';
 import { spawn } from 'node:child_process';
@@ -11,6 +13,7 @@ import { loadPresentation, PresentationError } from '../../../shared/presentatio
 
 const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check', 'users', 'authorize', 'create-person', 'create-agent', 'reset-agent', 'request-login-link', 'login-links', 'complete-login-link', 'reset-person'] as const;
 type Command = typeof commands[number];
+let currentCommand:Command|undefined;
 
 function isCommand(value: string | undefined): value is Command {
   return commands.some(command => command === value);
@@ -79,6 +82,7 @@ async function main(): Promise<Record<string, unknown>> {
     } finally { prompt.close(); }
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
+  currentCommand=command;
   if(['request-login-link','login-links','complete-login-link','reset-person'].includes(command)){
     const allowed=command==='request-login-link'?['--account','--method','--username']:command==='complete-login-link'?['--request','--credential-file']:command==='reset-person'?['--account','--credential-file']:['--account'];
     if([...options.keys()].some(key=>!allowed.includes(key))||flags.has('--overwrite'))throw new OperationError('登录方式管理参数无效。');
@@ -127,12 +131,14 @@ async function main(): Promise<Record<string, unknown>> {
 }
 
 try {
-  const result = await main();
+  runtimePolicy();const result = await main();
+  if(typeof result.command==='string')await recordOperation(result.command,'success');
   console.log(process.argv.includes('--json') ? JSON.stringify(result)
     : `完成：${result.command}${result.url ? `\n访问 ${result.url}` : ''}`);
 } catch (error) {
+  if(currentCommand)await recordOperation(currentCommand,'failed');
   const message = error instanceof OperationError || error instanceof PresentationError ? error.message : '操作失败，请检查容器及配置。';
-  console.error(JSON.stringify({ event: 'management_failed', message }));
+  runtimeRecord('management','error','management_failed');
   if (process.argv.includes('--json')) console.log(JSON.stringify({ ok: false, error: message }));
   process.exitCode = 1;
 }

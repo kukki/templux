@@ -75,6 +75,7 @@ export async function schemaVersion(pool: pg.Pool | pg.PoolClient, expected: Mig
   }
   if(expected.some(item=>item.version==='0006')){const check=await pool.query("SELECT to_regclass('templux.login_method_requests') IS NOT NULL AS complete");if(!check.rows[0]?.complete)throw new OperationError('登录方式验证结构缺失，部署已中止。');}
   if(expected.some(item=>item.version==='0007')){const check=await pool.query("SELECT count(*)=2 AS complete FROM information_schema.columns WHERE table_schema='templux' AND table_name='oauth_requests' AND column_name IN ('purpose','login_request_id')");if(!check.rows[0]?.complete)throw new OperationError('OAuth用途结构缺失，部署已中止。');}
+  if(expected.some(item=>item.version==='0008')){const check=await pool.query("SELECT count(*)=8 AS complete FROM information_schema.columns WHERE table_schema='templux' AND table_name='audit_events' AND column_name IN ('result','actor_assurance','actor_account_id','actor_kind','actor_responsible_person_id','target_kind','target_responsible_person_id','occurred_at')");if(!check.rows[0]?.complete)throw new OperationError('审计结构缺失，部署已中止。');}
   return result.rows.at(-1)!.version;
 }
 
