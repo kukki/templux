@@ -1,0 +1,23 @@
+{
+  "title":"控件示例",
+  "intro":"这是独立示例，修改不会影响正式数据。刷新或重置可恢复初始内容。",
+  "badge":"示例 · 不保存到正式系统",
+  "reset":"重置示例",
+  "account":"返回账号",
+  "name":"示例名称",
+  "apply":"应用到示例",
+  "updated":"已更新当前示例。",
+  "restored":"示例已恢复。",
+  "blank":"请填写示例名称。",
+  "sampleTitle":"试改一条示例",
+  "sampleNote":"这里的三条内容仅供体验。",
+  "density":"示例布局",
+  "standard":"标准间距",
+  "compact":"紧凑间距",
+  "defaultsTitle":"当前项目默认值",
+  "pageSize":"列表默认每页条数",
+  "pageSizes":"可选每页条数",
+  "duration":"普通通知显示秒数",
+  "visible":"通知可见条数（桌面 / 窄屏）",
+  "defaultsNote":"示例采用项目的品牌与元素默认值。完整控件演示将逐步开放。"
+}

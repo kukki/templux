@@ -1,3 +1,4 @@
+import {projectFeatures,FeatureConfigError} from '../../../shared/features.mjs';
 import {recordOperation} from './operational-audit.js';
 import {auditSettings} from './audit-settings.js';
 import {runtimePolicy,runtimeRecord} from '../../../shared/runtime-log.mjs';
@@ -84,7 +85,7 @@ async function main(): Promise<Record<string, unknown>> {
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
   currentCommand=command;
-  if(command==='start'||command==='config-check')auditSettings();
+  if(command==='start'||command==='config-check'){auditSettings();projectFeatures();}
   if(['request-login-link','login-links','complete-login-link','reset-person'].includes(command)){
     const allowed=command==='request-login-link'?['--account','--method','--username']:command==='complete-login-link'?['--request','--credential-file']:command==='reset-person'?['--account','--credential-file']:['--account'];
     if([...options.keys()].some(key=>!allowed.includes(key))||flags.has('--overwrite'))throw new OperationError('登录方式管理参数无效。');
@@ -139,7 +140,7 @@ try {
     : `完成：${result.command}${result.url ? `\n访问 ${result.url}` : ''}`);
 } catch (error) {
   if(currentCommand)await recordOperation(currentCommand,'failed');
-  const message = error instanceof OperationError || error instanceof PresentationError ? error.message : '操作失败，请检查容器及配置。';
+  const message = error instanceof OperationError || error instanceof PresentationError || error instanceof FeatureConfigError ? error.message : '操作失败，请检查容器及配置。';
   runtimeRecord('management','error','management_failed');
   if (process.argv.includes('--json')) console.log(JSON.stringify({ ok: false, error: message }));
   process.exitCode = 1;

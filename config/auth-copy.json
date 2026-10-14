@@ -165,5 +165,6 @@
   "auditUnknown": "未记录",
   "auditReadonly": "只读查询，无导出；记录原始时刻保留微秒，显示按项目时区配置。",
   "auditLoading": "正在查询审计…",
-  "auditTotal": "审计事件数"
+  "auditTotal": "审计事件数",
+  "examplesAction": "控件示例"
 }

@@ -1,10 +1,11 @@
+import {projectFeatures} from '../../shared/features.mjs';
 import {installRuntimeConsole,runtimeRecord} from '../../shared/runtime-log.mjs';
 import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
 import next from 'next';
 import {trustedProxyPolicy,webClientIp} from '../../shared/client-ip.mjs';
 try {
-installRuntimeConsole('web');
+installRuntimeConsole('web');projectFeatures();
 const trusted=trustedProxyPolicy(process.env.WEB_TRUSTED_PROXY_CIDRS??'');
 const app=next({dir:fileURLToPath(new URL('.',import.meta.url)),dev:false,hostname:'0.0.0.0',port:3000});const handle=app.getRequestHandler();await app.prepare();
 const server=createServer((request,response)=>{

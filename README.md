@@ -2,7 +2,7 @@
 
 供新项目复用、也可独立启动的通用模板项目。基于 Supplieroom、Skoope、Catchouse 提取共通能力，业务与数据由各项目保有。
 
-首版规格与29项实施任务已发布。当前已实现 T01–T09：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置及审计查询/日志留存。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
+首版规格与29项实施任务已发布。当前已实现 T01–T10：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存及受保护控件示例入口。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
 
 ## 启动
 
@@ -113,3 +113,10 @@ docker compose up -d --wait database
 审计默认保留90天，由API启动及每小时执行有界清理；清理删除与摘要审计同事务。AUDIT_RETENTION_DAYS、AUDIT_CLEANUP_INTERVAL_SECONDS、AUDIT_CLEANUP_BATCH_SIZE、AUDIT_CLEANUP_MAX_BATCHES可覆盖。API/Web运行日志仅保留安全结构化诊断；Docker每容器默认10MiB×10份，三长期服务约300MiB预算，约14天为目标，容量先到可更早淘汰。RUNTIME_LOG_MAX_BYTES与RUNTIME_LOG_MAX_FILES控制轮转，工具容器另有自身预算。
 
 通过 ./templux logs --json --non-interactive 或 Docker Compose日志查看；JSON结果在stdout，日志/诊断在stderr。具体字段、脱敏、逐类故障行为与配置范围见 [审计与运行日志合同](docs/specs/audit-and-runtime-implementation.md)，隔离0008、真实轮转及查询证据见 [T09验收](docs/discovery/t09-acceptance.md)。原真人环境仍0004，未应用本票迁移或重建日志配置；正式升级须另行备份、安排。
+
+
+### 受保护控件示例（T10）
+
+DEV/UAT默认从账号页进入 /examples，PROD默认关闭；COMPONENT_EXAMPLES_ENABLED=auto/true/false可配置，空值/非法开关及部署环境明确拒绝。只有正常登录、有application:read角色且符合Agent环境策略的账号可访问；示例不会授予管理权限。
+
+三条合成数据可在页面内试改和重置，刷新恢复，不保存正式数据、不新增业务API或表。当前展示项目元素默认值与最小内存体验，完整控件演示随T11–T20交付。新项目可先设false，再删除apps/web/app/examples与config/examples-copy.json并重建Web；真实认证、管理、审计不依赖示例模块。具体默认/必填/可选扩展及移除合同见 [示例实现合同](docs/specs/component-examples-implementation.md)，容器/配置矩阵/物理移除/浏览器证据见 [T10验收](docs/discovery/t10-acceptance.md)。
