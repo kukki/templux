@@ -67,3 +67,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .management-option small { color: var(--muted); }
 .account-management button:disabled { cursor: not-allowed; }
 @media (max-width: 600px) { .management-filters { grid-template-columns: 1fr 1fr; }.management-search { grid-column: 1 / -1; }.management-account, .management-editor { padding: 18px; }.management-option span { min-width: 0; overflow-wrap: anywhere; } }
+.method-management { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
+.method-management input:not([type=checkbox]) { width: 100%; min-height: 44px; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font: inherit; }
+.method-request { margin: 18px 0; padding: 16px; border: 1px solid var(--border); border-radius: 6px; overflow-wrap: anywhere; }
+.method-request button { margin-top: 12px; }

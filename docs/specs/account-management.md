@@ -12,7 +12,7 @@
 
 ## API与并发边界
 
-- GET `/api/admin/accounts?q=&state=&kind=&page=&pageSize=`：名称/ID文字按字面匹配，返回安全账号DTO、预定义角色、总数/当前页/总页数。当前为交互请求，更新有效会话活动；未返回用户名、密码哈希、会话或部署秘密。
+- GET `/api/admin/accounts?q=&state=&kind=&page=&pageSize=`：名称/ID文字按字面匹配，返回安全账号DTO、预定义角色、总数/当前页/总页数。当前为交互请求，更新有效会话活动；T08增加仅管理员可见的当前方式元数据（hasFeishu/passwordUsername/passwordEnabled）；不返回密码哈希、会话或部署秘密，关联及交付规则见login-methods.md。
 - POST `/api/admin/accounts/:id/authorization`：只接受 `roles:string[]`、`state:active|disabled`、`expectedVersion:string`、`confirm:true`，16KiB body上限。精确同源Origin，拒未知字段/无效值；浏览器不能提交actor、认证配置或可用性投影。
 - 网页调用现有 `setAuthorization`，独占授权事务锁取得后，通过同一SQL客户端重新读取操作者会话及accounts:manage。不得用事务外的初次鉴权替代该校验；等待期间被CLI降权/停用/撤销的操作者无法继续变更。目标行锁及expectedVersion防止旧页面覆盖其它管理结果。
 - CLI继续使用受信任宿主身份和认证可用性投影；API使用当前完整配置派生的非秘密身份域，不接收浏览器布尔开关。最后有效管理员计数、密码/Agent责任人规则沿用同一函数和锁。首次零管理员CLI初始化仍允许。

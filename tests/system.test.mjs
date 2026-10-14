@@ -15,7 +15,7 @@ test('a running installation reports readiness from the real database', async ()
     version: config.project.version,
     status: 'ready',
     database: 'connected',
-    schemaVersion: '0005',
+    schemaVersion: '0006',
   });
 });
 
@@ -24,6 +24,6 @@ test('the installation page renders live service readiness without exposing conf
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.ok(html.includes(config.copy.ready));
-  assert.match(html, /0005/);
+  assert.match(html, /0006/);
   assert.doesNotMatch(html, /postgresql:\/\/|DATABASE_URL|templux-local-only/);
 });

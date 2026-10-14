@@ -14,7 +14,7 @@ import {authorizationLock} from '../apps/api/dist/auth-store.js';
 const connectionString=process.env.TEST_AUTH_DATABASE_URL;assert.ok(connectionString?.endsWith('/templux_auth_test'));
 test('T06 real account management SQL/HTTP/CLI contract',async t=>{
  const pool=new pg.Pool({connectionString});t.after(()=>pool.end());await migrate(pool);
- await pool.query('TRUNCATE templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+ await pool.query('TRUNCATE templux.login_method_requests,templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
  const previous={...process.env};process.env.DEPLOYMENT_ENV='DEV';process.env.APP_PUBLIC_URL='http://localhost:31000';delete process.env.AGENT_LOGIN_ENABLED;
  t.after(()=>{for(const k of Object.keys(process.env))if(!Object.hasOwn(previous,k))delete process.env[k];Object.assign(process.env,previous);});
  const password=randomBytes(32).toString('base64url');const hash=await hashPassword(password);

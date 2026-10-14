@@ -7,7 +7,7 @@ import { OperationError } from './database.js';
 import { audit, authorizationLock, digest, opaqueToken, transaction } from './auth-store.js';
 import { generatePassword, hashPassword, normalizeUsername, verifyPassword } from './password.js';
 export type PasswordCreation = { kind: 'person' | 'agent'; username: string; name: string; owner?: string; file: string };
-function credentialFile(file: string, payload: object) {
+export function credentialFile(file: string, payload: object) {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}\.json$/.test(file)) throw new OperationError('--credential-file 须为受限凭据目录内的 JSON 文件名。');
   const directory = process.env.TEMPLUX_CREDENTIAL_DIR ?? '/opt/templux/credentials';
   const path = join(directory, file); let fd: number | undefined; let inode: number | undefined;

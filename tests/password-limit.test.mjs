@@ -5,7 +5,7 @@ import {canonicalIp,trustedProxyPolicy,webClientIp} from '../shared/client-ip.mj
 const connectionString=process.env.TEST_AUTH_DATABASE_URL;assert.ok(connectionString?.endsWith('/templux_auth_test'));
 test('T07 persistent password limits use real SQL and multiple HTTP instances',async t=>{
  const pool=new pg.Pool({connectionString}),secondPool=new pg.Pool({connectionString});t.after(()=>Promise.all([pool.end(),secondPool.end()]));await migrate(pool);
- await pool.query('TRUNCATE templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+ await pool.query('TRUNCATE templux.login_method_requests,templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
  const previous={...process.env};process.env.APP_PUBLIC_URL='http://localhost:31000';process.env.DEPLOYMENT_ENV='DEV';delete process.env.PASSWORD_PROXY_HOSTS;delete process.env.AGENT_LOGIN_ENABLED;
  t.after(()=>{for(const key of Object.keys(process.env))if(!Object.hasOwn(previous,key))delete process.env[key];Object.assign(process.env,previous);});
  const password=randomBytes(32).toString('base64url'),hash=await hashPassword(password);

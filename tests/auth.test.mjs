@@ -22,7 +22,7 @@ test('Feishu OAuth, authorization and audit use real isolated PostgreSQL', async
   const pool = new pg.Pool({connectionString});
   t.after(() => pool.end());
   await migrate(pool);
-  await pool.query('TRUNCATE templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+  await pool.query('TRUNCATE templux.login_method_requests,templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
   const authKeys=['FEISHU_APP_ID','FEISHU_APP_SECRET','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','APP_PUBLIC_URL'];
   const original=Object.fromEntries(authKeys.map(key=>[key,process.env[key]]));
   Object.assign(process.env,{FEISHU_APP_ID:config.appId,FEISHU_APP_SECRET:config.appSecret,FEISHU_TENANT_KEY:config.tenantKey,APP_PUBLIC_URL:config.publicOrigin});

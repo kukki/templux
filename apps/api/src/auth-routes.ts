@@ -1,3 +1,5 @@
+import {registerLoginMethodRoutes} from './login-method-routes.js';
+import {verifyFeishuLink} from './login-methods.js';
 import { passwordSource } from './password-source.js';
 import { PasswordLimited, cleanupPasswordFailures } from './password-limits.js';
 import { registerAccountManagement } from './account-management.js';
@@ -35,6 +37,7 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
   });
   server.addHook('onSend', async (_request, reply, payload) => { reply.header('Cache-Control', 'no-store'); reply.header('Referrer-Policy', 'no-referrer'); return payload; });
   registerAccountManagement(server,pool,config,roles,request=>requestCookie(request,'templux_session'));
+  registerLoginMethodRoutes(server,pool,config,roles,sessionSettings.publicOrigin,request=>requestCookie(request,'templux_session'));
   server.get('/api/auth/config', async () => ({ enabled: config !== null }));
   server.post('/api/auth/password', { bodyLimit: 4096 }, async (request, reply) => {
     if (request.headers.origin !== sessionSettings.publicOrigin) throw new AuthError('origin_denied', 403);
@@ -69,15 +72,16 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
       if (query.error !== undefined) throw new AuthError('login_cancelled', 400);
       if (typeof query.code !== 'string' || !query.code || query.code.length > 4096) throw new AuthError('provider_invalid', 400);
       const identity = await exchangeIdentity(settings, query.code, transport);
+      if(await verifyFeishuLink(pool,state,identity,settings,roles))return reply.redirect('/account?link=verified');
       const result = await registerSession(pool, identity, settings, () => server.log.error({ event: 'login_audit_failed' }, '登录成功审计未保存。'));
       reply.header('Set-Cookie', cookie('templux_session', result.token, settings.maximumSeconds, settings.secure));
       return reply.redirect('/account');
     } catch (error) {
-      const reason = error instanceof AuthError ? error.reason : 'service_unavailable';
+      const reason = error instanceof AuthError || error instanceof ManagementError ? error.reason : 'service_unavailable';
       if (error instanceof AuthError && error.diagnosis) server.log.warn({ event: 'feishu_protocol_rejected', ...error.diagnosis }, '飞书协议请求被拒绝。');
       if (!(error instanceof AuthError)) server.log.error({ event: 'login_registration_failed' }, '登录或初始账号保存失败。');
       reply.header('Set-Cookie', cookie('templux_oauth', '', 0, settings.secure));
-      return reply.redirect(`/login?reason=${reason}`);
+      return reply.redirect(`/login?reason=${encodeURIComponent(reason)}`);
     }
   });
   server.get('/api/auth/session', async request => ({ ok: true, account: await readSession(pool, requestCookie(request, 'templux_session'), config, roles), heartbeatSeconds:sessionSettings.heartbeatSeconds }));

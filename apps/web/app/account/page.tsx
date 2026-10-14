@@ -1,3 +1,4 @@
+import LoginMethodVerification from '../components/login-method-verification';
 import SessionGuard from '../components/session-guard';
 import Unavailable from '../components/unavailable';
 import { connection } from 'next/server';
@@ -15,7 +16,7 @@ export default async function AccountPage() {
     <section className="status-panel"><h2>{copy.accountTitle}</h2><dl>
       <div><dt>{copy.accountId}</dt><dd>{account.id}</dd></div><div><dt>{copy.accountName}</dt><dd>{account.name}</dd></div>
       <div><dt>{copy.accountKind}</dt><dd>{account.kind}</dd></div><div><dt>{copy.accountOwner}</dt><dd>{account.responsiblePersonId||'—'}</dd></div><div><dt>{copy.accountRoles}</dt><dd>{account.roles.join(', ')||'—'}</dd></div></dl></section>
-    <div className="auth-actions">{account.state==='active'&&account.permissions.includes('application:read')&&<a className="action" href="/protected">{copy.protectedAction}</a>}
+    <LoginMethodVerification copy={copy}/><div className="auth-actions">{account.state==='active'&&account.permissions.includes('application:read')&&<a className="action" href="/protected">{copy.protectedAction}</a>}
       {account.state==='active'&&account.permissions.includes('accounts:manage')&&<a className="action" href="/admin">{copy.adminAction}</a>}
       <a className="text-link" href="/login">{copy.relogin}</a><Logout label={copy.logout} failed={copy.logoutFailed} allLabel={copy.logoutAll}/></div>
   </ProjectShell>;

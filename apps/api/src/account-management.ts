@@ -28,9 +28,12 @@ export function registerAccountManagement(server: FastifyInstance, pool: pg.Pool
       const pages = Math.max(1,Math.ceil(total/pageSize)), currentPage = Math.min(page,pages);
       const accounts = (await client.query(`SELECT a.id,a.display_name AS name,a.state,a.kind,a.auth_version AS "authVersion",
         a.responsible_person_id AS "responsiblePersonId",o.display_name AS "responsiblePersonName",
+        EXISTS(SELECT 1 FROM templux.identities i WHERE i.account_id=a.id AND i.provider='feishu' AND i.app_id=$6 AND i.tenant_key=$7) AS "hasFeishu",
+        (SELECT username FROM templux.password_credentials p WHERE p.account_id=a.id) AS "passwordUsername",
+        coalesce((SELECT enabled FROM templux.password_credentials p WHERE p.account_id=a.id),false) AS "passwordEnabled",
         coalesce((SELECT array_agg(role_key ORDER BY role_key) FROM templux.account_roles r WHERE r.account_id=a.id),'{}') AS roles
         FROM templux.accounts a LEFT JOIN templux.accounts o ON o.id=a.responsible_person_id ${where}
-        ORDER BY a.id LIMIT $4 OFFSET $5`,[...values,pageSize,(currentPage-1)*pageSize])).rows;
+        ORDER BY a.id LIMIT $4 OFFSET $5`,[...values,pageSize,(currentPage-1)*pageSize,config?.appId??null,config?.tenantKey??null])).rows;
       return {ok:true,accounts,roles,total,page:currentPage,pageSize,pages};
     });
   });

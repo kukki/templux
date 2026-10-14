@@ -2,7 +2,8 @@
 import { createApplication } from '../../apps/api/dist/application.js';
 import { databasePool, migrate } from '../../apps/api/dist/database.js';
 const pool=databasePool(); await migrate(pool);
-const config={appId:'browser-fixture',appSecret:'browser-test-secret',tenantKey:'browser-tenant',redirectUri:'http://localhost:31030/api/auth/feishu/callback',publicOrigin:'http://localhost:31030',secure:false,idleSeconds:600,maximumSeconds:43200};
+const publicOrigin=process.env.TEST_AUTH_PUBLIC_URL??'http://localhost:31030';
+const config={appId:'browser-fixture',appSecret:'browser-test-secret',tenantKey:'browser-tenant',redirectUri:publicOrigin+'/api/auth/feishu/callback',publicOrigin,secure:false,idleSeconds:600,maximumSeconds:43200};
 const transport=async (url,init)=>{
   if(url==='https://accounts.feishu.cn/oauth/v3/token') return Response.json({code:0,access_token:'browser-test-runtime-token',token_type:'Bearer',expires_in:7200});
   if(url!=='https://open.feishu.cn/open-apis/authen/v1/user_info'||init.headers.Authorization!=='Bearer browser-test-runtime-token') throw new Error('Unexpected external request');
@@ -13,6 +14,9 @@ app.addHook('onSend',async(_request,reply,payload)=>{
   const location=reply.getHeader('location');
   if(typeof location==='string'&&location.startsWith('https://accounts.feishu.cn/open-apis/authen/v1/authorize?')) {
     const external=new URL(location); reply.header('location',`/api/fixture-authorize?state=${encodeURIComponent(external.searchParams.get('state'))}`);
+  }
+  if(typeof payload==='string'&&reply.getHeader('content-type')?.toString().includes('application/json')){
+    const value=JSON.parse(payload);if(typeof value.url==='string'&&value.url.startsWith('https://accounts.feishu.cn/open-apis/authen/v1/authorize?')){const external=new URL(value.url);value.url=`/api/fixture-authorize?state=${encodeURIComponent(external.searchParams.get('state'))}`;return JSON.stringify(value);}
   }
   return payload;
 });

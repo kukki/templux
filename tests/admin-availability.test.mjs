@@ -4,7 +4,7 @@ import {readAuthConfig,authenticationAvailability} from '../apps/api/dist/auth-c
 const connectionString=process.env.TEST_AUTH_DATABASE_URL;assert.ok(connectionString?.endsWith('/templux_auth_test'));
 test('last effective administrator matches verified deployment authentication availability',async t=>{
  const pool=new pg.Pool({connectionString});t.after(()=>pool.end());await migrate(pool);
- await pool.query('TRUNCATE templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+ await pool.query('TRUNCATE templux.login_method_requests,templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
  const original={...process.env};const keys=['FEISHU_APP_ID','FEISHU_APP_SECRET','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','FEISHU_REDIRECT_URI','TEMPLUX_AUTH_AVAILABILITY_JSON','TEMPLUX_REQUIRE_AUTH_PROJECTION'];
  const clean=()=>{for(const key of keys) delete process.env[key];process.env.APP_PUBLIC_URL='http://localhost:31000';process.env.DEPLOYMENT_ENV='PROD';delete process.env.AGENT_LOGIN_ENABLED;};clean();
  t.after(()=>{for(const key of Object.keys(process.env))if(!Object.hasOwn(original,key))delete process.env[key];Object.assign(process.env,original);});

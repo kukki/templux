@@ -1,14 +1,16 @@
 'use client';
+import LoginMethodManager from './login-method-manager';
 import { useEffect, useState } from 'react';
 import type { AuthCopy } from './auth-copy';
 import { endSession, sessionFetch, wakeSessionTabs } from './session-client';
-type AccountRow = {id:string;name:string;state:'pending'|'active'|'disabled';kind:'person'|'agent';roles:string[];authVersion:string;responsiblePersonId:string|null;responsiblePersonName:string|null};
+type AccountRow = {id:string;name:string;state:'pending'|'active'|'disabled';kind:'person'|'agent';roles:string[];authVersion:string;hasFeishu:boolean;passwordUsername:string|null;passwordEnabled:boolean;responsiblePersonId:string|null;responsiblePersonName:string|null};
 type Role = {label:string;permissions:string[];excludes?:string[]};
 type Listing = {accounts:AccountRow[];roles:Record<string,Role>;total:number;page:number;pages:number;pageSize:number};
-export default function AccountManager({copy,pagination}:{copy:AuthCopy;pagination:{pageSize:number;pageSizes:number[]}}) {
+export default function AccountManager({copy,pagination,ownAccountId}:{copy:AuthCopy;ownAccountId:string;pagination:{pageSize:number;pageSizes:number[]}}) {
   const [data,setData]=useState<Listing|null>(null),[query,setQuery]=useState(''),[search,setSearch]=useState(''),[state,setState]=useState(''),[kind,setKind]=useState('');
   const [page,setPage]=useState(1),[size,setSize]=useState(pagination.pageSize),[refresh,setRefresh]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState('');
-  const [target,setTarget]=useState<AccountRow|null>(null),[roles,setRoles]=useState<string[]>([]),[nextState,setNextState]=useState<'active'|'disabled'>('active'),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false);
+  const [target,setTarget]=useState<AccountRow|null>(null),[roles,setRoles]=useState<string[]>([]),[nextState,setNextState]=useState<'active'|'disabled'>('active'),[confirmed,setConfirmed]=useState(false),[authorizationBusy,setBusy]=useState(false);
+  const [methodBusy,setMethodBusy]=useState(false);const busy=authorizationBusy||methodBusy;
   useEffect(()=>{const timer=setTimeout(()=>{setSearch(query);setPage(1);},400);return()=>clearTimeout(timer);},[query]);
   useEffect(()=>{
     let ignore=false;const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),6000);
@@ -49,6 +51,7 @@ export default function AccountManager({copy,pagination}:{copy:AuthCopy;paginati
       <p className="auth-message">{copy.accountRoles}: {roles.length?roles.map(role=>data?.roles[role]?.label??role).join(', '):copy.managementZero} · {nextState==='active'?copy.managementActive:copy.managementDisabled}</p>
       <label className="management-option"><input type="checkbox" checked={confirmed} disabled={busy} onChange={event=>setConfirmed(event.target.checked)}/><span>{copy.managementConfirm}</span></label>
       <div className="auth-actions"><button disabled={!confirmed||busy||conflict} onClick={()=>void save()}>{busy?copy.managementBusy:copy.managementSave}</button><button className="secondary-action" disabled={busy} onClick={()=>{setTarget(null);setError('');}}>{copy.managementCancel}</button></div>
+    <LoginMethodManager key={target.id} target={target} ownAccountId={ownAccountId} copy={copy} blocked={busy} onBusy={setMethodBusy} onComplete={message=>{setNotice(message);setTarget(null);setRefresh(value=>value+1);}}/>
     </section>}
     {loading?<p role="status">{copy.managementLoading}</p>:!error&&data&&<>
       <p className="scope-note">{copy.managementTotal}: {data.total}</p>

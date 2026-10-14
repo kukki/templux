@@ -8,6 +8,11 @@ export class ManagementError extends OperationError {
 export type AuthorizationChange = { accountId: string; roles: string[]; state: 'active' | 'disabled'; expectedVersion?: string };
 // Browser actor data is validated only after obtaining the mutation lock, never trusted as a claimed account ID.
 export type AuthorizationActor = string | { token: string | undefined; config: AuthConfig | null };
+export async function managementOperator(client:pg.PoolClient,actor:AuthorizationActor,definitions:Roles){
+  const account=typeof actor==='string'?null:await loadSession(client,actor.token,actor.config,definitions,true);
+  if(account)requirePermission(account,'accounts:manage');
+  return {account,source:account?.loginMethod??'cli' as const,actor:account?`account:${account.id}`:actor as string};
+}
 export function validateRoleSelection(roles: string[], definitions: Roles): void {
   if (roles.length > 100 || roles.some(key => !Object.hasOwn(definitions, key)) || new Set(roles).size !== roles.length)
     throw new ManagementError('invalid_management_input', 400, '预定义角色无效或重复。');
@@ -23,8 +28,7 @@ export async function setAuthorization(pool: pg.Pool, change: AuthorizationChang
   try {
     return await transaction(pool, async client => {
       await authorizationLock(client);
-      const operator = typeof actor === 'string' ? null : await loadSession(client, actor.token, actor.config, definitions, true);
-      if (operator) requirePermission(operator, 'accounts:manage');
+      const operator=(await managementOperator(client,actor,definitions)).account;
       const account = (await client.query<{ id: string; state: string; auth_version: string }>('SELECT id,state,auth_version FROM templux.accounts WHERE id=$1 FOR UPDATE', [change.accountId])).rows[0];
       if (!account) throw new ManagementError('account_not_found',404,'未找到目标账号。');
       if (change.expectedVersion !== undefined && change.expectedVersion !== account.auth_version)
