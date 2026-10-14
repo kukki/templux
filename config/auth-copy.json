@@ -87,5 +87,6 @@
   "account_conflict": "目标账号已被修改。请刷新列表后重新编辑并确认。",
   "account_not_found": "目标账号不存在，请刷新列表。",
   "invalid_management_input": "管理参数无效，请核对状态、角色及确认。",
-  "management_save_failed": "授权或审计保存失败，变更未提交，请重试。"
+  "management_save_failed": "授权或审计保存失败，变更未提交，请重试。",
+  "login_limited": "此来源的登录尝试已暂时限制。请在限制到期后重新尝试；继续提交不会延长限制。"
 }

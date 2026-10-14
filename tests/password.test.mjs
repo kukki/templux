@@ -12,7 +12,7 @@ const connectionString=process.env.TEST_AUTH_DATABASE_URL;
 assert.ok(connectionString,'Explicit isolated test database required.');
 test('controlled password identities, normal HTTP sessions and audited CLI use real PostgreSQL',async t=>{
   const pool=new pg.Pool({connectionString});t.after(()=>pool.end());await migrate(pool);
-  await pool.query('TRUNCATE templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+  await pool.query('TRUNCATE templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
   const directory=mkdtempSync(join(tmpdir(),'templux-password-'));t.after(()=>rmSync(directory,{recursive:true,force:true}));
   const previous={...process.env};process.env.DEPLOYMENT_ENV='DEV';delete process.env.AGENT_LOGIN_ENABLED;process.env.APP_PUBLIC_URL='http://localhost:31000';
   t.after(()=>{for(const key of Object.keys(process.env)) if(!Object.hasOwn(previous,key)) delete process.env[key];Object.assign(process.env,previous);});
@@ -75,15 +75,15 @@ test('controlled password identities, normal HTTP sessions and audited CLI use r
     grant(owner,'admin,user');
   });
   await t.test('PROD defaults deny Agent login and existing sessions; explicit enable never grants roles',async()=>{
-    process.env.DEPLOYMENT_ENV='PROD';assert.equal((await login(secret('agent.json'))).status,403);assert.equal((await get('/api/protected',administrator)).status,401);
+    process.env.DEPLOYMENT_ENV='PROD';assert.equal((await login(secret('agent.json'))).status,401);assert.equal((await get('/api/protected',administrator)).status,401);
     process.env.AGENT_LOGIN_ENABLED='true';assert.equal((await login(secret('agent.json'))).status,200);
-    process.env.AGENT_LOGIN_ENABLED='false';assert.equal((await login(secret('agent.json'))).status,403);
+    process.env.AGENT_LOGIN_ENABLED='false';assert.equal((await login(secret('agent.json'))).status,401);
     process.env.DEPLOYMENT_ENV='UAT';delete process.env.AGENT_LOGIN_ENABLED;assert.equal((await login(secret('agent.json'))).status,200);
     process.env.DEPLOYMENT_ENV='DEV';
   });
   await t.test('disabled owner and disabled account reject login and issued sessions',async()=>{
     const backup=cli(['create-person','--username','backup-admin','--name','备用管理员','--credential-file','backup.json','--confirm']);assert.equal(backup.status,0,backup.stderr);grant(JSON.parse(backup.stdout).accountId,'admin');
-    grant(owner,'user','disabled');assert.equal((await login(secret('agent.json'))).status,403);assert.equal((await get('/api/protected',administrator)).status,401);
+    grant(owner,'user','disabled');assert.equal((await login(secret('agent.json'))).status,401);assert.equal((await get('/api/protected',administrator)).status,401);
     grant(owner,'admin,user');grant(agent,'user','disabled');assert.equal((await login(secret('agent.json'))).status,401);grant(agent,'user');
   });
   await t.test('Agent independent maximum and idle configuration is honored and restart preserves valid session',async()=>{

@@ -1,3 +1,4 @@
+import {countPasswordFailure,limitedSeconds,passwordFailureKey,PasswordLimited} from './password-limits.js';
 import { constants, openSync, closeSync, fchmodSync, fchownSync, fstatSync, fsyncSync, writeFileSync, unlinkSync, lstatSync } from 'node:fs';
 import { join } from 'node:path';
 import type pg from 'pg';
@@ -71,23 +72,35 @@ export async function resetAgentPassword(pool: pg.Pool, accountId: string, file:
     throw new OperationError('密码或审计保存失败，变更未提交。');
   }
 }
-export async function passwordLogin(pool: pg.Pool, usernameValue: unknown, password: unknown, logFailure: () => void) {
-  const username = normalizeUsername(usernameValue); const config = readSessionConfig();
+export async function passwordLogin(pool: pg.Pool, usernameValue: unknown, password: unknown, sourceIp: string, logFailure: () => void) {
+  const username = normalizeUsername(usernameValue); const config = readSessionConfig();const key=passwordFailureKey(sourceIp,username);
+  const restricted=await limitedSeconds(pool,key);if(restricted!==null)throw new PasswordLimited(restricted);
   const candidate = (await pool.query<{account_id:string;password_hash:string}>(
     'SELECT account_id,password_hash FROM templux.password_credentials WHERE username=$1 AND enabled',[username])).rows[0];
-  if (!await verifyPassword(password,candidate?.password_hash) || !candidate) throw new AuthError('invalid_credentials');
+  const verified=await verifyPassword(password,candidate?.password_hash); // KDF outside the short transaction.
   const token = opaqueToken();
-  const kind = await transaction(pool,async client => {
-    await authorizationLock(client);
-    const account = (await client.query<{kind:string;state:string;auth_version:string;password_hash:string;enabled:boolean;owner_valid:boolean}>(
-      `SELECT a.kind,a.state,a.auth_version,p.password_hash,p.enabled,
-       EXISTS(SELECT 1 FROM templux.accounts o WHERE o.id=a.responsible_person_id AND o.kind='person' AND o.state='active') AS owner_valid
-       FROM templux.accounts a JOIN templux.password_credentials p ON p.account_id=a.id WHERE a.id=$1 FOR UPDATE OF a,p`,[candidate.account_id])).rows[0];
-    if (!account || !account.enabled || account.password_hash !== candidate.password_hash || account.state === 'disabled') throw new AuthError('invalid_credentials');
-    if (account.kind === 'agent' && (!config.agentEnabled || !account.owner_valid)) throw new AuthError('agent_login_denied',403);
-    await client.query("INSERT INTO templux.auth_sessions(token_hash,account_id,auth_version,method,expires_at) VALUES($1,$2,$3,'password',now()+$4*interval '1 second')",[digest(token),candidate.account_id,account.auth_version,account.kind==='agent'?config.agentMaximumSeconds:config.maximumSeconds]);
-    return account.kind;
+  const result = await transaction(pool,async client => {
+    await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[`templux:password-failure:${key}`]);
+    await client.query('SELECT key_hash FROM templux.password_failures WHERE key_hash=$1 FOR UPDATE',[key]);
+    const seconds=await limitedSeconds(client,key);if(seconds!==null)return {error:'login_limited' as const,seconds};
+    if(verified&&candidate){
+      await authorizationLock(client);
+      const account = (await client.query<{kind:string;state:string;auth_version:string;password_hash:string;enabled:boolean;owner_valid:boolean}>(
+        `SELECT a.kind,a.state,a.auth_version,p.password_hash,p.enabled,
+         EXISTS(SELECT 1 FROM templux.accounts o WHERE o.id=a.responsible_person_id AND o.kind='person' AND o.state='active') AS owner_valid
+         FROM templux.accounts a JOIN templux.password_credentials p ON p.account_id=a.id WHERE a.id=$1 FOR UPDATE OF a,p`,[candidate.account_id])).rows[0];
+      if(account&&account.enabled&&account.password_hash===candidate.password_hash&&account.state!=='disabled'
+        &&(account.kind!=='agent'||config.agentEnabled&&account.owner_valid)){
+        await client.query("INSERT INTO templux.auth_sessions(token_hash,account_id,auth_version,method,expires_at) VALUES($1,$2,$3,'password',clock_timestamp()+$4*interval '1 second')",[digest(token),candidate.account_id,account.auth_version,account.kind==='agent'?config.agentMaximumSeconds:config.maximumSeconds]);
+        await client.query('DELETE FROM templux.password_failures WHERE key_hash=$1',[key]);
+        return {kind:account.kind,accountId:candidate.account_id};
+      }
+    }
+    const remaining=await countPasswordFailure(client,key);
+    return {error:remaining===null?'invalid_credentials' as const:'login_limited' as const,seconds:remaining};
   });
-  try { await audit(pool,'password','verified_password','login_succeeded',candidate.account_id,{}); } catch { logFailure(); }
-  return {token,maximumSeconds:kind==='agent'?config.agentMaximumSeconds:config.maximumSeconds};
+  // Failed attempts commit their counters before returning an error; throwing inside work would roll them back.
+  if('error' in result){if(result.error==='login_limited')throw new PasswordLimited(result.seconds!);throw new AuthError('invalid_credentials');}
+  try { await audit(pool,'password','verified_password','login_succeeded',result.accountId,{}); } catch { logFailure(); }
+  return {token,maximumSeconds:result.kind==='agent'?config.agentMaximumSeconds:config.maximumSeconds};
 }

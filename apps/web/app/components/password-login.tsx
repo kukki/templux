@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, type FormEvent } from 'react';
-type Copy = { username:string; password:string; submit:string; busy:string; invalid:string; denied:string; unavailable:string };
+type Copy = { username:string; password:string; submit:string; busy:string; invalid:string; denied:string; limited:string; unavailable:string };
 export default function PasswordLogin({copy}:{copy:Copy}) {
   const [ready,setReady]=useState(false); useEffect(()=>setReady(true),[]);
   const [busy,setBusy]=useState(false); const [error,setError]=useState('');
@@ -11,7 +11,7 @@ export default function PasswordLogin({copy}:{copy:Copy}) {
       const response=await fetch('/api/auth/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:data.get('username'),password:data.get('password')})});
       if(response.ok) { form.reset(); window.location.assign('/account'); return; }
       const value=await response.json().catch(()=>({}));
-      setError(value.error==='invalid_credentials'?copy.invalid:value.error==='agent_login_denied'?copy.denied:copy.unavailable);
+      setError(value.error==='login_limited'?copy.limited:value.error==='invalid_credentials'?copy.invalid:copy.unavailable);
     } catch {setError(copy.unavailable);} finally {setBusy(false);}
   }
   return <form className="password-form" method="post" action="/api/auth/password" onSubmit={login}>

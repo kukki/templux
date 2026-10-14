@@ -1,6 +1,7 @@
 name: ${TEMPLUX_PROJECT_NAME:-templux}
 
 x-auth-environment: &auth-environment
+  PASSWORD_PROXY_HOSTS: ${PASSWORD_PROXY_HOSTS-web}
   FEISHU_APP_ID: ${FEISHU_APP_ID:-}
   FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
   FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
@@ -58,6 +59,7 @@ services:
       target: web
     environment:
       API_INTERNAL_URL: http://api:8080
+      WEB_TRUSTED_PROXY_CIDRS: ${WEB_TRUSTED_PROXY_CIDRS:-}
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
       - ./config:/opt/templux/config:ro
@@ -139,6 +141,7 @@ services:
   auth-browser:
     image: ${TEMPLUX_PROJECT_NAME:-templux}-checks
     environment:
+      PASSWORD_PROXY_HOSTS: auth-web
       DATABASE_URL: postgresql://templux_test:isolated-test-only@auth-database:5432/templux_auth_test
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     entrypoint: ["node", "tests/fixtures/auth-browser-server.mjs"]
@@ -162,6 +165,7 @@ services:
     environment:
       DATABASE_URL: postgresql://templux_test:isolated-test-only@auth-database:5432/templux_auth_test
       APP_PUBLIC_URL: ${TEST_AUTH_PUBLIC_URL:-http://localhost:31040}
+      PASSWORD_PROXY_HOSTS: password-web
       DEPLOYMENT_ENV: ${TEST_DEPLOYMENT_ENV:-DEV}
       AGENT_LOGIN_ENABLED: ${TEST_AGENT_LOGIN_ENABLED:-}
       HEARTBEAT_INTERVAL_SECONDS: ${TEST_HEARTBEAT_INTERVAL_SECONDS:-30}
@@ -174,6 +178,7 @@ services:
     image: ${TEMPLUX_PROJECT_NAME:-templux}-web
     environment:
       API_INTERNAL_URL: http://password-api:8080
+      WEB_TRUSTED_PROXY_CIDRS: ${TEST_WEB_TRUSTED_PROXY_CIDRS:-}
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
       - ./config:/opt/templux/config:ro

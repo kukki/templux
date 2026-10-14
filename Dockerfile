@@ -42,6 +42,7 @@ COPY apps/web/package.json apps/web/package.json
 RUN npm ci --omit=dev --workspace @templux/web
 COPY --from=web-build --chown=node:node /opt/templux/apps/web/.next apps/web/.next
 COPY apps/web/next.config.ts apps/web/next.config.ts
+COPY apps/web/server.mjs apps/web/server.mjs
 COPY apps/web/public apps/web/public
 COPY shared shared
 COPY config config

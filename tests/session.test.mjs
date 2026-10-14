@@ -3,7 +3,7 @@ import {migrate} from '../apps/api/dist/database.js';import {createApplication} 
 const connectionString=process.env.TEST_AUTH_DATABASE_URL;assert.ok(connectionString?.endsWith('/templux_auth_test'));
 test('persistent session lifecycle uses real HTTP, SQL and CLI boundaries',async t=>{
  const pool=new pg.Pool({connectionString});t.after(()=>pool.end());await migrate(pool);
- await pool.query('TRUNCATE templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+ await pool.query('TRUNCATE templux.password_failures,templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
  const previous={...process.env};process.env.DEPLOYMENT_ENV='DEV';process.env.APP_PUBLIC_URL='http://localhost:31000';delete process.env.AGENT_LOGIN_ENABLED;
  t.after(()=>{for(const key of Object.keys(process.env))if(!Object.hasOwn(previous,key))delete process.env[key];Object.assign(process.env,previous);});
  const credentials={username:'session-person',password:randomBytes(32).toString('base64url')};const hash=await hashPassword(credentials.password);

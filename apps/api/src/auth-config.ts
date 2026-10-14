@@ -1,3 +1,4 @@
+import {passwordProxyHosts} from '../../../shared/client-ip.mjs';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { OperationError } from './database.js';
@@ -78,6 +79,7 @@ export function readRoles(): Roles {
 
 export type AuthenticationAvailability = { schemaVersion: 1; feishu: AuthRealm | null; agentEnabled: boolean };
 export function authenticationAvailability(): AuthenticationAvailability {
+  passwordProxyHosts(process.env.PASSWORD_PROXY_HOSTS??'');
   const config = readAuthConfig();
   return { schemaVersion: 1, feishu: config ? { appId: config.appId, tenantKey: config.tenantKey } : null,
     agentEnabled: readSessionConfig().agentEnabled };

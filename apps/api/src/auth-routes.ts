@@ -1,3 +1,5 @@
+import { passwordSource } from './password-source.js';
+import { PasswordLimited, cleanupPasswordFailures } from './password-limits.js';
 import { registerAccountManagement } from './account-management.js';
 import { ManagementError } from './authorization.js';
 import { revokeSessions } from './session-lifecycle.js';
@@ -16,9 +18,13 @@ function cookie(name: string, value: string, seconds: number, secure: boolean): 
   return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
 }
 export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, config: AuthConfig | null = readAuthConfig(), transport: Transport = fetch) {
+  const sourceIp=passwordSource();
   const roles = readRoles(); const sessionSettings = { ...readSessionConfig(), ...(config ? {publicOrigin:config.publicOrigin,secure:config.secure} : {}) };
   function configured(): AuthConfig { if (!config) throw new AuthError('authentication_unconfigured', 503); return config; }
+  const cleanup=setInterval(()=>{void cleanupPasswordFailures(pool).catch(()=>server.log.error({event:'password_failure_cleanup_failed'},'密码失败记录清理未完成。'));},60000);cleanup.unref();
+  server.addHook('onClose',async()=>clearInterval(cleanup));
   server.setErrorHandler((error, _request, reply) => {
+    if(error instanceof PasswordLimited)reply.header('Retry-After',String(error.retryAfterSeconds));
     if (error instanceof ManagementError) {
       if (error.status >= 500) server.log.error({event:error.reason},'管理变更未提交。');
       return void reply.code(error.status).send({ok:false,error:error.reason});
@@ -35,7 +41,7 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
     const body = request.body;
     if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k => !['username','password'].includes(k))) throw new AuthError('invalid_credentials');
     const input = body as {username?: unknown; password?: unknown};
-    const result = await passwordLogin(pool, input.username, input.password, () => server.log.error({event:'login_audit_failed'}, '登录成功审计未保存。'));
+    const result = await passwordLogin(pool, input.username, input.password, await sourceIp(request), () => server.log.error({event:'login_audit_failed'}, '登录成功审计未保存。'));
     reply.header('Set-Cookie', cookie('templux_session', result.token, result.maximumSeconds, sessionSettings.secure));
     return {ok:true};
   });
