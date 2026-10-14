@@ -18,7 +18,7 @@ export function themePreset(name) {
 
 export function validatePresentation(value) {
   // Additive, defaultable branch: preserve existing schema1 files; explicit bad values still fail.
-  if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,'search'))value={...value,elements:{...value.elements,search:structuredClone(defaults.elements.search)}};
+  for(const key of ['search','multiselect'])if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,key))value={...value,elements:{...value.elements,[key]:structuredClone(defaults.elements[key])}};
   function shape(actual, expected, path) {
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual) || actual.length === 0 || actual.length > 20 || actual.some(v => !Number.isInteger(v) || v < 1 || v > 1000)) {
@@ -47,6 +47,7 @@ export function validatePresentation(value) {
   if (!value.language.trim()) throw new PresentationError('语言标记不能为空。');
   try { new Intl.DateTimeFormat(value.language, { timeZone: value.time.timeZone }); } catch { throw new PresentationError('无效显示时区。'); }
   if(!Number.isInteger(value.elements.search.delayMs)||value.elements.search.delayMs<1||value.elements.search.delayMs>1000)throw new PresentationError('搜索延迟必须在1至1000毫秒内。');
+  if(!Number.isInteger(value.elements.multiselect.delayMs)||value.elements.multiselect.delayMs<1||value.elements.multiselect.delayMs>1000)throw new PresentationError('多选筛选延迟必须在1至1000毫秒内。');
   const { pageSize, pageSizes } = value.elements.pagination;
   if (!Number.isInteger(pageSize) || !pageSizes.includes(pageSize) || new Set(pageSizes).size !== pageSizes.length) throw new PresentationError('分页默认值须属于不重复的数量集合。');
   for (const n of Object.values(value.elements.notifications)) {

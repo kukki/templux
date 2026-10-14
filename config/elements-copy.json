@@ -9,8 +9,15 @@
   "forbiddenTitle": "无法查看",
   "forbiddenBody": "当前数据不可访问，请联系管理员。",
   "emptyTitle": "没有匹配记录",
-  "emptyBody": "请调整搜索条件后再试。",
+  "emptyBody": "请调整搜索或筛选条件后再试。",
   "retry": "重试读取",
   "waitingTitle": "等待输入完成",
-  "waitingBody": "停止输入后自动读取，或按回车应用。"
+  "waitingBody": "停止输入或勾选后自动读取；搜索可按回车，筛选可关闭选项立即应用。",
+  "optionSearch": "搜索选项",
+  "selectCurrent": "全选当前结果",
+  "noOptions": "没有匹配选项",
+  "allSelected": "全部已选",
+  "noneSelected": "全部未选",
+  "selected": "已选",
+  "closeOptions": "关闭选项"
 }

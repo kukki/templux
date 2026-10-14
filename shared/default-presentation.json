@@ -26,6 +26,7 @@
   "elements": {
     "pagination": { "pageSize": 10, "pageSizes": [5, 10, 15, 20, 25, 50] },
     "search": { "delayMs": 400, "showButton": false },
+    "multiselect": { "delayMs": 1000 },
     "notifications": { "durationMs": 15000, "desktopVisible": 3, "narrowVisible": 1 }
   }
 }

@@ -14,5 +14,5 @@ export default function ExampleLab({elements}:{elements:Presentation['elements']
    <label className="example-density">{copy.density}<select value={density} onChange={event=>setDensity(event.target.value)}><option value="standard">{copy.standard}</option><option value="compact">{copy.compact}</option></select></label>
    <ul className={'example-rows '+density}>{rows.map(row=><li key={row.id}>{row.name}</li>)}</ul><p role="status" className="example-notice">{notice}</p>
   </section><section className="example-panel"><h2>{copy.defaultsTitle}</h2><dl className="example-defaults"><div><dt>{copy.pageSize}</dt><dd>{elements.pagination.pageSize}</dd></div><div><dt>{copy.pageSizes}</dt><dd>{elements.pagination.pageSizes.join(' / ')}</dd></div><div><dt>{copy.duration}</dt><dd>{elements.notifications.durationMs/1000}</dd></div><div><dt>{copy.visible}</dt><dd>{elements.notifications.desktopVisible} / {elements.notifications.narrowVisible}</dd></div></dl><p className="scope-note">{copy.defaultsNote}</p></section></div>
- <SearchDemo key={searchReset} settings={elements.search}/></div>;
+ <SearchDemo key={searchReset} settings={elements.search} multiselect={elements.multiselect}/></div>;
 }

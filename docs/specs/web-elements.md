@@ -279,3 +279,7 @@ Supplieroom `src/shared/ui/image-preview-dialog.tsx` 的 `ImagePreviewDialog`：
 ## T11实施细化（2026-10-15）
 
 统一搜索、显式字段/匹配/数据读取、中文输入/异步竞态及响应式只读列表的本票合同见 [搜索与只读列表](search-and-readonly-list.md)，实际范围见 [T11验收](../discovery/t11-acceptance.md)。原规范历史保留；不将其它后续控件声称已实现。
+
+## T12实施细化（2026-10-15）
+
+整行多选、受控选项/值与列表延迟/关闭应用、搜索组合及可省配置合同见 [多选与列表筛选](multiselect-and-list-filter.md)，行为证据见 [T12验收](../discovery/t12-acceptance.md)。保留前述来源与规范历史，不将后续分页排序声称已实现。
