@@ -81,3 +81,35 @@ Standards 0项发现；Spec 1项P2（F1），修复后定向复核。现有69项
 未执行完整Linux/WSL2、实体移动设备、全面性能/渗透或真实OS后台调度矩阵；项目自建未保存/导航守卫必须遵守整合合同。T14完整编辑器、T07失败限制、T08人员关联/重置仍是后续票。T03真实飞书人工组织链路仍未完成，与本轮会话审查分开。
 
 只本地提交本审查文档，后续修复及工单处理由TL安排。
+
+## 附录：2026-10-15 F1 独立定向复核
+
+范围：`1747d0aefb0846a3ee7dc6c368b39b707aa86a5c...ba9900750b7c6b26e76b1f2b11d64f49bc52a384`，全部7个修复变更文件。上文初审保持历史原样。
+
+**最新结论：Standards未发现新增问题；Spec F1关闭，未发现新增问题。结合初审其它范围与本次定向验证，T05可按#6范围验收。T03真实组织人工链路仍另列未完成。**
+
+产品修复仅给成功response.json Promise加catch→null，并在null时返回；明确401/403的Next redirect、合法profile映射和页面渲染均保持catch外，没有广泛捕获开发错误或吞导航。已有Unavailable视图接收null，恢复到相应路由重试。
+
+### 本轮实际验证
+
+复用更新镜像，`docker compose up -d --wait ssr-body-api ssr-body-web`后独立执行：
+
+```sh
+docker compose run --rm --no-deps checks node --test tests/ssr-body.test.mjs
+docker compose run --rm --no-deps checks npm run typecheck
+```
+
+专项**8/8、0失败/跳过、退出0**，日志 `test-results/t05-f1-independent-web.log`；API/Web类型检查退出0，日志 `test-results/t05-f1-independent-typecheck.log`。
+
+- 原200响应头后断流、完整错误JSON、gzip解码错误以及挂起body：对/account、/protected、/admin均真实HTTP200项目不可用/网络文案与对应重试href，原路径不变，Location与Set-Cookie为空，无登录误跳或Cookie删除。timeout三路由合计约18秒，实际由既有6秒AbortSignal结束，不是立即mock拒绝。
+- 正常有效协议元数据三页面仍正确呈现，没有不可用提示。明确401三路由仍307→`/login?reason=authorization_changed`，正常业务403在protected/admin仍307→account，account保留原路由重试；不吞Next redirect。
+- fixture只处理三个profile读取路径，没有登录、会话发行、授权操作或SQL。测试的固定account只是协议呈现正例，不能声称它证明真实身份/权限；此前真实SQL认证/会话验收仍作为不同证据保留。
+- 一次性生产API/Web镜像实际检查：tests目录均不存在，退出0；默认API地址没有指向fixture。工具服务仅tools profile且不发布宿主端口。
+- 正式管理test入口明确启动auth-database与两个SSR工具服务，checks设置TEST_SSR_WEB_URL；测试对缺失变量使用assert而非skip，标准npm test通配会执行该文件。已读取开发完整77/77、0失败/跳过与专项日志，符合该入口；本轮只重跑相关8项，没有再重复无关SQL锁/全套构建。
+- `sh -n templux tests/presentation-installation.sh`和指定差异git diff --check退出0；本轮自有SSR工具容器已删除，默认API/Web/database仍健康。没有重新构建Web、截图、.env/部署/真人或Ego31操作。
+
+### 依据与局限
+
+图generation `2026-10-14T19:18:12Z`，定位及读取profile原文，7个修复证据文件覆盖无已记录缺口，仍为best-effort。Context7先resolve/query官方Next.js，确认redirect抛NEXT_REDIRECT应在catch外；响应体读取异常沿用初审MDN文档核对，本轮真实HTTP覆盖其故障行为。
+
+本轮为macOS/Docker Desktop/Linux容器中的真实Next SSR请求，未重跑跨标签、OS后台、原生弹窗或完整Linux/WSL/移动矩阵；初审相关局限继续保留。协议fixture与真实SQL身份验收明确区分，T03人工未完成不能写成已通过。审查阶段仅追加并本地提交本记录。
