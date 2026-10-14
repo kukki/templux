@@ -61,3 +61,27 @@ code-review采用双轴；结构按codebase-memory search→trace→snippet并�
 - 轮转验证并不证明每种原生Postgres错误均经过应用JSON adapter；Postgres由Docker JSON封装，协议与密码输出边界仍需实际部署控制。默认旧容器未自动获得本票轮转配置，正式升级另行备份/安排。
 
 本次仅可提交本审查文档；工作范围没有修改实现/部署/.env/真人权限、推送或关闭工单。官方文档核对：[Docker json-file](https://docs.docker.com/engine/logging/drivers/json-file/)、[Compose interpolation](https://docs.docker.com/reference/compose-file/interpolation/)、[Fastify logging](https://fastify.dev/docs/latest/Reference/Logging/)。
+
+## 2026-10-15 F1 修复定向复核附录
+
+范围 `fd037daaff73b3e3125861379a1b2f5e30b74e77..e57c3252037a79f0496c9c3e14b397757c4d5ed7`；开始时HEAD为后者、工作树干净。读取修复验收、合同补充及全部5文件差异，保留以上初审历史。
+
+**最新结论：F1关闭，无新增发现。Standards/Spec通过；结合初审正常路径及本次复核，T09可按 #10 验收。T03真实组织、生产TLS/宿主矩阵等既有局限仍另列。**
+
+- Compose仅对六个T09新键改用unset-only默认；API六项、management六项、Web两项容量以及所有服务Driver options一致，未扩大既有env修改。start/config-check在任何build/up/migrate动作前调用同一auditSettings，容量仍复用runtimePolicy且CLI给明确安全错误。四项AUDIT校验没有全局加到stop/status/logs等救援动作（`compose.yaml:4`、`:31`、`:118`，`manage.ts:87`、`:137`）。
+- 本次实际复用tests/compose-audit-config.py的独立副本，仅改证据输出文件名，执行23组/45次一次性入口：unset得到原默认；合法六值30/200/3/120/32768/4实际生效；六键逐一empty/越界/非数字均原样到容器且非零拒绝。API真实createApplication→listen→/health/live HTTP成功后输出有效设置；CLI config-check正常JSON成功或安全非零错误。probe数据库固定不可达127.0.0.1:1，CLI DATABASE_URL为空，不接触原部署数据；健康指live，不据此宣称数据库readiness。
+- 两容量空值在Docker options层先被Engine拒绝，非零/stderr且容器尚未执行，不能要求存在应用JSON；再以正常Driver options、container环境覆盖空值，API application_start_failed和CLI management_failed同样非零，证明应用不会依赖Engine偶然默认。start空AUDIT值精确返回审计留存配置错误，未进入Compose部署动作。
+- 23组都在内存解析完整config，只保留六键及退出/安全诊断分类；API/Web/management与所有Driver options同值逐项断言。新Python文件仅为测试宿主回归，正常templux Shell包装及生产镜像不新增Python依赖、校验逻辑仍在容器。没有SQL迁移或新的数据库对象变更。
+
+| 本次独立命令 | 结果与证据 |
+| --- | --- |
+| `python3 test-results/t09-fix-review-config.py`（原tests脚本仅独立输出名） | 23组/45入口全通过；t09-fix-independent-config.json/log |
+| checks `node --test --test-concurrency=1 tests/audit.test.mjs tests/audit-lifecycle.test.mjs tests/runtime-log.test.mjs` | 20/20，fail/cancelled/skipped均0；t09-fix-independent-targeted.log |
+| checks `npm run typecheck` | API/Web退出0；t09-fix-independent-typecheck.log |
+| 自有项目templux-t09-fix-review-rescue、实际management stop、不可达DB | exit0，三个自有容器均停止、maintenance_audit_unavailable明确；t09-fix-independent-rescue-evidence.json/log |
+
+本次20项仍包含强审计/清理摘要故障回滚、最新权限锁等待、匿名拒绝与审计例外、生命周期关闭及运行秘密剥离；既有跨认证/关联/会话完整147项证据保留，本次没有重跑147或浏览器/Web构建。救援是独立真实复测，不代替或覆盖开发t09-fix-rescue-evidence.json。
+
+codebase-memory search→trace→snippet与coverage覆盖全部5变更及auditSettings/operational-audit/runtimePolicy/包装/Dockerfile依赖，metadata_match、无记录缺口；main的片段裁剪部分通过源文件直接读，图仍为best-effort。Context7再次核对Compose两种默认语义；Docker日志选项资料及初审实际轮转证据复用。
+
+已删除本次自有救援fixture及auth-database；一次性probe --rm，默认API/Web/database原镜像持续healthy/原0004，没有迁移重启。没有改实现/部署/.env/真人、push或关闭工单。局限保持：Engine错误文本依版本可能不同、真实组织/TLS/跨平台未新增验收，约14天非保留保证及非宿主硬配额；实际应用空值拒绝已有独立证据，不依赖某版本Engine错误文本。
