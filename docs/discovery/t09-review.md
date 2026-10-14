@@ -21,6 +21,8 @@
 
 **建议**：对本票新配置使用只在未设置时默认的 `${VAR-default}`，或在宿主实际入口显式拒绝空值；同步API/Web/management环境及Docker容量选项，避免同一值在不同层再次吞掉。补Compose/实际工具入口的“未设置默认成功、显式空拒绝、合法覆盖成功、非法/越界拒绝”对照，并保持DB不可达时stop救援语义。不要扩大修改既有无关配置。
 
+进一步独立渲染三组对照（t09-independent-config-controls.json）：使用 `docker compose --env-file /dev/null config --format json`，子进程环境中仅为这六项移除/赋空/赋合法值；stdout完整内容仅在内存解析，文件和工具输出只含六个api环境键。未设置与显式空均得到90/1000/10/3600/10485760/10；合法覆盖得到30/200/3/120/32768/4。即合法覆盖工作正常，缺陷仅是明确的空输入与未设置被混同，不涉及基线其它env变量；没有更改或输出用户.env。
+
 ## 已核对的Standards与Spec范围
 
 - `/admin`进入只读`/audit`，SSR audit-access与查询API都要求accounts:manage和audit:read。query在共享授权锁后同客户端重读会话/版本/状态；HTTP等待CLI变更后401，无旧权限放行。普通用户直接403，Agent责任人/开关沿既有会话规则；没有导出或运行日志网页（`audit-query.ts:6`、`auth-routes.ts:42`）。
