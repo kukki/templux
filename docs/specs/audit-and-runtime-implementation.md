@@ -40,7 +40,7 @@ CLI为host_claim，只接收数字host-uid或unknown显示标识，任意自报�
 
 ## 自动清理与生命周期
 
-AUDIT_RETENTION_DAYS默认90（1–3650）；AUDIT_CLEANUP_INTERVAL_SECONDS默认3600（10–86400）；AUDIT_CLEANUP_BATCH_SIZE默认1000（1–10000）；AUDIT_CLEANUP_MAX_BATCHES默认10（1–100）。空值/非法/越界拒绝启动。启动后及每周期后台清理，先验证迁移/结构，再事务try advisory锁；多实例同批不互等，FOR UPDATE SKIP LOCKED选cutoff之前旧事件，时刻/ID索引排序，有界删除。
+AUDIT_RETENTION_DAYS默认90（1–3650）；AUDIT_CLEANUP_INTERVAL_SECONDS默认3600（10–86400）；AUDIT_CLEANUP_BATCH_SIZE默认1000（1–10000）；AUDIT_CLEANUP_MAX_BATCHES默认10（1–100）。空值/非法/越界拒绝启动。Compose仅对未设置提供默认，显式空值保留；management的start/config-check复用同一审计校验器，不能吞空值或在启动迁移前跳过配置检查。启动后及每周期后台清理，先验证迁移/结构，再事务try advisory锁；多实例同批不互等，FOR UPDATE SKIP LOCKED选cutoff之前旧事件，时刻/ID索引排序，有界删除。
 
 每批statement_timeout4秒，删除数量与audit_retention_cleaned摘要同事务。单次默认最多10批/10000行，不因积压无限占服务；同实例防重入，跨实例每事务锁，新强审计不等待旧事件行。90天是可清理阈值，积压/故障会延迟淘汰，按量调节批次/周期。无pg_cron、Redis或新平台。
 
@@ -50,7 +50,7 @@ onClose停timer、禁止下一批、等待当前事务；API随后结束池。�
 
 API Pino自定义destination、Web Next console/error adapter仅输出时间/service/level/event和有限数值诊断、已知stage、代码、命令/结果。禁请求日志；不输出原URL、请求体/headers、错误message/stack或任意provider文本，保留httpStatus/providerCode/stage及故障事件。Web直接node入口避免npm包装，启动/请求错误安全结构化；原始Node warnings禁用，由安全监听记录。
 
-Docker json-file同时设max-size/max-file，默认RUNTIME_LOG_MAX_BYTES=10485760（16KiB–100MiB）与RUNTIME_LOG_MAX_FILES=10（1–30），不压缩便于预算核验；新API/Web/database各约100MiB，三长期服务约300MiB预算。约14天是目标，容量先到更早淘汰；驱动末条记录/元数据有小额边界，不宣称硬磁盘配额。应用日志名单限制单条大小，不让巨大原始错误载荷撑破预算。
+Docker json-file同时设max-size/max-file，默认RUNTIME_LOG_MAX_BYTES=10485760（16KiB–100MiB）与RUNTIME_LOG_MAX_FILES=10（1–30），不压缩便于预算核验；新API/Web/database各约100MiB，三长期服务约300MiB预算。容量参数同样仅未设置使用默认；应用/CLI入口拒绝空值及非法范围，Docker驱动可能在应用启动前拒绝空日志options（此时非零、stderr诊断，不伪造JSON应用结果）。约14天是目标，容量先到更早淘汰；驱动末条记录/元数据有小额边界，不宣称硬磁盘配额。应用日志名单限制单条大小，不让巨大原始错误载荷撑破预算。
 
 tools各有自身预算，--rm结束删除；并行/保留停用容器额外占量，非整个Docker宿主全局配额。原0004服务未重建，不声称已替换其旧日志配置，正式升级/重建才启用。
 

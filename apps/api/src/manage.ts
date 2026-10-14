@@ -1,4 +1,5 @@
 import {recordOperation} from './operational-audit.js';
+import {auditSettings} from './audit-settings.js';
 import {runtimePolicy,runtimeRecord} from '../../../shared/runtime-log.mjs';
 import {loginMethodCommand} from './login-method-cli.js';
 import { passwordCommand } from './password-cli.js';
@@ -83,6 +84,7 @@ async function main(): Promise<Record<string, unknown>> {
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
   currentCommand=command;
+  if(command==='start'||command==='config-check')auditSettings();
   if(['request-login-link','login-links','complete-login-link','reset-person'].includes(command)){
     const allowed=command==='request-login-link'?['--account','--method','--username']:command==='complete-login-link'?['--request','--credential-file']:command==='reset-person'?['--account','--credential-file']:['--account'];
     if([...options.keys()].some(key=>!allowed.includes(key))||flags.has('--overwrite'))throw new OperationError('登录方式管理参数无效。');
@@ -131,7 +133,7 @@ async function main(): Promise<Record<string, unknown>> {
 }
 
 try {
-  runtimePolicy();const result = await main();
+  try{runtimePolicy();}catch{throw new OperationError('运行日志容量配置无效。');}const result = await main();
   if(typeof result.command==='string')await recordOperation(result.command,'success');
   console.log(process.argv.includes('--json') ? JSON.stringify(result)
     : `完成：${result.command}${result.url ? `\n访问 ${result.url}` : ''}`);
