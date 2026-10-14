@@ -1,0 +1,1 @@
+export const sessionReasons = new Set(['login_required','organization_denied','agent_login_denied','session_revoked','all_sessions_revoked','account_disabled','authorization_changed','session_expired','session_idle']);

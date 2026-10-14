@@ -1,9 +1,10 @@
+import { revokeSessions } from './session-lifecycle.js';
 import { passwordLogin } from './password-accounts.js';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type pg from 'pg';
 import { AuthError, readAuthConfig, readSessionConfig, readRoles, type AuthConfig } from './auth-config.js';
 import { authorizeEndpoint, exchangeIdentity, type Transport } from './feishu.js';
-import { beginOAuth, consumeOAuth, digest, readSession, registerSession, requirePermission } from './auth-store.js';
+import { beginOAuth, consumeOAuth, readSession, registerSession, requirePermission } from './auth-store.js';
 export function requestCookie(request: FastifyRequest, name: string): string | undefined {
   const values = (request.headers.cookie ?? '').split(';').map(part => part.trim()).filter(part => part.startsWith(`${name}=`));
   if (values.length !== 1) return undefined;
@@ -34,7 +35,7 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
   server.get('/api/admin/access', async request => {
     const account = await readSession(pool, requestCookie(request, 'templux_session'), config, roles, true);
     requirePermission(account, 'accounts:manage');
-    return {ok:true,account};
+    return {ok:true,account,heartbeatSeconds:sessionSettings.heartbeatSeconds};
   });
   server.get('/api/auth/feishu/start', async (_request, reply) => {
     const settings = configured(); const flow = await beginOAuth(pool);
@@ -66,18 +67,24 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
       return reply.redirect(`/login?reason=${reason}`);
     }
   });
-  server.get('/api/auth/session', async request => ({ ok: true, account: await readSession(pool, requestCookie(request, 'templux_session'), config, roles) }));
+  server.get('/api/auth/session', async request => ({ ok: true, account: await readSession(pool, requestCookie(request, 'templux_session'), config, roles), heartbeatSeconds:sessionSettings.heartbeatSeconds }));
   server.get('/api/protected', async request => {
     const account = await readSession(pool, requestCookie(request, 'templux_session'), config, roles, true);
     requirePermission(account, 'application:read');
-    return { ok: true, account };
+    return { ok: true, account, heartbeatSeconds:sessionSettings.heartbeatSeconds };
   });
-  server.post('/api/auth/logout', async (request, reply) => {
-    const settings = sessionSettings;
-    if (request.headers.origin !== settings.publicOrigin) throw new AuthError('origin_denied', 403);
-    const token = requestCookie(request, 'templux_session');
-    if (token && /^[A-Za-z0-9_-]{43}$/.test(token)) await pool.query("UPDATE templux.auth_sessions SET revoked_reason='logout' WHERE token_hash=$1", [digest(token)]);
-    reply.header('Set-Cookie', cookie('templux_session', '', 0, settings.secure));
-    return { ok: true };
+  server.get('/api/auth/heartbeat', async request => ({ ok:true,
+    account:await readSession(pool, requestCookie(request, 'templux_session'), config, roles), heartbeatSeconds:sessionSettings.heartbeatSeconds }));
+  server.post('/api/auth/activity', async request => {
+    if (request.headers.origin !== sessionSettings.publicOrigin) throw new AuthError('origin_denied',403);
+    return {ok:true,account:await readSession(pool,requestCookie(request,'templux_session'),config,roles,true)};
   });
+  for (const [path, all] of [['/api/auth/logout', false], ['/api/auth/logout-all', true]] as const) {
+    server.post(path, async (request, reply) => {
+      if (request.headers.origin !== sessionSettings.publicOrigin) throw new AuthError('origin_denied',403);
+      await revokeSessions(pool,requestCookie(request,'templux_session'),config,roles,all);
+      reply.header('Set-Cookie',cookie('templux_session','',0,sessionSettings.secure));
+      return {ok:true};
+    });
+  }
 }

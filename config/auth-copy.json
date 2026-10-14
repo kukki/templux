@@ -27,7 +27,7 @@
   "provider_unavailable": "飞书认证服务暂时不可用，请稍后重试。",
   "authentication_unconfigured": "飞书登录尚未配置，请联系部署管理员。",
   "account_disabled": "账号已停用，请联系管理员。",
-  "authorization_changed": "授权已变更，请重新登录。",
+  "authorization_changed": "授权或访问范围已变更，请重新登录。",
   "session_expired": "会话已到期，请重新登录。",
   "session_idle": "会话因闲置到期，请重新登录。",
   "session_revoked": "会话已撤销，请重新登录。",
@@ -43,5 +43,10 @@
   "adminAction": "验证管理员访问",
   "adminTitle": "管理员访问已验证",
   "accountKind": "身份类型",
-  "accountOwner": "责任人账号ID"
+  "accountOwner": "责任人账号ID",
+  "logoutAll": "退出全部会话",
+  "all_sessions_revoked": "全部会话已退出，请重新登录。",
+  "logged_out": "已退出当前会话。",
+  "sessionNetwork": "连接暂不可用，登录凭据不会因此被撤销。恢复后可重试。",
+  "retry": "重试"
 }

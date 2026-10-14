@@ -11,6 +11,7 @@ x-auth-environment: &auth-environment
   AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
   AGENT_IDLE_TIMEOUT_SECONDS: ${AGENT_IDLE_TIMEOUT_SECONDS:-600}
   AGENT_SESSION_MAX_SECONDS: ${AGENT_SESSION_MAX_SECONDS:-43200}
+  HEARTBEAT_INTERVAL_SECONDS: ${HEARTBEAT_INTERVAL_SECONDS:-30}
   PERSON_IDLE_TIMEOUT_SECONDS: ${PERSON_IDLE_TIMEOUT_SECONDS:-600}
   PERSON_SESSION_MAX_SECONDS: ${PERSON_SESSION_MAX_SECONDS:-43200}
 
@@ -159,9 +160,10 @@ services:
     image: ${TEMPLUX_PROJECT_NAME:-templux}-api
     environment:
       DATABASE_URL: postgresql://templux_test:isolated-test-only@auth-database:5432/templux_auth_test
-      APP_PUBLIC_URL: http://localhost:31040
+      APP_PUBLIC_URL: ${TEST_AUTH_PUBLIC_URL:-http://localhost:31040}
       DEPLOYMENT_ENV: ${TEST_DEPLOYMENT_ENV:-DEV}
       AGENT_LOGIN_ENABLED: ${TEST_AGENT_LOGIN_ENABLED:-}
+      HEARTBEAT_INTERVAL_SECONDS: ${TEST_HEARTBEAT_INTERVAL_SECONDS:-30}
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
       - ./config:/opt/templux/config:ro
