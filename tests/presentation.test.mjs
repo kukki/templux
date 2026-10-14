@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync, rmSync, chmodSync, statSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync, chmodSync, statSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import test from 'node:test';
 
 function installation(t) {
@@ -14,6 +14,28 @@ function installation(t) {
   });
   return { path, run };
 }
+
+async function tty(path, args, answers = []) {
+  return new Promise(resolve => {
+    const child = spawn('script', ['-q', '-e', '-c', `node apps/api/dist/manage.js ${args}`, '/dev/null'], {
+      env: { ...process.env, TEMPLUX_CONFIG_PATH: path }, stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    let output = '';
+    let timedOut = false;
+    let answerIndex = 0;
+    child.stdout.on('data', chunk => {
+      output += chunk;
+      const step = answers[answerIndex];
+      if (step && output.includes(step[0])) { answerIndex++; child.stdin.write(`${step[1]}\n`); }
+    });
+    child.stderr.on('data', chunk => { output += chunk; });
+    const timeout = setTimeout(() => { timedOut = true; child.kill('SIGTERM'); }, 3000);
+    child.on('error', error => { clearTimeout(timeout); resolve({ error, output }); });
+    child.on('close', status => { clearTimeout(timeout); resolve({ status, timedOut, output }); });
+    // With no supplied answers, keep stdin open to detect unwanted prompts.
+  });
+}
+
 
 test('initialization creates a project without any running web service', t => {
   const { path, run } = installation(t);
@@ -106,11 +128,83 @@ test('overwriting preserves the existing configuration owner and file permission
   assert.equal(run('init', '--name', '甲', '--confirm').status, 0);
   chmodSync(path, 0o660);
   const before = statSync(path);
-  assert.equal(run('init', '--name', '乙', '--overwrite', '--confirm').status, 0);
+  const result = spawnSync('sh', ['-c', 'umask 077; exec node apps/api/dist/manage.js init --name ExistingMask --overwrite --confirm --non-interactive --json'], {
+    encoding: 'utf8', timeout: 3000, env: { ...process.env, TEMPLUX_CONFIG_PATH: path },
+  });
+  assert.equal(result.status, 0, result.stderr);
   const after = statSync(path);
   assert.equal(after.mode & 0o777, 0o660);
   assert.equal(after.uid, before.uid);
   assert.equal(after.gid, before.gid);
+});
+
+test('a complete init in a real TTY finishes without optional input and protects existing files', async t => {
+  const { path } = installation(t);
+  const first = await tty(path, 'init --name TtyComplete --confirm');
+  assert.equal(first.timedOut, false, first.output);
+  assert.equal(first.status, 0, first.output);
+  assert.equal(JSON.parse(readFileSync(path)).brand.wordmark, 'TtyComplete');
+  const before = readFileSync(path, 'utf8');
+  const denied = await tty(path, 'init --name TtyReplacement --confirm');
+  assert.equal(denied.timedOut, false, denied.output);
+  assert.equal(denied.status, 1, denied.output);
+  assert.equal(readFileSync(path, 'utf8'), before);
+  const updated = await tty(path, 'init --name TtyReplacement --overwrite --confirm');
+  assert.equal(updated.timedOut, false, updated.output);
+  assert.equal(updated.status, 0, updated.output);
+  const config = JSON.parse(readFileSync(path));
+  assert.equal(config.project.name, 'TtyReplacement');
+  assert.equal(config.brand.wordmark, 'TtyComplete');
+});
+
+test('menu and explicit interactive init still collect optional fields and confirmation', async t => {
+  for (const args of ['', 'init --interactive']) {
+    const { path } = installation(t);
+    const answers = [
+      ...(args ? [] : [['请选择', '7']]),
+      ['项目名称', 'InteractiveProject'], ['品牌文字', 'InteractiveBrand'],
+      ['配色', 'dark-yellow'], ['输入 yes', 'yes'],
+    ];
+    const result = await tty(path, args, answers);
+    assert.equal(result.timedOut, false, result.output);
+    assert.equal(result.status, 0, result.output);
+    const config = JSON.parse(readFileSync(path));
+    assert.equal(config.project.name, 'InteractiveProject');
+    assert.equal(config.brand.wordmark, 'InteractiveBrand');
+    assert.equal(config.theme.colorScheme, 'dark');
+  }
+});
+
+test('new configuration under umask 077 is readable by a different service UID', t => {
+  const { path } = installation(t);
+  chmodSync(dirname(path), 0o755);
+  const env = { ...process.env, TEMPLUX_CONFIG_PATH: path, TEMPLUX_HOST_UID: '1001', TEMPLUX_HOST_GID: '1001' };
+  const result = spawnSync('sh', ['-c', 'umask 077; exec node apps/api/dist/manage.js init --name RestrictedMask --confirm --non-interactive --json'], {
+    encoding: 'utf8', timeout: 3000, env,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const read = spawnSync('setpriv', ['--reuid=1000', '--regid=1000', '--clear-groups', process.execPath,
+    '--input-type=module', '-e', 'import {loadPresentation} from "./shared/presentation.mjs"; console.log(loadPresentation().project.name);'], {
+    encoding: 'utf8', timeout: 3000, env,
+  });
+  assert.equal(read.status, 0, read.stderr);
+  assert.equal(read.stdout.trim(), 'RestrictedMask');
+  const file = statSync(path);
+  assert.equal(file.mode & 0o777, 0o644);
+  assert.equal(file.uid, 1001);
+  assert.equal(file.gid, 1001);
+  assert.deepEqual(readdirSync(dirname(path)), ['presentation.json']);
+});
+
+test('a metadata failure before publication leaves no new config or temporary artifact', t => {
+  const { path } = installation(t);
+  const result = spawnSync(process.execPath, ['apps/api/dist/manage.js', 'init', '--name', 'FailedOwner', '--confirm', '--non-interactive', '--json'], {
+    encoding: 'utf8', timeout: 3000,
+    env: { ...process.env, TEMPLUX_CONFIG_PATH: path, TEMPLUX_HOST_UID: 'invalid-uid', TEMPLUX_HOST_GID: '1001' },
+  });
+  assert.equal(result.status, 1);
+  assert.equal(JSON.parse(result.stdout).ok, false);
+  assert.deepEqual(readdirSync(dirname(path)), []);
 });
 
 test('management time applies the project zone and precision without mutating the stored instant', async () => {

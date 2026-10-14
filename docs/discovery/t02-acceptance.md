@@ -60,3 +60,36 @@ TL补充要求后，另执行 `TEMPLUX_HTTP_PORT=31020 TEMPLUX_API_PORT=31820 ./
 - codebase-memory 初始及最终已索引，使用图定位管理入口/状态页并追踪管理调用。相关实现及测试文件覆盖检查无已记录问题；TS配置曾标记not_tracked并直接读取。覆盖为best-effort信号，不宣称图证明全仓库完整。
 - Next.js请求期载入通过Context7官方 `/vercel/next.js` 的 connection、self-hosting 文档核对。
 - 已确认覆盖的并发更新采用最后成功写入，没有三方合并；运维需串行初始化。固定/吸附页头变体和实际导航/元素交互不属于T02实现范围。
+
+## 2026-10-15 初审 S1/F1 修复验收
+
+修复基线 `d4cccf4202fdc697f56ea0be06458c3cd60f0cad`。独立初审全文纳入 `docs/discovery/t02-review.md`，保留审查者原结论；本节记录开发复现与修复，独立复核待 TL 安排。
+
+先通过 Receiving Code Review 与 Diagnosing Bugs 核验反馈：
+
+- S1 在真实PTY执行原管理入口 `docker compose run --rm --no-deps -e TEMPLUX_CONFIG_PATH=/tmp/t02-s1-reproduce.json management init --name ReviewComplete --confirm`，停在可选品牌提示；Ctrl-C结束一次性容器。
+- 将条件固化为回归，在旧checks镜像挂载当前测试执行 `docker compose run --rm --no-deps -v "$PWD/tests:/opt/templux/tests:ro" checks node --test --test-name-pattern='real TTY|umask 077' tests/presentation.test.mjs`：两项均失败，退出1。真实PTY保持stdin打开且不发送答案，3秒超时；F1初始化成功后，uid1000/gid1000调用实际 `loadPresentation()` 读取失败。复现日志 `test-results/t02-review-regression-red.log`。
+
+定位后的最小代码修复：
+
+- S1：管理入口只在无参数菜单或显式 `--interactive` 时开启初始化字段补齐；显式完整命令在TTY也直接应用可选默认/保留语义。既有确认、覆盖与TTY前提校验继续生效。
+- F1：暂存文件在发布前显式chmod，新文件0644，已有文件沿用原模式；再保留/设置属主组。元数据失败仍由原catch/finally处理，文件发布前失败会清理暂存文件。
+
+修复后的实际验证：
+
+| 命令或回归 | 结果 |
+| --- | --- |
+| `docker compose build management checks` | 只构建管理/检查所需后端目标；成功，未构建Web或重跑隔离安装。最终checks测试更新另用 `docker compose build checks`。 |
+| `docker compose run --rm --no-deps checks npm test` | 最终18/18通过，0失败、0跳过，退出0。 |
+| `docker compose run --rm --no-deps checks npm run typecheck` | API/Web均通过，退出0。 |
+| 原命令真实PTY再验 | `docker compose run --rm --no-deps -e TEMPLUX_CONFIG_PATH=/tmp/t02-s1-fixed.json management init --name ReviewComplete --confirm`，无需输入，输出“完成：init”，退出0。 |
+
+新增/强化回归覆盖：
+
+- util-linux `script` 分配真实PTY，保持输入打开；新文件完整命令无可选输入直接成功，已有文件缺overwrite立即失败且原内容相同，显式overwrite成功且保留未指定品牌。
+- 菜单7与显式interactive均由真实PTY按提示输入，实际保存名称、品牌、配色并确认。
+- `umask 077`、HOST_UID/GID1001创建的新文件，`setpriv`以服务uid/gid1000实际读取成功；断言模式0644、属主/组1001，目录仅有最终配置文件。
+- 已有文件0660在umask077覆盖后仍为0660，属主组保留。
+- 用无效宿主UID触发暂存文件创建后的元数据失败，退出1且目录无最终文件或暂存残留；既有无效导入/覆盖保护和真实默认API/Web测试继续通过。
+
+最终日志：`test-results/t02-review-build.log`、`test-results/t02-review-tests.log`、`test-results/t02-review-typecheck.log`。这些回归只使用一次性容器/tmp，没有修改部署配置、重启原应用或重复浏览器截图。`script`和`setpriv`由已锁定的Linux checks镜像提供；本次权限结论限于该Linux容器，不扩展为未执行的Linux/WSL宿主矩阵。图定位与相关文件覆盖检查无已记录缺口（best-effort信号）。

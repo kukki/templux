@@ -77,7 +77,8 @@ async function main(): Promise<Record<string, unknown>> {
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
   if (command !== 'init' && (options.size > 0 || flags.has('--overwrite'))) throw new OperationError('品牌参数与 --overwrite 只适用于 init。');
-  if (command === 'init') return initialize(options, flags, !nonInteractive && !json && !!stdin.isTTY && !!stderr.isTTY);
+  if (command === 'init') return initialize(options, flags,
+    (interactive || positional.length === 0) && !nonInteractive && !json && !!stdin.isTTY && !!stderr.isTTY);
   if (command === 'config-check') { loadPresentation(); return { ok: true, command }; }
   if (command === 'stop' && !args.includes('--confirm')) {
     if (nonInteractive || json || !stdin.isTTY || !stderr.isTTY) throw new OperationError('stop 需要显式 --confirm。');

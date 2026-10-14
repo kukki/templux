@@ -41,7 +41,7 @@ export async function initialize(options: Map<string, string>, flags: Set<string
     try {
       const owner = exists ? statSync(path) : undefined;
       writeFileSync(temporary, `${JSON.stringify(candidate, null, 2)}\n`, { flag: 'wx', mode: owner ? owner.mode & 0o777 : 0o644 });
-      if (owner) chmodSync(temporary, owner.mode & 0o777);
+      chmodSync(temporary, owner ? owner.mode & 0o777 : 0o644);
       if (process.getuid?.() === 0) chownSync(temporary,
         owner?.uid ?? Number(process.env.TEMPLUX_HOST_UID ?? 0),
         owner?.gid ?? Number(process.env.TEMPLUX_HOST_GID ?? 0));
