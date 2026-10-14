@@ -51,3 +51,41 @@
 Standards：1项P2（S1）；Spec：1项P2（F1）。两轴均建议修复后再验收；无P0/P1高严重性故障。现有14项测试与类型检查通过不覆盖这两个触发条件。
 
 本轮只审查T02范围；未执行完整Linux/WSL2宿主矩阵、多进程并发故障注入、ACL/xattr、持久化掉电恢复或所有视口浏览器重跑。并发已确认覆盖采用最后成功写入是合同已说明的边界；未将其当作缺失三方合并。新文件umask问题的复现为Linux容器内受控CLI调用，不扩展为所有常规部署必然失败。
+
+## 附录：2026-10-15 S1/F1 修复独立定向复核
+
+复核范围：`d4cccf4202fdc697f56ea0be06458c3cd60f0cad...97fb0b870ebd07a05102487a917d5c227c18ca01`。本附录补充最新结论，上述初审历史保持原样。按TL指示继续由同一独立审查者分别检查Standards/Spec，未创建额外成员。
+
+### Standards：S1关闭
+
+`apps/api/src/manage.ts:80`现在只在菜单入口或显式 `--interactive` 时进入初始化字段补齐；必填名称、确认、已有文件覆盖保护仍由原初始化逻辑校验。呈现合同同步说明完整TTY命令直接执行以及可选值的默认/保留语义，符合ADR0025及CLI规范。
+
+本轮再次在真实PTY执行原触发命令：
+
+```sh
+docker compose run --rm --no-deps \
+  -e TEMPLUX_CONFIG_PATH=/tmp/t02-review-complete-fixed.json \
+  management init --name ReviewComplete --confirm
+```
+
+未发送任何品牌/主题输入，直接输出“完成：init”，退出0。独立重跑的真实TTY回归还验证：已有文件缺 `--overwrite` 时立即退出1且内容不变；显式覆盖退出0且未指定品牌保留；菜单7和显式interactive仍按实际提示收集名称/品牌/配色并确认。
+
+### Spec：F1关闭
+
+`apps/api/src/initialize.ts:44`在发布前对新文件也显式chmod0644，已有文件继续采用原模式；之后设置属主/组，元数据处理失败仍进入catch/finally清理且不会发布。呈现合同同步说明新文件权限不受进程umask截断。
+
+本轮复用checks镜像，在一次性容器临时目录按原条件独立执行：`umask 077`，新文件路径、HOST_UID/GID1001，实际调用 `manage.js init --name New --confirm --non-interactive --json`；再用子进程uid/gid1000调用共享 `loadPresentation()`。结果：init退出0、mode=644、uid=1001、gid=1001，服务读取退出0且名称为New，目录只有最终文件、暂存残留为0，临时目录已清理。该检查使用实际不同UID，不仅检查模式。
+
+本轮重跑回归还验证已有0660在umask077覆盖后模式和属主组不变；无效宿主UID引发发布前元数据失败时退出1、目录无最终文件或临时残留。
+
+### 验证、结论与局限
+
+- 独立执行 `docker compose run --rm --no-deps checks npm test`：18/18通过，0失败、0跳过，退出0，包含上述TTY及权限回归和真实默认安装API/Web读取。
+- 独立执行 `docker compose run --rm --no-deps checks npm run typecheck`：API/Web均通过，退出0。
+- `git diff --check d4cccf4...97fb0b8`退出0。已核对开发的旧镜像回归失败日志 `test-results/t02-review-regression-red.log`，两项原条件确实分别因可选输入挂起和服务读取失败而失败；修复后通过。构建/测试/类型检查日志与新增验收说明一致。
+- 复核了全部6个变更文件。初审记录原样纳入提交，合同修订是两项已要求语义的澄清；实际代码修复仅管理入口条件和chmod，没有扩大功能范围。
+- codebase-memory当前generation为 `2026-10-14T16:27:04Z`，读取管理及初始化符号原文；6个本轮证据文件和相关scope均无已记录覆盖缺口，仍为best-effort信号。此次未涉及框架行为变化，沿用初审Context7文档核对，不重复查询。
+
+**最新Standards：S1已关闭，无新增发现；最新Spec：F1已关闭，无新增发现。结合初审其余范围检查及本次实际复核，T02可按#3范围验收，现无审查阻塞项。** 此结论只针对T02，不代表完整首版完成；工单关闭由TL决定。
+
+复用更新镜像，没有重建Web、重跑隔离安装或截图，也没有更改部署配置、重启原服务。此前日志/截图证据及平台局限仍适用；本轮权限实测限于Linux容器，未执行完整Linux/WSL2宿主矩阵、ACL/xattr、多进程并发或掉电恢复。审查阶段只追加本文件，并仅本地提交审查记录。
