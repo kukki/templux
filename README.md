@@ -2,7 +2,7 @@
 
 供新项目复用、也可独立启动的通用模板项目。基于 Supplieroom、Skoope、Catchouse 提取共通能力，业务与数据由各项目保有。
 
-首版规格与29项实施任务已发布。当前已实现 T01–T10：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存及受保护控件示例入口。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
+首版规格与29项实施任务已发布。当前已实现 T01–T11：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存、受保护控件示例入口及统一搜索/只读列表。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
 
 ## 启动
 
@@ -120,3 +120,10 @@ docker compose up -d --wait database
 DEV/UAT默认从账号页进入 /examples，PROD默认关闭；COMPONENT_EXAMPLES_ENABLED=auto/true/false可配置，空值/非法开关及部署环境明确拒绝。只有正常登录、有application:read角色且符合Agent环境策略的账号可访问；示例不会授予管理权限。
 
 三条合成数据可在页面内试改和重置，刷新恢复，不保存正式数据、不新增业务API或表。当前展示项目元素默认值与最小内存体验，完整控件演示随T11–T20交付。新项目可先设false，再删除apps/web/app/examples与config/examples-copy.json并重建Web；真实认证、管理、审计不依赖示例模块。具体默认/必填/可选扩展及移除合同见 [示例实现合同](docs/specs/component-examples-implementation.md)，容器/配置矩阵/物理移除/浏览器证据见 [T10验收](docs/discovery/t10-acceptance.md)。
+
+
+### 统一搜索与只读列表（T11）
+
+/examples新增名称/编号搜索及五列只读合成列表。搜索字段、读取/匹配实现由采用项目显式提供，默认整段trim、忽略大小写、任一指定字段包含；400ms停顿、清空/Enter及中文输入按合同触发。加载、读取失败、无资格与成功空结果分开，空结果保留表头和搜索；窄屏只在表容器横滚。异步旧结果在新输入意图产生时失效，不等新请求发出。
+
+通用组件位于components/elements，不依赖examples；fields/matches/load及列/稳定ID必填，无默认全字段搜索或业务API。呈现配置elements.search可完整覆盖delayMs和showButton，旧文件未写分支补400/false；1–1000ms、按钮默认隐藏，已有值重启加载。详见 [搜索与只读列表合同](docs/specs/search-and-readonly-list.md) 和 [T11验收](docs/discovery/t11-acceptance.md)。筛选、完整分页排序及编辑按后续票交付。

@@ -1,0 +1,3 @@
+export function normalizeSearch(value){return value.trim().toLowerCase();}
+export function validateSearchFields(fields){if(!Array.isArray(fields)||!fields.length||fields.some(field=>!field||typeof field.key!=='string'||!field.key.trim()||typeof field.label!=='string'||!field.label.trim()||typeof field.read!=='function')||new Set(fields.map(f=>f.key)).size!==fields.length)throw new Error('搜索必须提供唯一字段、名称与读取实现。');}
+export function containsFields(row,term,fields){validateSearchFields(fields);const query=normalizeSearch(term);return !query||fields.some(field=>{const value=field.read(row);return (typeof value==='string'||typeof value==='number')&&String(value).toLowerCase().includes(query);});}

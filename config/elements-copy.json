@@ -1,0 +1,16 @@
+{
+  "search": "搜索",
+  "clear": "清空搜索",
+  "scroll": "只读列表，全部列可横向滚动",
+  "loadingTitle": "正在读取",
+  "loadingBody": "请稍候，搜索条件已应用。",
+  "errorTitle": "读取失败",
+  "errorBody": "请重试；现有搜索条件已保留。",
+  "forbiddenTitle": "无法查看",
+  "forbiddenBody": "当前数据不可访问，请联系管理员。",
+  "emptyTitle": "没有匹配记录",
+  "emptyBody": "请调整搜索条件后再试。",
+  "retry": "重试读取",
+  "waitingTitle": "等待输入完成",
+  "waitingBody": "停止输入后自动读取，或按回车应用。"
+}

@@ -1,0 +1,12 @@
+'use client';
+import {useCallback,useState} from 'react';import type {Presentation} from '../../../../shared/presentation.mjs';import {containsFields,type SearchField} from '../../../../shared/search.mjs';import type {ListResult,SearchRequest} from '../../../../shared/latest-query.mjs';import SearchList from '../components/elements/search-list';import type {ReadonlyColumn} from '../components/elements/readonly-table';import {demoRows,type DemoRow} from './search-data';import copy from '../../../../config/examples-copy.json';
+const fields:readonly SearchField<DemoRow>[]=[{key:'name',label:copy.searchName,read:row=>row.name},{key:'code',label:copy.searchCode,read:row=>row.code}];
+const columns:readonly ReadonlyColumn<DemoRow>[]=[{key:'name',label:copy.searchName,render:row=>row.name},{key:'code',label:copy.searchCode,render:row=>row.code},{key:'category',label:copy.category,render:row=>row.category},{key:'description',label:copy.description,render:row=>row.description},{key:'reference',label:copy.reference,render:row=>row.reference}];
+const key=(row:DemoRow)=>row.id;
+export default function SearchDemo({settings}:{settings:Presentation['elements']['search']}){
+ const [mode,setMode]=useState('normal'),[showButton,setShowButton]=useState(settings.showButton);
+ const load=useCallback(async ({term}:SearchRequest):Promise<ListResult<DemoRow>>=>{const delay=mode==='slow'?1600:mode==='race'&&term.startsWith('alpha')?1600:80;await new Promise(resolve=>setTimeout(resolve,delay));if(mode==='error')return {status:'error'};if(mode==='forbidden')return {status:'forbidden'};return {status:'success',rows:demoRows()};},[mode]);
+ return <section className="example-panel example-search-panel"><h2>{copy.searchTitle}</h2><p className="scope-note">{copy.searchNote}</p><div className="example-scenarios"><label>{copy.scenario}<select value={mode} onChange={event=>setMode(event.target.value)}><option value="normal">{copy.normal}</option><option value="slow">{copy.slow}</option><option value="race">{copy.race}</option><option value="error">{copy.readError}</option><option value="forbidden">{copy.forbidden}</option></select></label><label className="example-button-option"><input type="checkbox" checked={showButton} onChange={event=>setShowButton(event.target.checked)}/>{copy.showSearchButton}</label></div>
+ <SearchList fields={fields} matches={containsFields} load={load} columns={columns} rowKey={key} caption={copy.listCaption} hint={copy.searchHint} settings={{...settings,showButton}}/>
+ </section>;
+}
