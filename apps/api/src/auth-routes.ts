@@ -1,6 +1,7 @@
+import { passwordLogin } from './password-accounts.js';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type pg from 'pg';
-import { AuthError, readAuthConfig, readRoles, type AuthConfig } from './auth-config.js';
+import { AuthError, readAuthConfig, readSessionConfig, readRoles, type AuthConfig } from './auth-config.js';
 import { authorizeEndpoint, exchangeIdentity, type Transport } from './feishu.js';
 import { beginOAuth, consumeOAuth, digest, readSession, registerSession, requirePermission } from './auth-store.js';
 export function requestCookie(request: FastifyRequest, name: string): string | undefined {
@@ -12,7 +13,7 @@ function cookie(name: string, value: string, seconds: number, secure: boolean): 
   return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
 }
 export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, config: AuthConfig | null = readAuthConfig(), transport: Transport = fetch) {
-  const roles = readRoles();
+  const roles = readRoles(); const sessionSettings = { ...readSessionConfig(), ...(config ? {publicOrigin:config.publicOrigin,secure:config.secure} : {}) };
   function configured(): AuthConfig { if (!config) throw new AuthError('authentication_unconfigured', 503); return config; }
   server.setErrorHandler((error, _request, reply) => {
     const reason = error instanceof AuthError ? error.reason : 'service_unavailable';
@@ -21,6 +22,20 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
   });
   server.addHook('onSend', async (_request, reply, payload) => { reply.header('Cache-Control', 'no-store'); reply.header('Referrer-Policy', 'no-referrer'); return payload; });
   server.get('/api/auth/config', async () => ({ enabled: config !== null }));
+  server.post('/api/auth/password', { bodyLimit: 4096 }, async (request, reply) => {
+    if (request.headers.origin !== sessionSettings.publicOrigin) throw new AuthError('origin_denied', 403);
+    const body = request.body;
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k => !['username','password'].includes(k))) throw new AuthError('invalid_credentials');
+    const input = body as {username?: unknown; password?: unknown};
+    const result = await passwordLogin(pool, input.username, input.password, () => server.log.error({event:'login_audit_failed'}, '登录成功审计未保存。'));
+    reply.header('Set-Cookie', cookie('templux_session', result.token, result.maximumSeconds, sessionSettings.secure));
+    return {ok:true};
+  });
+  server.get('/api/admin/access', async request => {
+    const account = await readSession(pool, requestCookie(request, 'templux_session'), config, roles, true);
+    requirePermission(account, 'accounts:manage');
+    return {ok:true,account};
+  });
   server.get('/api/auth/feishu/start', async (_request, reply) => {
     const settings = configured(); const flow = await beginOAuth(pool);
     const url = new URL(authorizeEndpoint);
@@ -51,14 +66,14 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
       return reply.redirect(`/login?reason=${reason}`);
     }
   });
-  server.get('/api/auth/session', async request => ({ ok: true, account: await readSession(pool, requestCookie(request, 'templux_session'), configured(), roles) }));
+  server.get('/api/auth/session', async request => ({ ok: true, account: await readSession(pool, requestCookie(request, 'templux_session'), config, roles) }));
   server.get('/api/protected', async request => {
-    const account = await readSession(pool, requestCookie(request, 'templux_session'), configured(), roles, true);
+    const account = await readSession(pool, requestCookie(request, 'templux_session'), config, roles, true);
     requirePermission(account, 'application:read');
     return { ok: true, account };
   });
   server.post('/api/auth/logout', async (request, reply) => {
-    const settings = configured();
+    const settings = sessionSettings;
     if (request.headers.origin !== settings.publicOrigin) throw new AuthError('origin_denied', 403);
     const token = requestCookie(request, 'templux_session');
     if (token && /^[A-Za-z0-9_-]{43}$/.test(token)) await pool.query("UPDATE templux.auth_sessions SET revoked_reason='logout' WHERE token_hash=$1", [digest(token)]);

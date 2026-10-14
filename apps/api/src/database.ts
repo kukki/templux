@@ -65,6 +65,10 @@ export async function schemaVersion(pool: pg.Pool | pg.PoolClient, expected: Mig
     const check = await pool.query<{ complete: boolean }>('SELECT bool_and(to_regclass(name) IS NOT NULL) AS complete FROM unnest($1::text[]) AS name', [tables]);
     if (check.rows[0]?.complete !== true) throw new OperationError('认证数据库结构缺失，部署已中止。');
   }
+  if (expected.some(item => item.version === '0004')) {
+    const check = await pool.query("SELECT to_regclass('templux.password_credentials') IS NOT NULL AS complete");
+    if (!check.rows[0]?.complete) throw new OperationError('密码数据库结构缺失，部署已中止。');
+  }
   return result.rows.at(-1)!.version;
 }
 

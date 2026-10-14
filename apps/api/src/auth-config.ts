@@ -2,9 +2,30 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { OperationError } from './database.js';
 
+export type SessionConfig = { publicOrigin: string; secure: boolean; idleSeconds: number; maximumSeconds: number; agentIdleSeconds: number; agentMaximumSeconds: number; agentEnabled: boolean };
 export type AuthConfig = { appId: string; appSecret: string; tenantKey: string; redirectUri: string; publicOrigin: string; secure: boolean; idleSeconds: number; maximumSeconds: number };
 export class AuthError extends Error {
   constructor(public readonly reason: string, public readonly status = 401, public readonly diagnosis?: { stage: string; httpStatus: number; providerCode?: number | string }) { super(reason); }
+}
+export function readSessionConfig(): SessionConfig {
+  try {
+    const origin = new URL(process.env.APP_PUBLIC_URL ?? 'http://localhost:31000');
+    if (origin.username || origin.password || origin.pathname !== '/' || origin.search || origin.hash || !['http:', 'https:'].includes(origin.protocol)
+      || (origin.protocol === 'http:' && !['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname))) throw new Error();
+    const environment = process.env.DEPLOYMENT_ENV ?? 'PROD';
+    if (!['DEV', 'UAT', 'PROD'].includes(environment)) throw new Error();
+    const flag = process.env.AGENT_LOGIN_ENABLED;
+    if (flag !== undefined && flag !== '' && !['true', 'false'].includes(flag)) throw new Error();
+    const seconds = (key: string, fallback: number) => {
+      const number = Number(process.env[key] ?? fallback);
+      if (!Number.isInteger(number) || number < 60 || number > 604800) throw new Error();
+      return number;
+    };
+    return { publicOrigin: origin.origin, secure: origin.protocol === 'https:',
+      idleSeconds: seconds('PERSON_IDLE_TIMEOUT_SECONDS', 600), maximumSeconds: seconds('PERSON_SESSION_MAX_SECONDS', 43200),
+      agentIdleSeconds: seconds('AGENT_IDLE_TIMEOUT_SECONDS', 600), agentMaximumSeconds: seconds('AGENT_SESSION_MAX_SECONDS', 43200),
+      agentEnabled: flag ? flag === 'true' : environment !== 'PROD' };
+  } catch { throw new OperationError('公开地址、部署环境或会话配置无效。'); }
 }
 export type AuthRealm = Pick<AuthConfig, 'appId' | 'tenantKey'>;
 export function readAuthRealm(): AuthRealm | null {

@@ -1,6 +1,6 @@
 {
   "loginTitle": "登录项目",
-  "loginIntro": "使用部署允许组织的飞书账号登录。首次登录需要管理员通过容器命令授权。",
+  "loginIntro": "使用组织飞书或管理员授权的密码账号登录；新账号须获得角色后才能访问业务。",
   "loginAction": "使用飞书登录",
   "loginUnavailable": "飞书登录尚未配置，请联系部署管理员。",
   "accountTitle": "账号状态",
@@ -14,7 +14,7 @@
   "protectedAction": "进入受保护页面",
   "protectedTitle": "受保护访问已验证",
   "protectedIntro": "当前请求已通过服务端会话、账号状态、授权版本和权限检查。这里没有示例业务数据。",
-  "relogin": "重新通过飞书登录",
+  "relogin": "重新登录",
   "logout": "退出当前会话",
   "logoutFailed": "退出未完成，请重试。",
   "home": "返回服务状态",
@@ -32,5 +32,16 @@
   "session_idle": "会话因闲置到期，请重新登录。",
   "session_revoked": "会话已撤销，请重新登录。",
   "permission_denied": "当前账号没有访问权限。",
-  "service_unavailable": "服务暂时不可用，请稍后重试。"
+  "service_unavailable": "服务暂时不可用，请稍后重试。",
+  "passwordTitle": "密码登录",
+  "passwordUsername": "用户名",
+  "passwordPassword": "密码",
+  "passwordSubmit": "使用密码登录",
+  "passwordBusy": "正在验证…",
+  "invalid_credentials": "用户名或密码无效。",
+  "agent_login_denied": "当前环境或责任人状态不允许此Agent登录。",
+  "adminAction": "验证管理员访问",
+  "adminTitle": "管理员访问已验证",
+  "accountKind": "身份类型",
+  "accountOwner": "责任人账号ID"
 }

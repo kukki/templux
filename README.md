@@ -80,3 +80,9 @@ docker compose up -d --wait database
 - [领域术语](CONTEXT.md) / [架构决策](docs/adr/) / [Issue tracker](docs/agents/issue-tracker.md)
 
 共享改进经审查反哺模板，项目升级由维护者确认应用；不自动同步业务、合并或部署。
+
+### 受控密码账号与 Agent（T04）
+
+宿主运维可用菜单11/12创建人员或关联责任人的Agent，菜单13重置Agent密码。完整参数与受限凭据文件交付见 [密码认证合同](docs/specs/password-authentication.md)。创建默认零角色，须另用 `authorize` 明确授权；经正常 `/login` 密码页验证，普通用户和明确管理员使用同一后端权限检查。
+
+`DEPLOYMENT_ENV` 缺省 `PROD`，Agent默认不能登录；DEV/UAT默认允许，`AGENT_LOGIN_ENABLED=true/false`显式覆盖，开关不授予角色。密码及Agent配置独立于飞书密钥，既有组织飞书验证继续有效。人员关联/重置与持久化失败限制分别在T08/T07交付，本票不声称完成这些功能。T03真实组织个人授权仍由单独验收跟踪。

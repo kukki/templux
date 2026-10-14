@@ -1,3 +1,4 @@
+import PasswordLogin from '../components/password-login';
 import { connection } from 'next/server';
 import { presentation } from '../../../../shared/presentation.mjs';
 import ProjectShell from '../components/project-shell';
@@ -10,6 +11,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{reason
   return <ProjectShell config={config}><h1>{copy.loginTitle}</h1><p className="intro">{copy.loginIntro}</p>
     {message&&<p className="auth-message" role="alert">{message}</p>}
     {enabled?<a className="action" href="/api/auth/feishu/start">{copy.loginAction}</a>:<p className="auth-message">{copy.loginUnavailable}</p>}
+    <section className="status-panel password-panel"><h2>{copy.passwordTitle}</h2><PasswordLogin copy={{username:copy.passwordUsername,password:copy.passwordPassword,submit:copy.passwordSubmit,busy:copy.passwordBusy,invalid:copy.invalid_credentials,denied:copy.agent_login_denied,unavailable:copy.service_unavailable}}/></section>
     <p><a className="text-link" href="/">{copy.home}</a></p>
   </ProjectShell>;
 }

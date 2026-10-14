@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "typecheck": "npm run typecheck --workspaces",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

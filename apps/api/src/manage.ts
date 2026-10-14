@@ -1,3 +1,4 @@
+import { passwordCommand } from './password-cli.js';
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stderr } from 'node:process';
@@ -7,7 +8,7 @@ import { authorizationCommand } from './auth-cli.js';
 import { initialize } from './initialize.js';
 import { loadPresentation, PresentationError } from '../../../shared/presentation.mjs';
 
-const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check', 'users', 'authorize'] as const;
+const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check', 'users', 'authorize', 'create-person', 'create-agent', 'reset-agent'] as const;
 type Command = typeof commands[number];
 
 function isCommand(value: string | undefined): value is Command {
@@ -50,7 +51,7 @@ async function main(): Promise<Record<string, unknown>> {
   const options = new Map<string, string>();
   const positional: string[] = [];
   const flagNames = ['--json', '--non-interactive', '--interactive', '--confirm', '--overwrite'];
-  const valueNames = ['--name', '--brand', '--theme', '--version', '--copyright', '--config', '--account', '--roles', '--state'];
+  const valueNames = ['--name', '--brand', '--theme', '--version', '--copyright', '--config', '--account', '--roles', '--state', '--username', '--owner', '--credential-file'];
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]!;
     if (flagNames.includes(arg)) {
@@ -67,22 +68,27 @@ async function main(): Promise<Record<string, unknown>> {
   let command = positional[0];
   if (!command) {
     if (nonInteractive || !stdin.isTTY || !stderr.isTTY || json) {
-      throw new OperationError('缺少管理命令：start、status、stop、logs、typecheck、test、init、config-check、users 或 authorize。');
+      throw new OperationError('缺少管理命令：start、status、stop、logs、typecheck、test、init、config-check、users、authorize、create-person、create-agent 或 reset-agent。');
     }
     const prompt = createInterface({ input: stdin, output: stderr });
     try {
-      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n7. 初始化项目\n8. 校验呈现配置\n9. 查看账号\n10. 授权账号\n');
-      const selection = await prompt.question('请选择 1–10：');
+      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n7. 初始化项目\n8. 校验呈现配置\n9. 查看账号\n10. 授权账号\n11. 创建人员密码账号\n12. 创建Agent密码账号\n13. 重置Agent密码\n');
+      const selection = await prompt.question('请选择 1–13：');
       command = commands[Number(selection.trim()) - 1];
     } finally { prompt.close(); }
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
+  if (['create-person','create-agent','reset-agent'].includes(command)) {
+    const allowed = command === 'reset-agent' ? ['--account','--credential-file'] : ['--username','--name','--credential-file',...(command==='create-agent'?['--owner']:[])];
+    if ([...options.keys()].some(key=>!allowed.includes(key)) || flags.has('--overwrite')) throw new OperationError('密码账号管理参数无效。');
+    return passwordCommand(command as 'create-person' | 'create-agent' | 'reset-agent',options,flags,(interactive || positional.length===0)&&!nonInteractive&&!json&&!!stdin.isTTY&&!!stderr.isTTY);
+  }
   if (command === 'users' || command === 'authorize') {
     if ([...options.keys()].some(key => !['--account', '--roles', '--state'].includes(key)) || flags.has('--overwrite') || (command === 'users' && options.size)) throw new OperationError('账号管理参数无效。');
     return authorizationCommand(command, options, flags, (interactive || positional.length === 0) && !nonInteractive && !json && !!stdin.isTTY && !!stderr.isTTY);
   }
   if (command !== 'init' && (options.size > 0 || flags.has('--overwrite'))) throw new OperationError('品牌参数与 --overwrite 只适用于 init。');
-  if (command === 'init' && [...options.keys()].some(key => ['--account', '--roles', '--state'].includes(key))) throw new OperationError('init 参数无效。');
+  if (command === 'init' && [...options.keys()].some(key => ['--account', '--roles', '--state', '--username', '--owner', '--credential-file'].includes(key))) throw new OperationError('init 参数无效。');
   if (command === 'init') return initialize(options, flags,
     (interactive || positional.length === 0) && !nonInteractive && !json && !!stdin.isTTY && !!stderr.isTTY);
   if (command === 'config-check') { loadPresentation(); return { ok: true, command }; }

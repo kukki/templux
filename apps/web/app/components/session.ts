@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-export type Profile = { id:string; name:string; state:string; roles:string[]; permissions:string[] };
-export async function profile(protectedAccess = false): Promise<Profile> {
+export type Profile = { id:string; name:string; state:string; roles:string[]; permissions:string[]; kind:string; responsiblePersonId:string|null };
+export async function profile(protectedAccess: boolean | 'admin' = false): Promise<Profile> {
   const cookie = (await cookies()).get('templux_session')?.value;
   let response: Response;
   try {
-    response=await fetch(`${process.env.API_INTERNAL_URL ?? 'http://api:8080'}/api/${protectedAccess?'protected':'auth/session'}`, {
+    response=await fetch(`${process.env.API_INTERNAL_URL ?? 'http://api:8080'}/api/${protectedAccess==='admin'?'admin/access':protectedAccess?'protected':'auth/session'}`, {
       headers:cookie?{Cookie:`templux_session=${cookie}`}:{},cache:'no-store',signal:AbortSignal.timeout(6000),
     });
   } catch { redirect('/login?reason=service_unavailable'); }

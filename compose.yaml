@@ -7,6 +7,10 @@ x-auth-environment: &auth-environment
   FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
   FEISHU_REDIRECT_URI: ${FEISHU_REDIRECT_URI:-}
   APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:31000}
+  DEPLOYMENT_ENV: ${DEPLOYMENT_ENV:-PROD}
+  AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
+  AGENT_IDLE_TIMEOUT_SECONDS: ${AGENT_IDLE_TIMEOUT_SECONDS:-600}
+  AGENT_SESSION_MAX_SECONDS: ${AGENT_SESSION_MAX_SECONDS:-43200}
   PERSON_IDLE_TIMEOUT_SECONDS: ${PERSON_IDLE_TIMEOUT_SECONDS:-600}
   PERSON_SESSION_MAX_SECONDS: ${PERSON_SESSION_MAX_SECONDS:-43200}
 
@@ -77,6 +81,9 @@ services:
       target: management
     environment:
       <<: *database-environment
+      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV:-PROD}
+      AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
+      TEMPLUX_CREDENTIAL_DIR: /opt/templux/credentials
       FEISHU_APP_ID: ${FEISHU_APP_ID:-}
       FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
       FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
@@ -88,6 +95,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config:/opt/templux/config
+      - ${TEMPLUX_CREDENTIAL_DIR:-./credentials}:/opt/templux/credentials
     profiles: ["tools"]
 
   checks:
@@ -137,6 +145,29 @@ services:
       - ./config:/opt/templux/config:ro
     ports:
       - "127.0.0.1:31030:3000"
+    profiles: ["tools"]
+
+  password-api:
+    image: ${TEMPLUX_PROJECT_NAME:-templux}-api
+    environment:
+      DATABASE_URL: postgresql://templux_test:isolated-test-only@auth-database:5432/templux_auth_test
+      APP_PUBLIC_URL: http://localhost:31040
+      DEPLOYMENT_ENV: ${TEST_DEPLOYMENT_ENV:-DEV}
+      AGENT_LOGIN_ENABLED: ${TEST_AGENT_LOGIN_ENABLED:-}
+      TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
+    volumes:
+      - ./config:/opt/templux/config:ro
+    profiles: ["tools"]
+
+  password-web:
+    image: ${TEMPLUX_PROJECT_NAME:-templux}-web
+    environment:
+      API_INTERNAL_URL: http://password-api:8080
+      TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
+    volumes:
+      - ./config:/opt/templux/config:ro
+    ports:
+      - "127.0.0.1:31040:3000"
     profiles: ["tools"]
 
 volumes:

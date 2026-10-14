@@ -22,7 +22,7 @@ test('Feishu OAuth, authorization and audit use real isolated PostgreSQL', async
   const pool = new pg.Pool({connectionString});
   t.after(() => pool.end());
   await migrate(pool);
-  await pool.query('TRUNCATE templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
+  await pool.query('TRUNCATE templux.password_credentials,templux.audit_events,templux.oauth_requests,templux.auth_sessions,templux.account_roles,templux.identities,templux.accounts RESTART IDENTITY');
   const directory = mkdtempSync(join(tmpdir(),'templux-auth-'));
   t.after(() => rmSync(directory,{recursive:true,force:true}));
   const rolePath = join(directory,'roles.json');
@@ -75,7 +75,7 @@ test('Feishu OAuth, authorization and audit use real isolated PostgreSQL', async
     const unavailable=await createApplication(pool,null,fakeProtocol); t.after(()=>unavailable.close());
     assert.deepEqual((await unavailable.inject({url:'/api/auth/config'})).json(),{enabled:false});
     assert.equal((await unavailable.inject({url:'/api/auth/feishu/start'})).statusCode,503);
-    assert.equal((await unavailable.inject({url:'/api/protected'})).statusCode,503);
+    assert.equal((await unavailable.inject({url:'/api/protected'})).statusCode,401);
     const keys=['FEISHU_APP_ID','FEISHU_APP_SECRET','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','FEISHU_REDIRECT_URI','APP_PUBLIC_URL'];
     const prior=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
     try {
