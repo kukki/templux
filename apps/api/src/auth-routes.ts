@@ -1,3 +1,5 @@
+import { registerAccountManagement } from './account-management.js';
+import { ManagementError } from './authorization.js';
 import { revokeSessions } from './session-lifecycle.js';
 import { passwordLogin } from './password-accounts.js';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
@@ -17,11 +19,16 @@ export function registerAuthRoutes(server: FastifyInstance, pool: pg.Pool, confi
   const roles = readRoles(); const sessionSettings = { ...readSessionConfig(), ...(config ? {publicOrigin:config.publicOrigin,secure:config.secure} : {}) };
   function configured(): AuthConfig { if (!config) throw new AuthError('authentication_unconfigured', 503); return config; }
   server.setErrorHandler((error, _request, reply) => {
+    if (error instanceof ManagementError) {
+      if (error.status >= 500) server.log.error({event:error.reason},'管理变更未提交。');
+      return void reply.code(error.status).send({ok:false,error:error.reason});
+    }
     const reason = error instanceof AuthError ? error.reason : 'service_unavailable';
     if (!(error instanceof AuthError)) server.log.error({ event: 'authentication_request_failed' }, '认证或服务操作失败。');
     void reply.code(error instanceof AuthError ? error.status : 503).send({ ok: false, error: reason });
   });
   server.addHook('onSend', async (_request, reply, payload) => { reply.header('Cache-Control', 'no-store'); reply.header('Referrer-Policy', 'no-referrer'); return payload; });
+  registerAccountManagement(server,pool,config,roles,request=>requestCookie(request,'templux_session'));
   server.get('/api/auth/config', async () => ({ enabled: config !== null }));
   server.post('/api/auth/password', { bodyLimit: 4096 }, async (request, reply) => {
     if (request.headers.origin !== sessionSettings.publicOrigin) throw new AuthError('origin_denied', 403);

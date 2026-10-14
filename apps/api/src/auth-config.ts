@@ -56,16 +56,20 @@ export function readAuthConfig(): AuthConfig | null {
       secure: origin.protocol === 'https:', idleSeconds, maximumSeconds };
   } catch { throw new OperationError('飞书回调、公开地址或会话配置无效。'); }
 }
-export type Roles = Record<string, { label: string; permissions: string[] }>;
+export type Roles = Record<string, { label: string; permissions: string[]; excludes?: string[] }>;
 export function readRoles(): Roles {
   try {
     const value = JSON.parse(readFileSync(process.env.TEMPLUX_ROLE_CONFIG_PATH ?? resolve('config/roles.json'), 'utf8'));
     if (value.schemaVersion !== 1 || Object.keys(value).some(k => !['schemaVersion', 'roles'].includes(k)) || !value.roles || typeof value.roles !== 'object' || Array.isArray(value.roles)) throw new Error();
     for (const [key, role] of Object.entries(value.roles)) {
-      const item = role as { label?: unknown; permissions?: unknown };
-      if (!/^[a-z][a-z0-9_-]{0,79}$/.test(key) || !item || Object.keys(item).some(k => !['label', 'permissions'].includes(k))
+      const item = role as { label?: unknown; permissions?: unknown; excludes?: unknown };
+      if (!/^[a-z][a-z0-9_-]{0,79}$/.test(key) || !item || Object.keys(item).some(k => !['label', 'permissions', 'excludes'].includes(k))
         || typeof item.label !== 'string' || !item.label.trim() || item.label.length > 200 || !Array.isArray(item.permissions)
         || item.permissions.length > 100 || item.permissions.some(p => typeof p !== 'string' || !/^[a-z][a-z0-9_-]*:[a-z][a-z0-9_-]*$/.test(p))) throw new Error();
+    }
+    for (const [key, role] of Object.entries(value.roles) as [string, Roles[string]][]) {
+      if (role.excludes !== undefined && (!Array.isArray(role.excludes) || new Set(role.excludes).size !== role.excludes.length
+        || role.excludes.some(other => typeof other !== 'string' || other === key || !Object.hasOwn(value.roles, other)))) throw new Error();
     }
     if (!value.roles.admin?.permissions.includes('accounts:manage') || !value.roles.admin?.permissions.includes('application:read') || !value.roles.user) throw new Error();
     return value.roles;

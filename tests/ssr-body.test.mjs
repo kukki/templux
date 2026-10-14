@@ -12,7 +12,8 @@ test('real Next SSR response-body faults retain route, Cookie and project retry 
   }
  });
  await t.test('normal valid profile still renders each authenticated page',async()=>{
-  for(const [path,label] of [['/account',copy.activeTitle],['/protected',copy.protectedTitle],['/admin',copy.adminTitle]]){const response=await request(path,'valid');assert.equal(response.status,200);assert.equal(response.headers.get('set-cookie'),null);const html=await response.text();assert.ok(html.includes(label));assert.ok(html.includes('SSR协议验收元数据'));assert.ok(!html.includes(copy.sessionNetwork));}
+  for(const [path,label] of [['/account',copy.activeTitle],['/protected',copy.protectedTitle],['/admin',copy.adminTitle]]){const response=await request(path,'valid');assert.equal(response.status,200);assert.equal(response.headers.get('set-cookie'),null);const html=await response.text();assert.ok(html.includes(label));assert.ok(html.includes('SSR协议验收元数据'));// Client component props include configured copy in RSC scripts; check rendered content.
+    assert.ok(!html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').includes(copy.sessionNetwork));}
  });
  await t.test('explicit401 redirects to the persistent reason and is never caught as unavailable',async()=>{
   for(const path of ['/account','/protected','/admin']){const response=await request(path,'unauthorized');assert.equal(response.status,307);assert.equal(response.headers.get('location'),'/login?reason=authorization_changed');assert.equal(response.headers.get('set-cookie'),null);}

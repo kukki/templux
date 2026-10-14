@@ -46,3 +46,24 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .password-panel { padding-bottom:26px; }
 .password-panel h2 { margin-bottom:1rem; }
 .logout-actions { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
+
+.account-management { margin-top: 32px; }
+.management-filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; margin: 22px 0; }
+.management-filters label, .management-state, .management-pages label { display: grid; gap: 6px; font-size: 13px; }
+.account-management input[type=search], .account-management select { width: 100%; min-width: 0; min-height: 44px; padding: 9px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font: inherit; }
+.account-management input:focus-visible, .account-management select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.management-accounts { display: grid; gap: 16px; }
+.management-account, .management-editor { padding: 22px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.management-account h3, .management-editor h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+.management-account dl { margin: 20px 0; gap: 18px; }
+.management-account dd { font-size: 14px; }
+.management-pages { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 22px 0; }
+.management-pages button { padding: 8px 12px; }
+.secondary-action { background: var(--surface); color: var(--text); border-color: var(--border); }
+.management-editor { margin-top: 24px; border-top: 3px solid var(--accent); }
+.management-editor fieldset { border: 1px solid var(--border); border-radius: 6px; margin: 20px 0; min-width: 0; }
+.management-option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 4px; line-height: 1.6; cursor: pointer; }
+.management-option input { flex-shrink: 0; width: 20px; height: 20px; margin-top: 3px; accent-color: var(--accent); }
+.management-option small { color: var(--muted); }
+.account-management button:disabled { cursor: not-allowed; }
+@media (max-width: 600px) { .management-filters { grid-template-columns: 1fr 1fr; }.management-search { grid-column: 1 / -1; }.management-account, .management-editor { padding: 18px; }.management-option span { min-width: 0; overflow-wrap: anywhere; } }

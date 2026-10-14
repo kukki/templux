@@ -1,18 +1,34 @@
 import type pg from 'pg';
 import { OperationError } from './database.js';
-import { readRoles, availableAuthRealm, readSessionConfig, type AuthRealm, type Roles } from './auth-config.js';
-import { audit, authorizationLock, transaction } from './auth-store.js';
-export type AuthorizationChange = { accountId: string; roles: string[]; state: 'active' | 'disabled' };
-export async function setAuthorization(pool: pg.Pool, change: AuthorizationChange, actor: string, definitions: Roles = readRoles(), realm: AuthRealm | null = availableAuthRealm()) {
-  if (!/^[1-9][0-9]{0,18}$/.test(change.accountId) || !['active', 'disabled'].includes(change.state)
+import { readRoles, availableAuthRealm, readSessionConfig, AuthError, type AuthConfig, type AuthRealm, type Roles } from './auth-config.js';
+import { audit, authorizationLock, transaction, loadSession, requirePermission } from './auth-store.js';
+export class ManagementError extends OperationError {
+  constructor(public readonly reason: string, public readonly status: number, message: string) { super(message); }
+}
+export type AuthorizationChange = { accountId: string; roles: string[]; state: 'active' | 'disabled'; expectedVersion?: string };
+// Browser actor data is validated only after obtaining the mutation lock, never trusted as a claimed account ID.
+export type AuthorizationActor = string | { token: string | undefined; config: AuthConfig | null };
+export function validateRoleSelection(roles: string[], definitions: Roles): void {
+  if (roles.length > 100 || roles.some(key => !Object.hasOwn(definitions, key)) || new Set(roles).size !== roles.length)
+    throw new ManagementError('invalid_management_input', 400, '预定义角色无效或重复。');
+  if (roles.some(key => definitions[key]!.excludes?.some(other => roles.includes(other))))
+    throw new ManagementError('role_conflict', 409, '所选预定义角色存在项目声明的互斥，请调整角色。');
+}
+export async function setAuthorization(pool: pg.Pool, change: AuthorizationChange, actor: AuthorizationActor, definitions: Roles = readRoles(), realm: AuthRealm | null = availableAuthRealm()) {
+  if (!/^[1-9][0-9]{0,18}$/.test(change.accountId) || BigInt(change.accountId) > 9223372036854775807n || !['active', 'disabled'].includes(change.state)
     || change.roles.some(key => !Object.hasOwn(definitions, key)) || new Set(change.roles).size !== change.roles.length) {
-    throw new OperationError('账号ID、状态或预定义角色无效。');
+    throw new ManagementError('invalid_management_input',400,'账号ID、状态或预定义角色无效。');
   }
+  validateRoleSelection(change.roles, definitions);
   try {
     return await transaction(pool, async client => {
       await authorizationLock(client);
-      const account = (await client.query<{ id: string; state: string }>('SELECT id,state FROM templux.accounts WHERE id=$1 FOR UPDATE', [change.accountId])).rows[0];
-      if (!account) throw new OperationError('未找到目标账号。');
+      const operator = typeof actor === 'string' ? null : await loadSession(client, actor.token, actor.config, definitions, true);
+      if (operator) requirePermission(operator, 'accounts:manage');
+      const account = (await client.query<{ id: string; state: string; auth_version: string }>('SELECT id,state,auth_version FROM templux.accounts WHERE id=$1 FOR UPDATE', [change.accountId])).rows[0];
+      if (!account) throw new ManagementError('account_not_found',404,'未找到目标账号。');
+      if (change.expectedVersion !== undefined && change.expectedVersion !== account.auth_version)
+        throw new ManagementError('account_conflict',409,'目标账号已经变更，请刷新后重新确认。');
       const before = (await client.query<{ role_key: string }>('SELECT role_key FROM templux.account_roles WHERE account_id=$1 ORDER BY role_key', [account.id])).rows.map(r => r.role_key);
       const settings = readSessionConfig();
       const effectiveAdmins = async () => Number((await client.query<{count:string}>(
@@ -26,14 +42,14 @@ export async function setAuthorization(pool: pg.Pool, change: AuthorizationChang
       await client.query('DELETE FROM templux.account_roles WHERE account_id=$1', [account.id]);
       for (const key of change.roles) await client.query('INSERT INTO templux.account_roles(account_id,role_key) VALUES($1,$2)', [account.id, key]);
       await client.query('UPDATE templux.accounts SET state=$2,auth_version=auth_version+1 WHERE id=$1', [account.id, change.state]);
-      if (beforeAdmins > 0 && await effectiveAdmins() === 0) throw new OperationError('不能停用或降权最后一个有效管理员，请先建立另一位管理员。');
-      await audit(client, 'cli', actor, 'authorization_changed', account.id,
+      if (beforeAdmins > 0 && await effectiveAdmins() === 0) throw new ManagementError('last_admin',409,'不能停用或降权最后一个有效管理员，请先建立另一位管理员。');
+      await audit(client, operator?.loginMethod ?? 'cli', operator ? `account:${operator.id}` : actor as string, 'authorization_changed', account.id,
         { before: { state: account.state, roles: before }, after: { state: change.state, roles: change.roles } });
-      return { ok: true, command: 'authorize', accountId: account.id, roles: change.roles, state: change.state, reloginRequired: true };
+      return { ok: true, command: 'authorize', accountId: account.id, roles: change.roles, state: change.state, reloginRequired: true, selfChanged: operator?.id === account.id };
     });
   } catch (error) {
-    if (error instanceof OperationError) throw error;
-    throw new OperationError('授权或审计保存失败，变更未提交。');
+    if (error instanceof OperationError || error instanceof AuthError) throw error;
+    throw new ManagementError('management_save_failed',503,'授权或审计保存失败，变更未提交。');
   }
 }
 export async function listAccounts(pool: pg.Pool) {
