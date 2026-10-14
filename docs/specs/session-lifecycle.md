@@ -44,3 +44,9 @@
 真实SQL/HTTP/CLI覆盖当前/全部退出、多设备、重启、活动/期限、审计回滚、范围事务和并发锁边界；正常密码Agent页面覆盖标签页/离线恢复/可见性/403/网络及未保存整合。真实飞书组织验收仍由T03另列；常规测试仅模拟外部飞书协议，不绕过本地SQL、会话或权限。
 
 Context7核对[React effects/cleanup](https://react.dev/reference/react/useEffect)、[pg同客户端事务](https://node-postgres.com/features/transactions)和[Chrome网络状态协议](https://chromedevtools.github.io/devtools-protocol/tot/Network)。遵循Postgres短事务和既有版本迁移规范；本票复用现有结构，无新迁移或部署数据变更。
+
+## T05 F1：SSR响应体失败的恢复边界
+
+fetch在响应头到达后即可完成；200响应的JSON body仍可能断流、解码失败、超时中止或语法错误。profile仅在成功response.json消费/解析的Promise上捕获这些失败并返回null，由/account、/protected、/admin显示本路由重试；不清Cookie、不误跳登录。映射及页面渲染不被广泛catch覆盖，401/403的Next redirect仍在body catch之外。
+
+使用真实Next Web和独立HTTP故障服务回归，服务只注入上游响应故障/协议元数据，没有登录、session发行或授权操作，且仅作为tools测试容器，生产镜像不包含该脚本。依据 [Next redirect控制流](https://nextjs.org/docs/app/api-reference/functions/redirect) 与 [Response.json异常](https://developer.mozilla.org/en-US/docs/Web/API/Response/json)、[响应头后body中止](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)。

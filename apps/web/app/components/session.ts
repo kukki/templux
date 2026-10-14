@@ -12,6 +12,7 @@ export async function profile(protectedAccess: boolean | 'admin' = false): Promi
   } catch { return null; }
   if(response.status===403&&protectedAccess) redirect('/account');
   if(!response.ok) { const value=await response.json().catch(()=>null); if(response.status===401&&value&&sessionReasons.has(value.error))redirect(`/login?reason=${encodeURIComponent(value.error)}`); return null; }
-  const value=await response.json();
+  const value=await response.json().catch(()=>null);
+  if(value===null)return null;
   return {...value.account,heartbeatSeconds:value.heartbeatSeconds};
 }

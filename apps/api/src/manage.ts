@@ -114,7 +114,7 @@ async function main(): Promise<Record<string, unknown>> {
   if (command === 'logs') await compose(['logs', '--no-color', '--tail', '100', 'api', 'web', 'database']);
   if (command === 'test' || command === 'typecheck') {
     await compose(['build', 'checks']);
-    if (command === 'test') await compose(['up', '-d', '--wait', 'auth-database']);
+    if (command === 'test') await compose(['up', '-d', '--wait', 'auth-database', 'ssr-body-api', 'ssr-body-web']);
     await compose(['run', '--rm', '--no-deps', 'checks', 'npm', 'run', command]);
   }
   return { ok: true, command };
