@@ -10,6 +10,8 @@ FROM dependencies AS source
 COPY apps apps
 COPY database database
 COPY tests tests
+COPY shared shared
+COPY config config
 
 FROM source AS api-build
 RUN npm run build --workspace @templux/api
@@ -23,6 +25,8 @@ COPY apps/web/package.json apps/web/package.json
 RUN npm ci --omit=dev --workspace @templux/api
 COPY --from=api-build /opt/templux/apps/api/dist apps/api/dist
 COPY database database
+COPY shared shared
+COPY config config
 USER node
 CMD ["node", "apps/api/dist/server.js"]
 
@@ -38,6 +42,9 @@ COPY apps/web/package.json apps/web/package.json
 RUN npm ci --omit=dev --workspace @templux/web
 COPY --from=web-build --chown=node:node /opt/templux/apps/web/.next apps/web/.next
 COPY apps/web/next.config.ts apps/web/next.config.ts
+COPY apps/web/public apps/web/public
+COPY shared shared
+COPY config config
 USER node
 CMD ["npm", "run", "start", "--workspace", "@templux/web"]
 

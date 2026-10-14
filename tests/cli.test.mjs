@@ -13,7 +13,7 @@ test('non-interactive missing commands fail promptly with machine-readable outpu
   assert.equal(result.status, 1);
   assert.equal(result.error, undefined);
   assert.deepEqual(JSON.parse(result.stdout), {
-    ok: false, error: '缺少管理命令：start、status、stop、logs、typecheck 或 test。',
+    ok: false, error: '缺少管理命令：start、status、stop、logs、typecheck、test、init 或 config-check。',
   });
   assert.equal(JSON.parse(result.stderr).event, 'management_failed');
 });

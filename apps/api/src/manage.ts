@@ -3,8 +3,10 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stderr } from 'node:process';
 import { isAbsolute } from 'node:path';
 import { OperationError } from './database.js';
+import { initialize } from './initialize.js';
+import { loadPresentation, PresentationError } from '../../../shared/presentation.mjs';
 
-const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test'] as const;
+const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check'] as const;
 type Command = typeof commands[number];
 
 function isCommand(value: string | undefined): value is Command {
@@ -43,24 +45,40 @@ async function main(): Promise<Record<string, unknown>> {
   if (interactive && (nonInteractive || json || !stdin.isTTY || !stderr.isTTY)) {
     throw new OperationError('--interactive 需要交互终端，不能与 --json 或 --non-interactive 同用。');
   }
-  if (args.some(arg => arg.startsWith('-') && !['--json', '--non-interactive', '--interactive', '--confirm'].includes(arg))) {
-    throw new OperationError('未知参数。支持 --json、--non-interactive、--interactive、--confirm。');
+  const flags = new Set<string>();
+  const options = new Map<string, string>();
+  const positional: string[] = [];
+  const flagNames = ['--json', '--non-interactive', '--interactive', '--confirm', '--overwrite'];
+  const valueNames = ['--name', '--brand', '--theme', '--version', '--copyright', '--config'];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]!;
+    if (flagNames.includes(arg)) {
+      if (flags.has(arg)) throw new OperationError('重复参数。');
+      flags.add(arg);
+    } else if (valueNames.includes(arg)) {
+      const value = args[++i];
+      if (options.has(arg) || value === undefined || value.startsWith('--')) throw new OperationError('参数重复或缺少值。');
+      options.set(arg, value);
+    } else if (arg.startsWith('-')) throw new OperationError('未知参数。');
+    else positional.push(arg);
   }
-  const positional = args.filter(arg => !arg.startsWith('-'));
   if (positional.length > 1) throw new OperationError('只允许一个管理命令。');
   let command = positional[0];
   if (!command) {
     if (nonInteractive || !stdin.isTTY || !stderr.isTTY || json) {
-      throw new OperationError('缺少管理命令：start、status、stop、logs、typecheck 或 test。');
+      throw new OperationError('缺少管理命令：start、status、stop、logs、typecheck、test、init 或 config-check。');
     }
     const prompt = createInterface({ input: stdin, output: stderr });
     try {
-      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n');
-      const selection = await prompt.question('请选择 1–6：');
+      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n7. 初始化项目\n8. 校验呈现配置\n');
+      const selection = await prompt.question('请选择 1–8：');
       command = commands[Number(selection.trim()) - 1];
     } finally { prompt.close(); }
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
+  if (command !== 'init' && (options.size > 0 || flags.has('--overwrite'))) throw new OperationError('品牌参数与 --overwrite 只适用于 init。');
+  if (command === 'init') return initialize(options, flags, !nonInteractive && !json && !!stdin.isTTY && !!stderr.isTTY);
+  if (command === 'config-check') { loadPresentation(); return { ok: true, command }; }
   if (command === 'stop' && !args.includes('--confirm')) {
     if (nonInteractive || json || !stdin.isTTY || !stderr.isTTY) throw new OperationError('stop 需要显式 --confirm。');
     const prompt = createInterface({ input: stdin, output: stderr });
@@ -72,6 +90,7 @@ async function main(): Promise<Record<string, unknown>> {
   }
   if (command === 'status') return status();
   if (command === 'start') {
+    loadPresentation();
     await compose(['build', 'api', 'web']);
     await compose(['up', '-d', '--wait', '--wait-timeout', '60', 'database']);
     await compose(['run', '--rm', '--no-deps', 'migrate']);
@@ -92,7 +111,7 @@ try {
   console.log(process.argv.includes('--json') ? JSON.stringify(result)
     : `完成：${result.command}${result.url ? `\n访问 ${result.url}` : ''}`);
 } catch (error) {
-  const message = error instanceof OperationError ? error.message : '操作失败，请检查容器及配置。';
+  const message = error instanceof OperationError || error instanceof PresentationError ? error.message : '操作失败，请检查容器及配置。';
   console.error(JSON.stringify({ event: 'management_failed', message }));
   if (process.argv.includes('--json')) console.log(JSON.stringify({ ok: false, error: message }));
   process.exitCode = 1;

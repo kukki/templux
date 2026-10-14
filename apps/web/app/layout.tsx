@@ -1,8 +1,18 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { connection } from 'next/server';
+import { presentation } from '../../../shared/presentation.mjs';
 import './style.css';
 
-export const metadata: Metadata = { title: 'Templux · 服务状态', description: 'Templux 模板项目运行状态' };
-export default function Layout({ children }: { children: ReactNode }) {
-  return <html lang="zh-CN"><body>{children}</body></html>;
+export async function generateMetadata(): Promise<Metadata> {
+  await connection();
+  const config = presentation();
+  return { title: `${config.project.name} · ${config.copy.title}`, description: config.copy.description };
+}
+export default async function Layout({ children }: { children: ReactNode }) {
+  await connection();
+  const config = presentation();
+  const style = Object.fromEntries(Object.entries(config.theme).map(([key, value]) =>
+    [key === 'colorScheme' ? 'colorScheme' : `--${key}`, value])) as CSSProperties;
+  return <html lang={config.language}><body style={style}>{children}</body></html>;
 }

@@ -1,4 +1,11 @@
 import Fastify from 'fastify';
+import { presentation, PresentationError } from '../../../shared/presentation.mjs';
+
+let config;
+try { config = presentation(); } catch (error) {
+  console.error(JSON.stringify({ event: 'presentation_invalid', message: error instanceof PresentationError ? error.message : '呈现配置加载失败。' }));
+  process.exit(1);
+}
 import { databasePool, migrations, schemaVersion } from './database.js';
 
 const pool = databasePool();
@@ -14,10 +21,10 @@ server.get('/api/status', async (_request, reply) => {
   reply.header('Cache-Control', 'no-store');
   try {
     const version = await schemaVersion(pool, expected);
-    return { name: 'Templux', version: '0.1.0', status: 'ready', database: 'connected', schemaVersion: version };
+    return { name: config.project.name, version: config.project.version, status: 'ready', database: 'connected', schemaVersion: version };
   } catch {
     server.log.error({ event: 'readiness_failed' }, '数据库连接或结构校验失败。');
-    return reply.code(503).send({ name: 'Templux', status: 'unavailable' });
+    return reply.code(503).send({ name: config.project.name, status: 'unavailable' });
   }
 });
 server.addHook('onClose', async () => { await pool.end(); });

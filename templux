@@ -4,5 +4,6 @@ TEMPLUX_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" \
   run --build --quiet-build --rm --no-deps \
   -e "TEMPLUX_PROJECT_DIR=$TEMPLUX_ROOT" \
+  -e "TEMPLUX_HOST_UID=$(id -u)" -e "TEMPLUX_HOST_GID=$(id -g)" \
   -v "$TEMPLUX_ROOT:$TEMPLUX_ROOT:ro" \
   management "$@"
