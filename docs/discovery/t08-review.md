@@ -71,3 +71,39 @@
 - 未对本票无关主题/安装/性能重新构建或增加测试；后续票仍独立验收。
 
 官方来源：[授权码](https://open.feishu.cn/document/common-capabilities/sso/api/obtain-oauth-code)、[token v3](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/authentication-management/access-token/get-user-access-token-v3)、[user_info](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/authen-v1/user_info/get)。
+
+## 2026-10-15 修复定向复核附录
+
+复核范围：`1dde7e7c7d50ffda436c84ae11b3aa6d7583fc14..0d8b8754766e8f0c534f644420c63d7247cba068`，开始时HEAD为后者、工作树干净；审查全部12文件差异、修复验收、合同补充及0007。以上初审历史保持原样。
+
+**最新结论：F1关闭、F2关闭；本次无新增发现。Standards通过，结合初审与本次复核，T08代码及可独立验证范围可按 #9 验收。真实飞书组织人工验收仍另列。**
+
+### F1关闭证据
+
+0007为持久OAuth增加purpose和login_request_id，普通登录默认login，原0006当前映射state回填login_link。CHECK限定两种用途/ID空值关系、FK及索引维护关联。consumeOAuth单条DELETE RETURNING捕获用途/ID/当前映射并严格检查一致性；callback仅按捕获用途分支，关联兑换后按捕获ID重新锁内查请求及state/状态/期限/版本/证明会话，没有查不到就普通登录的false路径（`auth-store.ts:43`、`auth-routes.ts:70`、`login-methods.ts:54`）。远程调用仍在事务外。
+
+本次实际重跑新login-link-race共8计数：原“已消费state→兑换等待→第二begin”条件稳定返回登录失效原因，无templux_session、accounts/identities/auth_sessions数量不变，目标未绑定且请求pending；新的state正常verified并可最终完成。取消、过期、目标版本变化、请求缺失四种兑换中变更同样拒绝，无注册/会话副作用。普通用途但实际关联映射、错误关联ID在消费阶段invalid_state；普通OAuth仍正常发行SQL会话。没有将旧已验证外部身份的语义降级描述成未认证权限提升。
+
+本次在自建scratch数据库 `templux_t08_review_migration` 实际pg_restore --exit-on-error恢复开发保留的0006隔离备份，再添加普通、pending关联及cancelled关联state，执行原0007 SQL：普通用途/空ID保持，两类关联均准确回填，非法用途CHECK和不存在请求FK均实际拒绝。scratch库随后删除。首轮审查辅助SQL误写迁移记录表为templux.schema_migrations，失败未写入；定位实际public.templux_migrations后重跑全部通过。这是审查脚本错误，不是迁移实现缺陷。证据 `test-results/t08-fix-independent-migration.log`。0001–0006差异为空；原0004部署无迁移/重启。
+
+### F2关闭证据
+
+本人无既有密码、未验证阶段显示正常飞书重新登录/账号页证明步骤；verified本人password请求显示包含真实requestId的complete-login-link、合法ASCII新文件名及confirm/non-interactive，移除本人该请求的Web完成按钮；已有passwordUsername对应reset-person完整账号ID/文件名。本人feishu和他人请求的Web完成分支保留（`login-method-manager.tsx:25`、`:26`，集中methodSelfVerifyNote/methodSelfEnableNote/methodSelfNote）。
+
+本次新回归读取实际集中模板并替换真实ID，spawn执行完整参数CLI：首次启用exit0/0600、重复执行exit1、不打印密码，旧Feishu401，新随机密码正常登录并可访问管理API200。原login-methods及CLI专项同时验证已有密码重置/Agent文件、两方式旧会话失效、审计回滚、锁后操作者校验和T07失败记录保持。
+
+开发真实页面证据另行核对：t08-fix-browser-command.json的request11/person8命令与源码模板一致，页面无本人Web完成按钮；cli.json记exit0、overwriteExit1、0600、leaked=false；reset-command.json/reset.log记实际reset-person、旧密码/旧Feishu401和新密码200；evidence.json区分未验证证明阶段与verified命令。它们是开发浏览器实跑证据，本次没有重跑浏览器或把它写成审查者页面执行。
+
+### 本次验证、方法与剩余边界
+
+| 独立命令/检查 | 结果 |
+| --- | --- |
+| `docker compose run --rm --no-deps checks node --test --test-concurrency=1 tests/login-link-race.test.mjs tests/login-methods.test.mjs tests/cli.test.mjs` | 27/27，fail/cancelled/skipped均0，含全部新8项；t08-fix-independent-targeted.log |
+| `docker compose run --rm --no-deps checks npm run typecheck` | API/Web退出0；t08-fix-independent-typecheck.log |
+| scratch恢复0006→真实state回填→0007约束检查 | 全部通过；t08-fix-independent-migration.log，已删除scratch |
+
+本次复用镜像，仅运行独立auth-database及checks，不启动或重建Web、不重跑完整127项。开发t08-fix-final-suite.log的127/127已读取，本次独立27项与其区别明确。生产镜像构建边界未扩大，fixture仍只在checks；开发秘密扫描20文件/2凭据无命中证据已核对。本次临时CLI秘密由测试在容器私有目录清除，未输出明文；测试数据库容器已移除，默认API/Web/database原镜像持续healthy。
+
+结构search→trace→snippet及coverage覆盖全部12变更文件和依赖，metadata_match、无记录缺口；SQL直接读取和实际验证，图仍为best-effort。Postgres技能核对短事务/锁/约束，Context7 PostgreSQL18核对DELETE RETURNING、React核对条件渲染；协议没有变化，复用初审同日完整官方材料，不再调用真实组织。
+
+剩余局限沿用初审：T03真人组织/实际关联冲突、生产TLS与Linux/WSL2、浏览器安全落盘及交付、真实网络COMMIT回复丢失未新增验收。迁移回填演练使用隔离备份与自有state，不代表真人库已升级或可不备份直接迁移。未修改实现/部署/.env/真人权限、未推送/关工单。
