@@ -34,8 +34,8 @@ T14 / 工单 #15，父规格故事79–80；沿用 ADR0012、0020及 session-lif
 
 编辑路由将 `EditNavigationProvider` 放在整个页面壳之外。`useEditor`注册控制器；未来弹窗/面板可使用相同controller和 `requestLeave(action)`，不依赖示例。一次离开只确认一次；取消保留当前编辑，确认放弃会reset所有注册编辑后执行action。
 
-- Provider捕获普通a和Next Link主键同窗点击；Ctrl/Command/Shift新窗口、下载及仅hash导航不离开当前编辑，不提醒。点击真正离开时使用浏览器确认框，明确“放弃”与“取消保留”。
-- `EditLink`使用Next受支持的onNavigate，从onClick读取真实呈现锚点的解析后href，与捕获层共用同一路由/search判断；相对hash、完整同页hash及对象形式hash均不确认或reset草稿。真正路由/search离开仍统一确认一次。命令式 `router.push/replace/back/forward`须显式包在 `requestLeave(()=>router.…())`。不能从其它模块直接调用router并假定全局拦截。
+- Provider在document冒泡阶段处理普通a主键同窗点击，先尊重消费者preventDefault；原生链接必须保留事件冒泡才能使用该兜底。Next客户端导航须采用EditLink，不能依赖document监听拦住普通Next Link已经发起的SPA导航。Ctrl/Command/Shift新窗口、下载及仅hash导航不离开当前编辑，不提醒。点击真正离开时使用浏览器确认框，明确“放弃”与“取消保留”。
+- `EditLink`使用Next受支持的onNavigate，从onClick读取真实呈现锚点的解析后href，与原生兜底共用同一路由/search判断；相对hash、完整同页hash及对象形式hash均不确认或reset草稿。消费者onClick执行一次，先于确认；消费者onNavigate也先获得同步取消机会。消费者须在回调返回前preventDefault，异步决定不能推迟Next已发起的导航。取消导航不确认、不reset；真正路由/search离开才统一确认一次。Next已preventDefault的SPA点击不会被document兜底重复处理；外部replace在Next跳转前单独遵守相同规则。命令式 `router.push/replace/back/forward`须显式包在 `requestLeave(()=>router.…())`。不能从其它模块直接调用router并假定全局拦截。
 - 原生刷新、关闭、跨文档back/forward使用dirty期间才注册的beforeunload。浏览器只在其允许且有用户交互的条件下显示通用原生提示，不能指定文案或保证手机杀进程时弹出。
 - **App Router没有通用可取消的popstate守卫**。本合同不保证未经接入的同文档浏览器工具栏back/forward；需要可靠离开保护的编辑入口应使用普通文档导航，或提供上述已接入的back/forward按钮。不得用历史哨兵、pushState复制记录、异步回滚URL伪造取消。本票示例提供普通返回锚点、EditLink及命令式路由消费者，隔离组件验证受控back/forward。
 - 列表search/filter/pagination不注册编辑状态；纯replaceState偏好更新不触发离开保护。
