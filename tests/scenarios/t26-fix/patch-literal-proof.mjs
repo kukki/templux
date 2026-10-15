@@ -22,10 +22,10 @@ function changeTarget(f,p,value){const root=join(f.target,'project');put(root,p,
 const f=fixture();try{
  changeTarget(f,'Dockerfile','COPY a/a/file /app\ntwo\nthree\nupdated-target\n');
  const r=await propose({...f,trustProjectCode:true,behavior:'tools/behavior.mjs'});
- assert.equal(r.directlyApplicable,true);assert.equal(r.patchValidation.status,'passed');
+ assert.equal(r.directlyApplicable,true);
  const patch=readFileSync(join(f.output,'changes.patch'),'utf8');
  const check=spawnSync('git',['apply','--check',join(f.output,'changes.patch')],{cwd:f.current,encoding:'utf8'});
- assert.equal(check.status,0,check.stderr);assert.ok(patch.includes('COPY a/a/file /app'));
+ assert.equal(check.status,0,check.stderr);assert.equal(r.patchValidation.status,'passed');assert.ok(patch.includes('COPY a/a/file /app'));
  const applied=join(f.root,'applied');cpSync(f.current,applied,{recursive:true});assert.equal(spawnSync('git',['apply',join(f.output,'changes.patch')],{cwd:applied}).status,0);
  for(const p of r.vendor){cpSync(join(f.output,'candidate/vendor',p.file),join(applied,'vendor',p.file));rmSync(join(applied,'vendor',p.replaces));}
  const {readdirSync,lstatSync}=await import('node:fs');function inventory(dir,prefix=''){return Object.fromEntries(readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name)).flatMap(e=>{const p=prefix+e.name,full=join(dir,e.name);return e.isDirectory()?Object.entries(inventory(full,p+'/')):[[p,{sha256:sha(readFileSync(full)),mode:lstatSync(full).mode&0o777}]];}));}
