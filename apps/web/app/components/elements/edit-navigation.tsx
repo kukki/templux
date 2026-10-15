@@ -3,8 +3,8 @@ import {createContext,useCallback,useContext,useEffect,useRef,type ReactNode,typ
 import Link from 'next/link';
 import {sessionIsEnding} from '../session-client';
 import copy from '../../../../../config/elements-copy.json';
-type EditSource={getSnapshot:()=>{dirty:boolean};subscribe:(listener:()=>void)=>()=>void;reset:()=>void;cancel:()=>void};
-type Navigation={register:(source:EditSource)=>()=>void;requestLeave:(action:()=>void)=>boolean};
+type EditSource={getSnapshot:()=>{dirty:boolean;blocked?:boolean};subscribe:(listener:()=>void)=>()=>void;reset:()=>void;cancel:()=>void};
+type Navigation={register:(source:EditSource)=>()=>void;requestLeave:(action:()=>void)=>boolean;requestDiscard:(source:EditSource,action:()=>void)=>boolean};
 const Context=createContext<Navigation|null>(null);
 function leavesEditDocument(href:string){const url=new URL(href,location.href);return ['http:','https:'].includes(url.protocol)&&!(url.origin===location.origin&&url.pathname===location.pathname&&url.search===location.search);}
 type LinkClick=Pick<MouseEvent,'defaultPrevented'|'button'|'metaKey'|'ctrlKey'|'shiftKey'|'altKey'>;
@@ -13,14 +13,16 @@ function sameWindowClick(anchor:HTMLAnchorElement,event:LinkClick){return !event
 export function EditNavigationProvider({children}:{children:ReactNode}){
  const sources=useRef(new Map<EditSource,()=>void>()),refresh=useRef(()=>{});
  const register=useCallback((source:EditSource)=>{const unsubscribe=source.subscribe(()=>refresh.current());sources.current.set(source,unsubscribe);refresh.current();return()=>{unsubscribe();sources.current.delete(source);refresh.current();};},[]);
- const requestLeave=useCallback((action:()=>void)=>{
-  if(sessionIsEnding())return false;
-  if([...sources.current.keys()].some(source=>source.getSnapshot().dirty)){
+ const discard=useCallback((targets:EditSource[],action:()=>void)=>{
+  if(sessionIsEnding()||targets.some(source=>source.getSnapshot().blocked))return false;
+  if(targets.some(source=>source.getSnapshot().dirty)){
    if(!window.confirm(copy.discardChanges))return false;
-   for(const source of sources.current.keys())source.reset();
+   for(const source of targets)source.reset();
   }
   action();return true;
  },[]);
+ const requestLeave=useCallback((action:()=>void)=>discard([...sources.current.keys()],action),[discard]);
+ const requestDiscard=useCallback((source:EditSource,action:()=>void)=>discard([source],action),[discard]);
  useEffect(()=>{
   let installed=false;
   const beforeUnload=(event:BeforeUnloadEvent)=>{if(sessionIsEnding())return;event.preventDefault();event.returnValue='';};
@@ -38,7 +40,7 @@ export function EditNavigationProvider({children}:{children:ReactNode}){
   document.addEventListener('click',click);window.addEventListener('templux:session-ending',ending);
   return()=>{refresh.current=()=>{};window.removeEventListener('beforeunload',beforeUnload);document.removeEventListener('click',click);window.removeEventListener('templux:session-ending',ending);};
  },[requestLeave]);
- return <Context.Provider value={{register,requestLeave}}>{children}</Context.Provider>;
+ return <Context.Provider value={{register,requestLeave,requestDiscard}}>{children}</Context.Provider>;
 }
 export function useEditNavigation(){const value=useContext(Context);if(!value)throw new Error('EditNavigationProvider is required for editable routes');return value;}
 /** Use for client-side Link navigation; imperative push/replace/back/forward must use requestLeave too. */

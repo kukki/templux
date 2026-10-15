@@ -41,5 +41,21 @@
   "sortBy": "按",
   "sortAction": "排序",
   "discardChanges": "放弃未保存的修改并离开？选择取消可保留编辑。",
-  "saveFailed": "保存失败，修改已保留。请确认结果后再试。"
+  "saveFailed": "保存失败，修改已保留。请确认结果后再试。",
+  "edit": "编辑",
+  "saveEdit": "保存",
+  "cancelEdit": "取消编辑",
+  "closeEdit": "关闭编辑窗",
+  "savingEdit": "正在保存，请稍候。",
+  "unsavedEdit": "有未保存修改",
+  "savedEdit": "已保存",
+  "unconfirmedEdit": "结果未确认。请核验后再保存；超时不代表提交已取消。",
+  "verifyEdit": "核验保存结果",
+  "verifyingEdit": "正在核验…",
+  "unknownEdit": "暂时无法确认结果，修改仍保留。请稍后核验。",
+  "notAppliedEdit": "已确认未保存，可再次明确保存。",
+  "sourceChangedEdit": "数据或编辑目标已变化。当前草稿已保留，请取消后重新打开最新记录。",
+  "rowActions": "操作",
+  "rowEditing": "当前行编辑",
+  "editingScroll": "记录及行编辑，可横向滚动"
 }
