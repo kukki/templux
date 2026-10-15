@@ -36,6 +36,6 @@ config/roles.json仍为schemaVersion1，默认仅admin/user且不互斥。新项
 
 tests/account-management.test.mjs在隔离Postgres中覆盖真实SQL、HTTP和CLI，含正常密码登录、仅模拟外部飞书响应的Pending首登/审批/重新登录、事务审计故障、权限与版本、项目互斥、操作者锁等待以及网页/CLI并发最后管理员降权和停用。浏览器使用CLI新建独立受限文件凭据，真实页面操作；测试脚本只在checks/tools镜像，生产API无fixture入口。
 
-不增加迁移或修改数据库历史。T03真实飞书组织验收仍另列；本票模拟外部响应不证明个人授权已完成。macOS Docker/Ego验证不替代Linux/WSL2矩阵。验收证据见docs/discovery/t06-acceptance.md。
+不增加迁移或修改数据库历史。T03真实飞书组织验收仍另列；本票模拟外部响应不证明个人授权已完成。macOS 开发机 Docker/Ego 验证不替代 Ubuntu UAT/生产真实主机验收；Windows/WSL2 已移出当前范围，见 [平台范围](deployment-platforms.md)。验收证据见docs/discovery/t06-acceptance.md。
 
 Context7核对 [React effect清理与过期响应](https://react.dev/reference/react/useEffect) 和 [Fastify参数校验](https://fastify.dev/docs/latest/Reference/Validation-and-Serialization/)；采用手动严格字段校验，避免默认AJV removeAdditional静默删除未知字段。

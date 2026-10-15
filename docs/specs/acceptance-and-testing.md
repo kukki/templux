@@ -12,7 +12,7 @@
 ## 首版实际入口与剩余验收
 
 - 采用容器Node测试、真实PG/HTTP/CLI与Ego浏览器，截图受阻时记录自有fallback；精确源码/image/产物绑定见[T29交付演练](../discovery/t29-acceptance.md)。
-- [17组完整矩阵与平台状态](../discovery/t29-matrix.md)：macOS实际执行，Linux宿主/WSL2待提供环境；Linux容器不替代宿主。
+- [17组完整矩阵与平台状态](../discovery/t29-matrix.md)：macOS 可选开发已实际执行；Ubuntu UAT/生产真实主机待提供环境（版本/架构未定），容器不替代宿主。Windows/WSL2 已按用户决策移出范围，不是通过，见 [平台范围](deployment-platforms.md)。
 - 自有随机账号/0600交付、失败日志/受限数据回收与清理；真实组织Feishu须本人授权后独立记录，不点击或复用真人会话。
 
 本文件保留交付要求；T29提供实际执行、固定来源复用和明确未执行三类结果，不将候选或单机suite通过等同全平台/真人验收完成。

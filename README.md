@@ -6,7 +6,7 @@
 
 ## 启动
 
-宿主只需 Docker、Compose 和基础 Shell；Linux、macOS 使用下列入口，Windows 通过 WSL2 使用。
+部署目标为 Ubuntu 主机上的 UAT/生产，macOS 仅作为可选开发主机；两者使用下列 Docker、Compose 和基础 Shell 入口。Windows/WSL2 已移出支持与验收范围，不表示通过。Ubuntu 具体版本/架构待环境提供后核验，真实主机尚未执行；见 [平台范围与验收状态](docs/specs/deployment-platforms.md)。
 
 ```sh
 ./templux
@@ -69,7 +69,7 @@ docker compose run --rm --no-deps checks node --test tests/scenarios/database-un
 docker compose up -d --wait database
 ```
 
-故障演练后须恢复数据库。浏览器截图及测试临时产物写在忽略的测试结果目录。跨平台完整验收、真实飞书和全首版矩阵由后续任务完成，不以本次本机 Docker 验证替代。
+故障演练后须恢复数据库。浏览器截图及测试临时产物写在忽略的测试结果目录。Ubuntu 真实主机、真实飞书及首版剩余验收见 [交付矩阵](docs/discovery/t29-matrix.md)，不以 macOS 开发机或本机 Docker 验证替代。
 
 `./tests/schema-drift.sh` 在自动清理的独立 Compose 项目中验证应用 schema 丢失会被公开迁移检查拒绝，不修改当前数据库。当前测试的 PostgreSQL 为18.6，Compose 同时锁定镜像摘要。
 

@@ -2,7 +2,7 @@
 
 ## 已确认范围
 
-- 支持 Linux、macOS 的 Shell 入口；Windows 通过 WSL2 使用，不承诺首版原生 PowerShell 包装。
+- Ubuntu UAT/生产与 macOS 可选开发使用 Shell 入口；Windows/WSL2 不在支持或验收范围，非已通过。Ubuntu 版本/架构尚待环境核验，详见 [平台范围](deployment-platforms.md)。
 - 宿主依赖为 Docker、Compose 与基础 Shell，不要求 npm、Node.js、Java 或数据库客户端。
 - 宿主脚本仅作容器入口包装、参数转交及退出码传递；交互菜单、应用参数解析、校验和实际操作均在容器内执行。
 - 无参数时提供人工交互菜单，不必记忆参数；完整参数的一行脚本支持获授权 Agent 自动化运行。两种入口共用命令及校验逻辑。

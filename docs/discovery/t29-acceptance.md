@@ -2,7 +2,7 @@
 
 ## 结论与边界
 
-本票形成可审查的本机完整候选和真实隔离安装、恢复、升级演练。**不宣称 #30 或父 #1 的全平台验收完成**：Linux 宿主、Windows/WSL2 尚无可用环境；真实飞书组织/本人授权仍未执行；本机默认 BuildKit 冷安装网络路径未通过。上述缺口已向 TL 报告，不能用 Linux 容器、密码或已有缓存替代。没有推送、外部 registry、关票、自动上线或全局计划任务。
+本票形成可审查的本机完整候选和真实隔离安装、恢复、升级演练。2026-10-16 按 [用户平台决策](../specs/deployment-platforms.md) 更新当前状态：Ubuntu UAT/生产真实主机仍未执行（版本/架构待环境提供后核验），macOS 为可选开发，Windows/WSL2 移出范围而非通过。真实飞书组织/本人授权仍未执行；macOS 默认 BuildKit 冷依赖路径已另行补验并 [独立复核](t29-cold-install-review.md)，下文保留原演练失败记录。**不宣称 #30 或父 #1 完整验收完成**，不能用容器或密码替代 Ubuntu 主机与真人组织结果。没有推送、外部 registry、关票、自动上线或全局计划任务。
 
 实现/运行产品基线 `c02ac42859b7140a5e76f7b4126b18973bbdd84f`。前置独立来源核对 `df628c0f4296fc1d26a8c1db233b3853885a9fec`，Standards/Spec0，TL 随后仅放行本机候选生成，**不是产物验收批准**；原 [固定方案](t29-candidate-plan.md) SHA `0ded7d9cce3b3c5fa661864ee08b4df8d1b852211c22a53150dcaf5f1a5dbd5c` 未更改。[17组能力矩阵](t29-matrix.md) 将新实跑、固定来源历史证据及未执行分开。
 
@@ -62,9 +62,11 @@ docker run --rm --entrypoint node "$IMAGE" tools/release/build.mjs /release
 
 `independent-deployment-proof.json`：再次选择明确independent目标真实恢复后，**显式**准备独立部署/网络/入口；恢复初始entry503，显式resume后旧人员/Agent均401、新登录均200；源库原cookie仍200。不是只检查SQL为空就宣称HTTP已拒绝，也没有自动修改源连接或自动开放目标。
 
-`cli-menu-proof.json` 是真实macOS PTY→hostwrapper→实际容器菜单，选择2查看状态，exit0，无变更。完整参数init/backup/restore/maintenance及缺确认/无TTY/JSON诊断由真实公开链路及517覆盖；不把此PTY当Linux/WSL宿主。
+`cli-menu-proof.json` 是真实macOS PTY→hostwrapper→实际容器菜单，选择2查看状态，exit0，无变更。完整参数init/backup/restore/maintenance及缺确认/无TTY/JSON诊断由真实公开链路及517覆盖；不把此 PTY 当 Ubuntu UAT/生产宿主实测；Windows/WSL2 已移出当前范围。
 
-## 本机冷构建环境限制（未隐瞒）
+## 原演练本机冷构建环境限制（历史记录）
+
+本节保留当时失败与 workaround 原文；后续默认冷依赖实际通过见 [补验](t29-cold-install.md) 与 [独立复核](t29-cold-install-review.md)，不将旧失败计作通过或推断根因。
 
 默认 BuildKit 网络下 npm ci超240秒无完成，已只取消自身构建客户端；`consumer-management-observed-build.log`、初次init日志保留。普通全新Node容器**同锁94包5秒/exit0**：`consumer-cold-install-diagnostic.log`。同一标准Dockerfile **--network=host** 独立api/web/migration/management均exit0；命令和日志 `consumer-image-commands.json`、`consumer-target-*.log`。
 
@@ -127,7 +129,7 @@ python3 tests/scenarios/t29-final-audit.py
 
 本次每条实际命令、image/lock及退出结果在对应JSON/log。fresh脚本拒已存在输出，复跑应归档旧证据并新建自有根，不删除未知/他人产物。host只既有Shell/Python/Git/浏览器工具，npm/TS/PG全部容器，不安装宿主应用依赖。
 
-剩余 **Linux宿主、WSL2、真实Feishu本人组织授权、默认BuildKit冷网络安装** 的具体条件/复跑见matrix与上述环境说明；必须补实际结果或由用户明确变更支持承诺，不能自行降低AC。非穷尽物理触屏/软键盘/辅助技术/云TLS/大库矩阵，既有受控触屏/模拟时钟证据按范围复用。图片不设像素门禁。
+当前剩余 **Ubuntu UAT/生产真实主机、真实Feishu本人组织授权** 的具体条件/复跑见 [矩阵](t29-matrix.md)；Ubuntu版本/架构待定且未执行。WSL2 是用户明确移出范围，不是通过；macOS 开发机默认 BuildKit 冷依赖路径已有独立补验，不替代 Ubuntu。非穷尽物理触屏/软键盘/辅助技术/云TLS/大库矩阵，既有受控触屏/模拟时钟证据按范围复用。图片不设像素门禁。
 
 ## 安全、清理与最终点
 
