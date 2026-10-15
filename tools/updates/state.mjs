@@ -1,4 +1,6 @@
 import {readFileSync,existsSync,openSync,writeFileSync,fsyncSync,closeSync,renameSync,rmSync} from 'node:fs';import {join} from 'node:path';import {randomUUID} from 'node:crypto';import {safePath,entry} from '../upgrade/files.mjs';import {UpdateError} from './catalog.mjs';
 export function stateRead(root,file){try{const e=entry(root,file);return e?JSON.parse(e.bytes):null;}catch{throw new UpdateError('invalid_state');}}
 export function stateWrite(root,file,value){const final=safePath(join(root,file)),temp=join(root,'.'+randomUUID()+'.tmp');let fd;try{fd=openSync(temp,'wx',0o600);writeFileSync(fd,JSON.stringify(value)+'\n');fsyncSync(fd);closeSync(fd);fd=undefined;renameSync(temp,final);}finally{if(fd!==undefined)closeSync(fd);rmSync(temp,{force:true});}}
-export function lastAttempt(root){const v=stateRead(root,'attempt.json');if(!v)return 0;if(!Number.isSafeInteger(v.at)||v.at<=0)throw new UpdateError('invalid_state');return v.at;}
+export function readAttempt(root){const v=stateRead(root,'attempt.json');if(v===null&&!entry(root,'attempt.json'))return null;if(!v||typeof v!=='object'||Array.isArray(v)||!Number.isSafeInteger(v.at)||v.at<=0||typeof v.id!=='string'||!v.id)throw new UpdateError('invalid_state');return v;}
+export function lastAttempt(root){return readAttempt(root)?.at??0;}
+export function nextDelay(last,now,interval){if(!last)return{ms:0,clockRollback:false};return{ms:Math.min(interval,Math.max(0,last+interval-now)),clockRollback:last>now};}

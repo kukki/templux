@@ -1,10 +1,19 @@
-import {setTimeout as wait} from 'node:timers/promises';import {parseConfig} from './config.mjs';import {lastAttempt} from './state.mjs';import {checkUpdates} from './check.mjs';
-export function nextDelay(last,now,interval){if(!last)return{ms:0,clockRollback:false};return{ms:Math.min(interval,Math.max(0,last+interval-now)),clockRollback:last>now};}
+import timers from 'node:timers/promises';import {parseConfig} from './config.mjs';import {checkUpdates} from './check.mjs';
+export {nextDelay} from './state.mjs';
+// Node truncates delays above this value to 1ms. Monotonic time avoids wall-clock jumps mid-wait.
+export async function waitFor(ms,signal){const deadline=performance.now()+ms;signal?.throwIfAborted();for(let remaining=deadline-performance.now();remaining>0;remaining=deadline-performance.now())await timers.setTimeout(Math.ceil(Math.min(2147483647,remaining)),undefined,{signal});}
 export async function schedule(options,{maxRuns=Infinity,signal,onResult=()=>{}}={}){
- const c=parseConfig(options.config),interval=c.intervalSeconds*1000;let runs=0;
- while(runs<maxRuns&&!signal?.aborted){const d=nextDelay(lastAttempt(options.state),Date.now(),interval);if(d.ms)try{await wait(d.ms,undefined,{signal});}catch{break;}if(signal?.aborted)break;const startedAt=Date.now(),result=await checkUpdates({...options,config:c});await onResult({...result,startedAt,clockRollback:d.clockRollback,nextAttemptNoEarlierThan:startedAt+interval});runs++;
-  // Contention does not update our attempt record. Still avoid a tight retry loop.
-  if(result.status==='locked'&&runs<maxRuns)try{await wait(interval,undefined,{signal});}catch{break;}
+ const c=parseConfig(options.config),interval=c.intervalSeconds*1000;let runs=0,automatic={},clockRollback=false;
+ while(runs<maxRuns&&!signal?.aborted){
+  const invokedAt=Date.now(),result=await checkUpdates({...options,config:c,automatic});
+  if(result.status==='deferred'){
+   clockRollback ||= result.clockRollback;
+   try{await waitFor(result.delayMs,signal);}catch(e){if(e.name==='AbortError'&&signal?.aborted)break;throw e;}
+   automatic={...result,waited:true};continue;
+  }
+  const startedAt=result.attemptedAt??invokedAt;await onResult({...result,startedAt,clockRollback,nextAttemptNoEarlierThan:startedAt+interval});runs++;automatic={};clockRollback=false;
+  // Lock contention and failures before publishing attempt must not form a tight retry loop.
+  if(result.attemptedAt===undefined&&runs<maxRuns)try{await waitFor(interval,signal);}catch(e){if(e.name==='AbortError'&&signal?.aborted)break;throw e;}
  }
  return{runs};
 }
