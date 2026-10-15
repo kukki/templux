@@ -78,3 +78,8 @@ CMD ["npm", "test"]
 
 FROM checks AS release-tools
 CMD ["node", "tools/release/build.mjs", "/release"]
+
+FROM release-tools AS upgrade-tools
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+ENTRYPOINT ["node", "tools/upgrade/cli.mjs"]

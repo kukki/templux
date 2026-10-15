@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 export const sha=(bytes,algorithm='sha256')=>createHash(algorithm).update(bytes).digest(algorithm==='sha256'?'hex':'base64');
+export const isExactVersion=v=>typeof v==='string'&&/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$/.test(v);
 const names=['@templux/core','@templux/web'];
 const fail=()=>{throw new Error('共享发布校验失败：需要受信清单、准确锁定版本/字节和受支持组合。');};
 const json=p=>JSON.parse(readFileSync(p,'utf8'));
@@ -11,7 +12,7 @@ function safeFile(root,file){if(!/^[a-z0-9.-]+\.tgz$/.test(file))fail();const pa
 export function verifyProject(directory,{installed=false}={}){
  try{
   const root=resolve(directory),m=json(join(root,'vendor/manifest.json')),lock=json(join(root,'templux.lock.json'));
-  if(m.schemaVersion!==1||lock.schemaVersion!==1||m.version!=='0.1.0'||lock.version!==m.version||sha(readFileSync(join(root,'vendor/manifest.json')))!==lock.manifestSha256||JSON.stringify(m.compatibility)!==JSON.stringify({protocol:1,config:1,schema:'0010',node:24,next:16})||!m.source?.commit?.match(/^[a-f0-9]{40}$/)||!m.source.treeSha256?.match(/^[a-f0-9]{64}$/)||!Array.isArray(m.packages)||m.packages.length!==2||JSON.stringify(m.packages)!==JSON.stringify(lock.packages))fail();
+  if(m.schemaVersion!==1||lock.schemaVersion!==1||!isExactVersion(m.version)||lock.version!==m.version||sha(readFileSync(join(root,'vendor/manifest.json')))!==lock.manifestSha256||JSON.stringify(m.compatibility)!==JSON.stringify({protocol:1,config:1,schema:'0010',node:24,next:16})||!m.source?.commit?.match(/^[a-f0-9]{40}$/)||!m.source.treeSha256?.match(/^[a-f0-9]{64}$/)||!Array.isArray(m.packages)||m.packages.length!==2||JSON.stringify(m.packages)!==JSON.stringify(lock.packages))fail();
   for(const [i,name]of names.entries()){
    const p=m.packages[i];if(p.name!==name||p.version!==m.version||p.file!==`templux-${i===0?'core':'web'}-${m.version}.tgz`||!/^[a-f0-9]{64}$/.test(p.sha256))fail();
    const path=safeFile(root,p.file),bytes=readFileSync(path);if(sha(bytes)!==p.sha256||'sha512-'+sha(bytes,'sha512')!==p.integrity)fail();

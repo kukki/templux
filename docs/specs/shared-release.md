@@ -57,3 +57,7 @@ Web包发布现有页面/SSR壳、全部T11–T20控件与状态模块、样式/
 `.templux/baseline/project`保存原始骨架及默认非秘密配置；baseline.json保存原文件哈希、发布来源commit/选定输入tree哈希、manifest摘要；vendor保留不可变包。source.files是明确列出的发布输入集，不是整个Git仓库树ID；不包含生成cache。项目修改自己的业务/配置不会被verify回写，基线不吸收后续真实配置值。发布排除.env、秘密/凭据/备份/日志目录、fixture凭据、test-results、node_modules、.git、构建cache与map；实际tar清单另行验收。后续升级依赖原基线，缺失/篡改应在后票阻断，不在本票自动合并、生成升级或覆盖定制。
 
 本票证据及平台边界见[T25验收](../discovery/t25-acceptance.md)。真实飞书组织人工验收仍单独pending，不能用此密码消费演练替代。
+
+## T26 升级提案接续
+
+0.1.0发布文件不变。后续发布版本可为准确SemVer，仍须满足上述受检协议/运行组合和字节锁，版本字符串不单独授予兼容性。目标manifest的`upgrade.from`须明确来源版本；缺路径不自动推断。基于保存baseline的三方候选、项目业务/config保留、隔离检查与人工审查应用见[升级提案](upgrade-proposals.md)。发布构建在complete之前再次校验整个项目锁/包组合，不发布不兼容完成标记。
