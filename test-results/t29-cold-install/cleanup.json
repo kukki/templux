@@ -1,0 +1,52 @@
+{
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "image",
+        "rm",
+        "t29-cold-default-management"
+      ],
+      "timeoutSeconds": 20,
+      "timedOut": false,
+      "exitCode": 0,
+      "elapsedSeconds": 0.185
+    },
+    {
+      "command": [
+        "docker",
+        "image",
+        "rm",
+        "t29-cold-default-web"
+      ],
+      "timeoutSeconds": 20,
+      "timedOut": false,
+      "exitCode": 0,
+      "elapsedSeconds": 0.398
+    },
+    {
+      "command": [
+        "docker",
+        "image",
+        "rm",
+        "sha256:8496bdf469291bd83a754babf7a4cdf0c9ee3389fdcbe5d3576b52f2d92ba7f1"
+      ],
+      "timeoutSeconds": 20,
+      "timedOut": false,
+      "exitCode": 0,
+      "elapsedSeconds": 0.175
+    }
+  ],
+  "ownWorkRemoved": true,
+  "builderCreated": false,
+  "networkCreated": false,
+  "dbCreated": false,
+  "remainingContainers": [
+    "templux-web-1",
+    "templux-api-1",
+    "templux-database-1",
+    "traefik"
+  ],
+  "sharedBuildCachePruned": false,
+  "contextAfter": "desktop-linux"
+}

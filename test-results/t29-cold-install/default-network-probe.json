@@ -1,0 +1,13 @@
+{
+  "command": [
+    "docker",
+    "build",
+    "--no-cache",
+    "--progress=plain",
+    "/Users/jkoo/git/templux-t29-cold-t2y9bs4x/probe"
+  ],
+  "timeoutSeconds": 40,
+  "timedOut": false,
+  "exitCode": 0,
+  "elapsedSeconds": 3.625
+}

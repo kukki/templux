@@ -1,0 +1,69 @@
+{
+  "management": {
+    "imageId": "sha256:9512013190597c3b0e0b95cb81e6e778ffe7aeb0db552f9e71105c52890b5d84",
+    "npmLog": {
+      "logs": 1,
+      "cacheMisses": 61,
+      "cacheHits": 62,
+      "fetch200": 62,
+      "fetchHostCounts": {
+        "registry.npmjs.org": 62
+      }
+    }
+  },
+  "web": {
+    "imageId": "sha256:299f5403b288a5f0451b21adb5b036f1407823cb8e6f1f6594a550587646c05f",
+    "npmLog": {
+      "logs": 0,
+      "cacheMisses": 0,
+      "cacheHits": 0,
+      "fetch200": 0,
+      "fetchHostCounts": {
+        "registry.npmjs.org": 0
+      }
+    }
+  },
+  "base": {
+    "npmCacheExists": false,
+    "projectExists": false,
+    "node": "v24.21.0"
+  },
+  "dockerfileHasCacheMount": false,
+  "sourceUnchanged": true,
+  "workingCopyUnchanged": true,
+  "noDependencyCacheInContext": true,
+  "fixedFiles": {
+    "test-results/t29/releases/0.1.2-t29.1/project/Dockerfile": "a39eb85836a9f0741c4cff06fea9815680c8892a6ce0ec78ee2611a32c2bae7f",
+    "test-results/t29/releases/0.1.2-t29.1/project/compose.yaml": "94d144148023fea3fdd60c24c80570d3d17faeb3c38ccdef892e0f705b2b45c3",
+    "test-results/t29/releases/0.1.2-t29.1/project/package-lock.json": "cbc901ed75f8bc09afa4f723b20388ebe1ab5f4a4bd587a121d6dba36b825dda",
+    "test-results/t29/releases/0.1.2-t29.1/project/templux.lock.json": "a1e0b4b09b6fc99f6ddb1549282afb2a6255cbd8b3cabae08cdbb44cd0477ae4",
+    "test-results/t29/releases/0.1.2-t29.1/manifest.json": "de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878",
+    "test-results/t29/delivery.json": "3928db76aee723b9b16d839b3d1579c38b797d2dc8b56316ca7bf1e2ad63f237"
+  },
+  "effectiveBuild": {
+    "api": {
+      "build": {
+        "context": "/Users/jkoo/git/templux-t29-cold-t2y9bs4x/project",
+        "dockerfile": "Dockerfile",
+        "target": "api"
+      },
+      "image": null
+    },
+    "entry": {
+      "build": {
+        "context": "/Users/jkoo/git/templux-t29-cold-t2y9bs4x/project",
+        "dockerfile": "Dockerfile",
+        "target": "api"
+      },
+      "image": null
+    },
+    "web": {
+      "build": {
+        "context": "/Users/jkoo/git/templux-t29-cold-t2y9bs4x/project",
+        "dockerfile": "Dockerfile",
+        "target": "web"
+      },
+      "image": null
+    }
+  }
+}

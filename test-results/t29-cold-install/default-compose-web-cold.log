@@ -1,0 +1,149 @@
+ Image t29-cold-default-web Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 603B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 3.54kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24.21.0-bookworm-slim
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 32B
+#4 transferring context: 123B done
+#4 DONE 0.0s
+
+#5 [dependencies 1/4] FROM docker.io/library/node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20
+#5 resolve docker.io/library/node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 done
+#5 DONE 0.0s
+
+#6 [dependencies 2/4] WORKDIR /opt/project
+#6 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 6.18kB done
+#7 DONE 0.0s
+
+#8 [dependencies 3/4] COPY . .
+#8 DONE 0.1s
+
+#9 [dependencies 4/4] RUN node .templux/verify.mjs . && npm ci --ignore-scripts --no-audit --no-fund && node .templux/verify.mjs . --installed
+#9 0.106 {"ok":true,"version":"0.1.2-t29.1","manifestSha256":"de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878"}
+#9 6.103 
+#9 6.103 added 94 packages in 6s
+#9 6.105 npm notice
+#9 6.105 npm notice New major version of npm available! 11.19.0 -> 12.2.0
+#9 6.105 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#9 6.105 npm notice To update run: npm install -g npm@12.2.0
+#9 6.105 npm notice
+#9 6.182 {"ok":true,"version":"0.1.2-t29.1","manifestSha256":"de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878"}
+#9 DONE 6.8s
+
+#10 [web-build 1/1] RUN npm run build --workspace project-web
+#10 ...
+
+#11 [web  3/14] COPY --from=dependencies /opt/project/package.json /opt/project/package-lock.json ./
+#11 DONE 0.1s
+
+#10 [web-build 1/1] RUN npm run build --workspace project-web
+#10 0.241 
+#10 0.241 > project-web@1.0.0 build
+#10 0.241 > next build --webpack
+#10 0.241 
+#10 ...
+
+#12 [web  4/14] COPY --from=dependencies /opt/project/apps/api/package.json apps/api/package.json
+#12 DONE 0.0s
+
+#13 [web  5/14] COPY --from=dependencies /opt/project/apps/web/package.json apps/web/package.json
+#13 DONE 0.0s
+
+#14 [web  6/14] COPY --from=dependencies /opt/project/vendor vendor
+#14 DONE 0.0s
+
+#15 [web  7/14] COPY --from=dependencies /opt/project/.templux .templux
+#15 DONE 0.0s
+
+#16 [web  8/14] COPY --from=dependencies /opt/project/templux.lock.json templux.lock.json
+#16 DONE 0.0s
+
+#10 [web-build 1/1] RUN npm run build --workspace project-web
+#10 0.448 ▲ Next.js 16.4.0 (webpack)
+#10 0.463 ✓ Running next.config.ts took 15ms
+#10 0.474 
+#10 0.487   Creating an optimized production build ...
+#10 4.981 ✓ Compiled successfully in 3.3s
+#10 4.982   Running TypeScript ...
+#10 5.247   Finished TypeScript in 265ms ...
+#10 5.249   Collecting page data using 9 workers ...
+#10 5.800   Generating static pages using 9 workers (0/10) ...
+#10 6.095   Generating static pages using 9 workers (2/10) 
+#10 6.095   Generating static pages using 9 workers (4/10) 
+#10 6.095   Generating static pages using 9 workers (7/10) 
+#10 6.095 ✓ Generating static pages using 9 workers (10/10) in 295ms
+#10 6.277   Finalizing page optimization ...
+#10 6.277   Collecting build traces ...
+#10 ...
+
+#17 [web  9/14] RUN node .templux/verify.mjs . && npm ci --ignore-scripts --omit=dev --workspace project-web --no-audit --no-fund
+#17 0.106 {"ok":true,"version":"0.1.2-t29.1","manifestSha256":"de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878"}
+#17 6.705 
+#17 6.705 added 24 packages in 7s
+#17 6.707 npm notice
+#17 6.707 npm notice New major version of npm available! 11.19.0 -> 12.2.0
+#17 6.707 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#17 6.707 npm notice To update run: npm install -g npm@12.2.0
+#17 6.707 npm notice
+#17 DONE 7.3s
+
+#10 [web-build 1/1] RUN npm run build --workspace project-web
+#10 9.962 
+#10 9.963 Route (app)
+#10 9.963 ┌ ƒ /
+#10 9.963 ├ ƒ /_not-found
+#10 9.963 ├ ƒ /account
+#10 9.963 ├ ƒ /admin
+#10 9.963 ├ ƒ /api/[...path]
+#10 9.963 ├ ƒ /audit
+#10 9.963 ├ ƒ /business
+#10 9.963 ├ ƒ /examples
+#10 9.963 ├ ƒ /login
+#10 9.963 └ ƒ /protected
+#10 9.963 
+#10 9.963 
+#10 9.963 ƒ  (Dynamic)  server-rendered on demand
+#10 9.963 
+#10 DONE 10.0s
+
+#18 [web 10/14] COPY --from=web-build --chown=node:node /opt/project/apps/web/.next apps/web/.next
+#18 DONE 0.1s
+
+#19 [web 11/14] COPY --from=dependencies /opt/project/apps/web/server.mjs apps/web/server.mjs
+#19 DONE 0.0s
+
+#20 [web 12/14] COPY --from=dependencies /opt/project/apps/web/next.config.ts apps/web/next.config.ts
+#20 DONE 0.0s
+
+#21 [web 13/14] COPY --from=dependencies /opt/project/node_modules/@templux/web/apps/web/public apps/web/public
+#21 DONE 0.0s
+
+#22 [web 14/14] COPY --from=dependencies /opt/project/config config
+#22 DONE 0.0s
+
+#23 exporting to image
+#23 exporting layers
+#23 exporting layers 7.3s done
+#23 exporting manifest sha256:9c3d1163bd55456ddd93268b01d806f047d1fed72a67ce2b3a46ff1a310039e1 0.0s done
+#23 exporting config sha256:45eb37efd9f10c0698227dab7303173f5ea67c97bcaa0c34311adbd631e16e8a done
+#23 exporting attestation manifest sha256:8c2baf15fff5ae74cec81dac36845bf58228d068fa0795921e4da4267922c319 done
+#23 exporting manifest list sha256:299f5403b288a5f0451b21adb5b036f1407823cb8e6f1f6594a550587646c05f done
+#23 naming to docker.io/library/t29-cold-default-web:latest done
+#23 unpacking to docker.io/library/t29-cold-default-web:latest
+#23 unpacking to docker.io/library/t29-cold-default-web:latest 1.7s done
+#23 DONE 9.1s
+
+#24 resolving provenance for metadata file
+#24 DONE 0.3s
+ Image t29-cold-default-web Built 

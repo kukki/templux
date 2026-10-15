@@ -1,0 +1,342 @@
+{
+  ".dockerignore": {
+    "sha256": "93a7734c4112033108501e47dc03bfef55265af9afba0b3b42d20b10c69886d7",
+    "mode": "0o644"
+  },
+  ".gitignore": {
+    "sha256": "8d4476ca0b19872088e7509186b507a763cf7d1ddc46f759bf29702c11af8b8f",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/.dockerignore": {
+    "sha256": "93a7734c4112033108501e47dc03bfef55265af9afba0b3b42d20b10c69886d7",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/.gitignore": {
+    "sha256": "8d4476ca0b19872088e7509186b507a763cf7d1ddc46f759bf29702c11af8b8f",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/Dockerfile": {
+    "sha256": "a39eb85836a9f0741c4cff06fea9815680c8892a6ce0ec78ee2611a32c2bae7f",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/README.md": {
+    "sha256": "7b152d4ce5a7bb0c668d37be51239eaa7d058332553fd7201d2003564f30a7c3",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/api/package.json": {
+    "sha256": "12ab85336d808d578604e10047ce213a96fd0171a9a38064425c93663f505c4c",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/api/src/server.ts": {
+    "sha256": "da19550b3dd7d939fd4c4ec500050c6e6a758494e3d31e9b5e7809fd2b6fa37f",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/api/tsconfig.json": {
+    "sha256": "7a759636eb3269ab855af77721a7277c4e226991b2ae74478770b62d391d7ebe",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/account/page.tsx": {
+    "sha256": "e3389bf1314e2d9693b1864a46e177791cd9c69e083b08e8316853c1d8097959",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/admin/page.tsx": {
+    "sha256": "0f9a68f5eb88d4a42886407f05e14fd8a7441951c723b1aa1797dc7edc27bc66",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/api/[...path]/route.ts": {
+    "sha256": "95c717c2bc2cf5bef800da0ffd5dde8eceb161b02655f31395a4ecd977535ea1",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/audit/page.tsx": {
+    "sha256": "969983227423ead3f159dd7b062811a2afbd9c6da928eac213a05f77bf51886a",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/business/page.tsx": {
+    "sha256": "28daa2951b4f0fe3f15db66a3cd97587d8e842278769e13c7fbce34bc078509b",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/examples/page.tsx": {
+    "sha256": "aa00009a8a2c697f03c3906f6c9fbdc9aa504bfd1a8dde8f538121e7cc25d654",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/layout.tsx": {
+    "sha256": "9c5013135b03223051a4016d9fe025f8a62e4d698fb27599fddaaaf5929adb7c",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/login/page.tsx": {
+    "sha256": "f7d6b40121d8b2d2d63eea9cbaa92ebe10c7bcddc0706692adf341678394136c",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/page.tsx": {
+    "sha256": "6f88ad80be9a5135913febda89c86d3ad35c06dd3986ee58fb4969b8f4950014",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/app/protected/page.tsx": {
+    "sha256": "ef176df5dd5b96bd49af313d06f79b85298d7c33fa51777c8db5bc1550c14332",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/next-env.d.ts": {
+    "sha256": "879741880b6ab48da99dcc06dcc674d381c9826137b0496bf7bb368f302de9fc",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/next.config.ts": {
+    "sha256": "9b56f44176db8ff66f33639354554016b8be861b54d275b250cb6ed57525965f",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/package.json": {
+    "sha256": "a5fad13b46efa21d029a8c43bc336aebfb91ea7d44b14538289874708734a43b",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/server.mjs": {
+    "sha256": "51a2cfdb79087e3036801abd0fbfecb0c9a70ea8f6308de532d5f277d8db2448",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/apps/web/tsconfig.json": {
+    "sha256": "bb963e71079135f757da5a4061fa9f9ce87edc4a4e502523f246b622318bd535",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/check-updates": {
+    "sha256": "730678549f70fbd1605a06a121a61d8475bfa4617ac96ea30b3bf4d028161bc0",
+    "mode": "0o755"
+  },
+  ".templux/baseline/project/compose.yaml": {
+    "sha256": "94d144148023fea3fdd60c24c80570d3d17faeb3c38ccdef892e0f705b2b45c3",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/auth-copy.json": {
+    "sha256": "cdec175dacbad47d94a7ce18329567367a90ec0e79dbed63e9b9685a3bb3cbad",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/elements-copy.json": {
+    "sha256": "a9f40f1c227d8a52e9de6f681a57a15d7cdcb0035c332911496a73a56a094983",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/examples-copy.json": {
+    "sha256": "8f92ea6cc2588c73dfd394171ef1de569427b5516019949cf53747176254c99a",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/maintenance-copy.json": {
+    "sha256": "73353fb68a4f328838edc1fc5bf4584d7ffb1fe0360f0b985fd9a635d601d1a7",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/navigation-copy.json": {
+    "sha256": "0961398be0efef25d1aab7cbac6a0de96e7afda2b4c1f53ebd9fb9cc13d5862e",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/presentation.json": {
+    "sha256": "55f79d583fcb0e5a469a9c14fe13cf89cb5532e9fd4d9e90aac792d5b193e20a",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/roles.json": {
+    "sha256": "8fba0db35361f34631555ce461392e6945e34f45a9637b8b2ddfb077bcbe51e8",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/config/updates.example.json": {
+    "sha256": "b63f6688348cbb486c6ef09b727806c98854030ea29e31c2e4fde3b1204390c1",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/package.json": {
+    "sha256": "89c4c443a1c1f9cdc70118d687e15b1e0b19c9c27596d3ea42cfb562d25b6d45",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/templux": {
+    "sha256": "671bf1af1d83d1038eca2797032537d27fc7cc8bfd64c804bbefd0e74eaa26c4",
+    "mode": "0o755"
+  },
+  ".templux/baseline/project/tools/auth-config-probe.mjs": {
+    "sha256": "030d5e058affa76d9c24774f4f5c40a91ee59041f0a18bc9c66c546e4c8478f4",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/tools/entry.mjs": {
+    "sha256": "632d7c2ed7ac6227ca0fc6e71dbec0dc9aa4cf377491545679f8797130732654",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/tools/manage.mjs": {
+    "sha256": "9209bb58555d51d0e65815536a88486d3b2abc5f1bdb94b865440c97b7769621",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/tools/migrate.mjs": {
+    "sha256": "92067d99810055f0650e40ed32d5368734246e4251367fd9c477b57fc1e13f40",
+    "mode": "0o644"
+  },
+  ".templux/baseline/project/tools/updates.compose.yaml": {
+    "sha256": "550a30cca3b54847a7a092f2ce152fcf22c3b99ef341e0e9e051ef4799251ebc",
+    "mode": "0o644"
+  },
+  ".templux/baseline.json": {
+    "sha256": "d50591dc948b1672148d6b140c04df3d5be802e5de74563210afeb066dda9487",
+    "mode": "0o644"
+  },
+  ".templux/verify.mjs": {
+    "sha256": "9298ddcd0c61b62de5c0efe0fd5e9b5d79d3123d6ffbed121f1f420251a88d81",
+    "mode": "0o644"
+  },
+  "Dockerfile": {
+    "sha256": "a39eb85836a9f0741c4cff06fea9815680c8892a6ce0ec78ee2611a32c2bae7f",
+    "mode": "0o644"
+  },
+  "README.md": {
+    "sha256": "7b152d4ce5a7bb0c668d37be51239eaa7d058332553fd7201d2003564f30a7c3",
+    "mode": "0o644"
+  },
+  "apps/api/package.json": {
+    "sha256": "7a55a9757a8d151a2d701938466ba2f486a44d8d95972ba71c8d041593561ae3",
+    "mode": "0o644"
+  },
+  "apps/api/src/server.ts": {
+    "sha256": "da19550b3dd7d939fd4c4ec500050c6e6a758494e3d31e9b5e7809fd2b6fa37f",
+    "mode": "0o644"
+  },
+  "apps/api/tsconfig.json": {
+    "sha256": "7a759636eb3269ab855af77721a7277c4e226991b2ae74478770b62d391d7ebe",
+    "mode": "0o644"
+  },
+  "apps/web/app/account/page.tsx": {
+    "sha256": "e3389bf1314e2d9693b1864a46e177791cd9c69e083b08e8316853c1d8097959",
+    "mode": "0o644"
+  },
+  "apps/web/app/admin/page.tsx": {
+    "sha256": "0f9a68f5eb88d4a42886407f05e14fd8a7441951c723b1aa1797dc7edc27bc66",
+    "mode": "0o644"
+  },
+  "apps/web/app/api/[...path]/route.ts": {
+    "sha256": "95c717c2bc2cf5bef800da0ffd5dde8eceb161b02655f31395a4ecd977535ea1",
+    "mode": "0o644"
+  },
+  "apps/web/app/audit/page.tsx": {
+    "sha256": "969983227423ead3f159dd7b062811a2afbd9c6da928eac213a05f77bf51886a",
+    "mode": "0o644"
+  },
+  "apps/web/app/business/page.tsx": {
+    "sha256": "28daa2951b4f0fe3f15db66a3cd97587d8e842278769e13c7fbce34bc078509b",
+    "mode": "0o644"
+  },
+  "apps/web/app/examples/page.tsx": {
+    "sha256": "aa00009a8a2c697f03c3906f6c9fbdc9aa504bfd1a8dde8f538121e7cc25d654",
+    "mode": "0o644"
+  },
+  "apps/web/app/layout.tsx": {
+    "sha256": "9c5013135b03223051a4016d9fe025f8a62e4d698fb27599fddaaaf5929adb7c",
+    "mode": "0o644"
+  },
+  "apps/web/app/login/page.tsx": {
+    "sha256": "f7d6b40121d8b2d2d63eea9cbaa92ebe10c7bcddc0706692adf341678394136c",
+    "mode": "0o644"
+  },
+  "apps/web/app/page.tsx": {
+    "sha256": "6f88ad80be9a5135913febda89c86d3ad35c06dd3986ee58fb4969b8f4950014",
+    "mode": "0o644"
+  },
+  "apps/web/app/protected/page.tsx": {
+    "sha256": "ef176df5dd5b96bd49af313d06f79b85298d7c33fa51777c8db5bc1550c14332",
+    "mode": "0o644"
+  },
+  "apps/web/next-env.d.ts": {
+    "sha256": "879741880b6ab48da99dcc06dcc674d381c9826137b0496bf7bb368f302de9fc",
+    "mode": "0o644"
+  },
+  "apps/web/next.config.ts": {
+    "sha256": "9b56f44176db8ff66f33639354554016b8be861b54d275b250cb6ed57525965f",
+    "mode": "0o644"
+  },
+  "apps/web/package.json": {
+    "sha256": "f2ac15414835b7af943a975be98946eb24a1ff9bc876c440361a9875f0076a76",
+    "mode": "0o644"
+  },
+  "apps/web/server.mjs": {
+    "sha256": "51a2cfdb79087e3036801abd0fbfecb0c9a70ea8f6308de532d5f277d8db2448",
+    "mode": "0o644"
+  },
+  "apps/web/tsconfig.json": {
+    "sha256": "bb963e71079135f757da5a4061fa9f9ce87edc4a4e502523f246b622318bd535",
+    "mode": "0o644"
+  },
+  "check-updates": {
+    "sha256": "730678549f70fbd1605a06a121a61d8475bfa4617ac96ea30b3bf4d028161bc0",
+    "mode": "0o755"
+  },
+  "compose.yaml": {
+    "sha256": "94d144148023fea3fdd60c24c80570d3d17faeb3c38ccdef892e0f705b2b45c3",
+    "mode": "0o644"
+  },
+  "config/auth-copy.json": {
+    "sha256": "cdec175dacbad47d94a7ce18329567367a90ec0e79dbed63e9b9685a3bb3cbad",
+    "mode": "0o644"
+  },
+  "config/elements-copy.json": {
+    "sha256": "a9f40f1c227d8a52e9de6f681a57a15d7cdcb0035c332911496a73a56a094983",
+    "mode": "0o644"
+  },
+  "config/examples-copy.json": {
+    "sha256": "8f92ea6cc2588c73dfd394171ef1de569427b5516019949cf53747176254c99a",
+    "mode": "0o644"
+  },
+  "config/maintenance-copy.json": {
+    "sha256": "73353fb68a4f328838edc1fc5bf4584d7ffb1fe0360f0b985fd9a635d601d1a7",
+    "mode": "0o644"
+  },
+  "config/navigation-copy.json": {
+    "sha256": "0961398be0efef25d1aab7cbac6a0de96e7afda2b4c1f53ebd9fb9cc13d5862e",
+    "mode": "0o644"
+  },
+  "config/presentation.json": {
+    "sha256": "55f79d583fcb0e5a469a9c14fe13cf89cb5532e9fd4d9e90aac792d5b193e20a",
+    "mode": "0o644"
+  },
+  "config/roles.json": {
+    "sha256": "8fba0db35361f34631555ce461392e6945e34f45a9637b8b2ddfb077bcbe51e8",
+    "mode": "0o644"
+  },
+  "config/updates.example.json": {
+    "sha256": "b63f6688348cbb486c6ef09b727806c98854030ea29e31c2e4fde3b1204390c1",
+    "mode": "0o644"
+  },
+  "package-lock.json": {
+    "sha256": "cbc901ed75f8bc09afa4f723b20388ebe1ab5f4a4bd587a121d6dba36b825dda",
+    "mode": "0o644"
+  },
+  "package.json": {
+    "sha256": "89c4c443a1c1f9cdc70118d687e15b1e0b19c9c27596d3ea42cfb562d25b6d45",
+    "mode": "0o644"
+  },
+  "templux": {
+    "sha256": "671bf1af1d83d1038eca2797032537d27fc7cc8bfd64c804bbefd0e74eaa26c4",
+    "mode": "0o755"
+  },
+  "templux.lock.json": {
+    "sha256": "a1e0b4b09b6fc99f6ddb1549282afb2a6255cbd8b3cabae08cdbb44cd0477ae4",
+    "mode": "0o644"
+  },
+  "tools/auth-config-probe.mjs": {
+    "sha256": "030d5e058affa76d9c24774f4f5c40a91ee59041f0a18bc9c66c546e4c8478f4",
+    "mode": "0o644"
+  },
+  "tools/entry.mjs": {
+    "sha256": "632d7c2ed7ac6227ca0fc6e71dbec0dc9aa4cf377491545679f8797130732654",
+    "mode": "0o644"
+  },
+  "tools/manage.mjs": {
+    "sha256": "9209bb58555d51d0e65815536a88486d3b2abc5f1bdb94b865440c97b7769621",
+    "mode": "0o644"
+  },
+  "tools/migrate.mjs": {
+    "sha256": "92067d99810055f0650e40ed32d5368734246e4251367fd9c477b57fc1e13f40",
+    "mode": "0o644"
+  },
+  "tools/updates.compose.yaml": {
+    "sha256": "550a30cca3b54847a7a092f2ce152fcf22c3b99ef341e0e9e051ef4799251ebc",
+    "mode": "0o644"
+  },
+  "vendor/manifest.json": {
+    "sha256": "de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878",
+    "mode": "0o644"
+  },
+  "vendor/templux-core-0.1.2-t29.1.tgz": {
+    "sha256": "02e7b02a66eef73dee4a2c15238c6c2631e370a09d70cca8dfb432fdeee6895d",
+    "mode": "0o644"
+  },
+  "vendor/templux-web-0.1.2-t29.1.tgz": {
+    "sha256": "b1f92427590644e6448ce2a4c5ecc19a0f806ec44db9b132b9be18465f978913",
+    "mode": "0o644"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "ServerVersion": "29.8.2",
+  "OperatingSystem": "Docker Desktop",
+  "OSType": "linux",
+  "Architecture": "aarch64",
+  "KernelVersion": "7.0.14-linuxkit",
+  "Driver": "overlayfs",
+  "NCPU": 10,
+  "MemTotal": 8319504384,
+  "proxyPresent": {
+    "HttpProxy": true,
+    "HttpsProxy": true,
+    "NoProxy": true
+  },
+  "context": "desktop-linux",
+  "builders": [
+    {
+      "name": "default",
+      "current": false,
+      "driver": "docker",
+      "nodes": [
+        {
+          "name": "default",
+          "version": "v0.33.1",
+          "status": "running",
+          "network": "host"
+        }
+      ]
+    },
+    {
+      "name": "default",
+      "current": false,
+      "driver": "docker",
+      "nodes": [
+        {
+          "name": "default",
+          "version": "v0.33.1",
+          "status": "running",
+          "network": "host"
+        }
+      ]
+    },
+    {
+      "name": "desktop-linux",
+      "current": true,
+      "driver": "docker",
+      "nodes": [
+        {
+          "name": "desktop-linux",
+          "version": "v0.33.1",
+          "status": "running",
+          "network": "host"
+        }
+      ]
+    },
+    {
+      "name": "desktop-linux",
+      "current": true,
+      "driver": "docker",
+      "nodes": [
+        {
+          "name": "desktop-linux",
+          "version": "v0.33.1",
+          "status": "running",
+          "network": "host"
+        }
+      ]
+    }
+  ],
+  "hostProxyEnvironmentPresent": {
+    "HTTP_PROXY": false,
+    "HTTPS_PROXY": false,
+    "ALL_PROXY": false,
+    "NO_PROXY": false,
+    "BUILDX_BUILDER": false,
+    "COMPOSE_BAKE": false
+  },
+  "clientProxyProfilesPresent": false,
+  "clientProxyFields": []
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "docker",
+    "image",
+    "rm",
+    "t29-cold-default-web"
+  ],
+  "timeoutSeconds": 20,
+  "timedOut": false,
+  "exitCode": 0,
+  "elapsedSeconds": 0.398
+}

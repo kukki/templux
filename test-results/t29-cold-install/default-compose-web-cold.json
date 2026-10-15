@@ -1,0 +1,19 @@
+{
+  "command": [
+    "docker",
+    "compose",
+    "--env-file",
+    "/dev/null",
+    "-p",
+    "t29-cold-default",
+    "--progress",
+    "plain",
+    "build",
+    "--no-cache",
+    "web"
+  ],
+  "timeoutSeconds": 150,
+  "timedOut": false,
+  "exitCode": 0,
+  "elapsedSeconds": 27.305
+}

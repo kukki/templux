@@ -1,0 +1,41 @@
+{
+  "pythonAST": 3,
+  "existingOutputRefused": {
+    "exit": 1,
+    "dockerReached": false
+  },
+  "threeBoundedCommandsExitZero": true,
+  "fixedInputHashesUnchanged": true,
+  "secretPatternScan": {
+    "files": 22,
+    "hits": []
+  },
+  "currentBuilder": "desktop-linux",
+  "productChanges": false,
+  "typescriptTests": "not rerun: no TS/product edits",
+  "inventory": {
+    "test-results/t29-cold-install/input-inventory.json": "c8a1c3b5fd55746d91ea4960c61cf705d2a56583aaaa8a9248ac1a92cc62b55a",
+    "test-results/t29-cold-install/web.py": "29558125f0159f336c5fefba7ddcfcdeb30d559f2600a2b92fa3da604689adb1",
+    "test-results/t29-cold-install/default-compose-cold.json": "48748f077623faf33920586854d248ec7a118f5e09aafd88862eff059f374fc5",
+    "test-results/t29-cold-install/remove-probe-image.log": "750d454ca9f2fe727e38079b13cb1aa27a87328f6b5922ae25edfb946a71a916",
+    "test-results/t29-cold-install/remove-t29-cold-default-management.log": "c564f97edca485d3392432d7fdb4d9361bfe746e0b73e68467eaa3bc94460a44",
+    "test-results/t29-cold-install/default-compose-web-cold.json": "34ca945b27fb01f52c70b839f87fabba4247ea3d84e87af2dc60e3fd530164f8",
+    "test-results/t29-cold-install/remove-t29-cold-default-web.log": "837d5002241248114d72a980378de63d37e00672705ad341ac12016f22bb9b6b",
+    "test-results/t29-cold-install/finalize.py": "17d8cf6834172475ce1302a0c2a4df6eb64de01b250ea57baed059feda50077c",
+    "test-results/t29-cold-install/remove-probe-image.json": "2222ad92fa996f532a6805e930ea791547e7ea9b9719fa0e883d82039f8869a0",
+    "test-results/t29-cold-install/input-unchanged.json": "389601ec4f47166569ea7762583f66079988043f0b18ececdb05b599af67a7fb",
+    "test-results/t29-cold-install/work.json": "0f4765db653ebaae06fb88b390be245c021f1356662a449192f51f20cebbaf97",
+    "test-results/t29-cold-install/cleanup.json": "6d6e9a0eadb8a580aa0f4b4dc3e49d47842aba66e578393264f4ab4481fde323",
+    "test-results/t29-cold-install/diagnose.py": "4eb03a878f4ce59d56c00c6d7f3ed8ad331880cdeca11d243a5de51e2cc7a6de",
+    "test-results/t29-cold-install/remove-t29-cold-default-web.json": "ed73891d62110bb906355722eecc6bd7193fd98ae0569abcff9137167481be49",
+    "test-results/t29-cold-install/cold-proof.json": "192d454167d87811967fbf269f69ca9d235a6f0486eb2f3d8df0ff67a598880f",
+    "test-results/t29-cold-install/default-compose-cold.log": "ca0b80ce9f6af48fd756a7d4e544f7c014bef136f619ed2cb9c60e5e727f6e27",
+    "test-results/t29-cold-install/remove-t29-cold-default-management.json": "5b64feb272f48f7fb23c63cb14b62364e149233c334c059d2c23c8b6855eef0c",
+    "test-results/t29-cold-install/default-network-probe.json": "a13e8fec359fe7fe896780cd200e79c59c4564e2a1668183b9989c450310696c",
+    "test-results/t29-cold-install/default-compose-web-cold.log": "e0879fe1de820c065513a62e1c68ace1d636ada40daab891df7df840b3902cb0",
+    "test-results/t29-cold-install/default-network-probe.log": "a1f25335b1506699217e0e8051320247633265fc2d52497cbca7e35b1c6644ac",
+    "test-results/t29-cold-install/environment.json": "cf68bb7b77b33d4acccf18dda8af7949704026cb207acb8a692d95c301443f98",
+    "docs/discovery/t29-cold-install.md": "7fec23a1d4641e0986ac20cb4ce59e4ea2abe0fbe78b5d0c937c788e30de33e2"
+  },
+  "rawLogsPreservedWithTrailingWhitespace": true
+}

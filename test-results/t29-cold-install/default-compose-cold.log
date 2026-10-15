@@ -1,0 +1,132 @@
+ Image t29-cold-default-management Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 638B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 3.54kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24.21.0-bookworm-slim
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/docker:29.8.2-cli
+#4 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/library/postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+#5 DONE 0.0s
+
+#6 [internal] load .dockerignore
+#6 transferring context:
+#6 transferring context: 123B done
+#6 DONE 0.0s
+
+#7 [docker-client 1/1] FROM docker.io/library/docker:29.8.2-cli@sha256:35cfcf893c20f2931f4909151b5407aaaeab711277de7ce8b8f521f095d54c32
+#7 resolve docker.io/library/docker:29.8.2-cli@sha256:35cfcf893c20f2931f4909151b5407aaaeab711277de7ce8b8f521f095d54c32 0.0s done
+#7 CACHED
+
+#8 [dependencies 1/4] FROM docker.io/library/node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20
+#8 resolve docker.io/library/node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 0.0s done
+#8 DONE 0.0s
+
+#9 [dependencies 2/4] WORKDIR /opt/project
+#9 CACHED
+
+#10 [pg-tools 1/2] FROM docker.io/library/postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+#10 resolve docker.io/library/postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c 0.0s done
+#10 CACHED
+
+#11 [internal] load build context
+#11 transferring context: 412.74kB 0.0s done
+#11 DONE 0.0s
+
+#12 [dependencies 3/4] COPY . .
+#12 DONE 0.1s
+
+#13 [pg-tools 2/2] RUN mkdir -p /opt/pg-tools/bin /opt/pg-tools/lib && cp /usr/lib/postgresql/18/bin/pg_dump /usr/lib/postgresql/18/bin/pg_restore /usr/lib/postgresql/18/bin/psql /opt/pg-tools/bin/ && ldd /opt/pg-tools/bin/* | awk '/=> \// {print $3}' | sort -u | xargs -r cp -L -t /opt/pg-tools/lib/
+#13 DONE 0.2s
+
+#14 [dependencies 4/4] RUN node .templux/verify.mjs . && npm ci --ignore-scripts --no-audit --no-fund && node .templux/verify.mjs . --installed
+#14 0.179 {"ok":true,"version":"0.1.2-t29.1","manifestSha256":"de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878"}
+#14 5.805 
+#14 5.805 added 94 packages in 6s
+#14 5.806 npm notice
+#14 5.806 npm notice New major version of npm available! 11.19.0 -> 12.2.0
+#14 5.806 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#14 5.806 npm notice To update run: npm install -g npm@12.2.0
+#14 5.806 npm notice
+#14 5.885 {"ok":true,"version":"0.1.2-t29.1","manifestSha256":"de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878"}
+#14 DONE 6.3s
+
+#15 [api-build 1/1] RUN npm run build --workspace project-api
+#15 0.212 
+#15 0.212 > project-api@1.0.0 build
+#15 0.212 > tsc -p tsconfig.json
+#15 0.212 
+#15 DONE 0.3s
+
+#16 [api  3/12] COPY --from=dependencies /opt/project/package.json /opt/project/package-lock.json ./
+#16 DONE 0.0s
+
+#17 [api  4/12] COPY --from=dependencies /opt/project/apps/api/package.json apps/api/package.json
+#17 DONE 0.0s
+
+#18 [api  5/12] COPY --from=dependencies /opt/project/apps/web/package.json apps/web/package.json
+#18 DONE 0.0s
+
+#19 [api  6/12] COPY --from=dependencies /opt/project/vendor vendor
+#19 DONE 0.0s
+
+#20 [api  7/12] COPY --from=dependencies /opt/project/.templux .templux
+#20 DONE 0.0s
+
+#21 [api  8/12] COPY --from=dependencies /opt/project/templux.lock.json templux.lock.json
+#21 DONE 0.0s
+
+#22 [api  9/12] RUN node .templux/verify.mjs . && npm ci --ignore-scripts --omit=dev --workspace project-api --no-audit --no-fund
+#22 0.095 {"ok":true,"version":"0.1.2-t29.1","manifestSha256":"de067a89e34f10a482286d7d8b330e9522ab7ad7bb1c7d751c9c9317d6f13878"}
+#22 1.107 
+#22 1.107 added 63 packages in 982ms
+#22 1.107 npm notice
+#22 1.107 npm notice New major version of npm available! 11.19.0 -> 12.2.0
+#22 1.107 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#22 1.107 npm notice To update run: npm install -g npm@12.2.0
+#22 1.107 npm notice
+#22 DONE 1.2s
+
+#23 [api 10/12] COPY --from=api-build /opt/project/apps/api/dist apps/api/dist
+#23 DONE 0.0s
+
+#24 [api 11/12] COPY --from=dependencies /opt/project/config config
+#24 DONE 0.0s
+
+#25 [api 12/12] COPY --from=dependencies /opt/project/tools tools
+#25 DONE 0.0s
+
+#26 [management 1/4] COPY --from=pg-tools /opt/pg-tools /opt/pg-tools
+#26 DONE 0.0s
+
+#27 [management 2/4] COPY --from=docker-client /usr/local/bin/docker /usr/local/bin/docker
+#27 DONE 0.1s
+
+#28 [management 3/4] COPY --from=docker-client /usr/local/libexec/docker/cli-plugins/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose
+#28 DONE 0.1s
+
+#29 [management 4/4] COPY --from=docker-client /usr/local/libexec/docker/cli-plugins/docker-buildx /usr/local/libexec/docker/cli-plugins/docker-buildx
+#29 DONE 0.1s
+
+#30 exporting to image
+#30 exporting layers
+#30 exporting layers 1.2s done
+#30 exporting manifest sha256:87982c52556a0f9519d632c65b37d674f774e5a5cf52745c10e4562193307e45 done
+#30 exporting config sha256:9f07d2e3b54d365a22770f8d7bda89736d777e1cf8ef687668335828f40ad822 done
+#30 exporting attestation manifest sha256:32dc4e8d0cec47e83e824569c3db27c30683ac2061f09be3a51fd4e62514380a done
+#30 exporting manifest list sha256:9512013190597c3b0e0b95cb81e6e778ffe7aeb0db552f9e71105c52890b5d84 done
+#30 naming to docker.io/library/t29-cold-default-management:latest done
+#30 unpacking to docker.io/library/t29-cold-default-management:latest
+#30 unpacking to docker.io/library/t29-cold-default-management:latest 0.7s done
+#30 DONE 1.9s
+
+#31 resolving provenance for metadata file
+#31 DONE 0.0s
+ Image t29-cold-default-management Built 
