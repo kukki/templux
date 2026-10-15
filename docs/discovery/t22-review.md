@@ -81,3 +81,52 @@ Standards0 / Spec1(P2)，建议先修F1再验收。未重复288、生产构建�
 ## 开发修复交付（待独立复核）
 
 F1的RED→GREEN、空库定义、标准migration实际SQL/备份恢复和最终专项记录见 [t22-fix-acceptance.md](t22-fix-acceptance.md)。本附记不更改上述初审结论或替代复核。
+
+## F1 定向独立复核附录
+
+固定修复范围 `1a438064078b27dc4558c4f88f14b2d4a5e7b428..e572682f559b63807c68846f678203333ed49c71`。读取全部7文件差异、修复验收及更新后的空库定义；唯一产品变更为database.ts的existing目录查询，历史SQL未改。继续同一审查者双轴，保留初审。
+
+### Standards
+
+新增 **0项**。pg_depend的namespace依赖可覆盖独立类型及其它schema命名对象；空自定义schema独立判断，非schema目录单列。原迁移锁、pending检查、beforeChange与元数据写入先后保持。查询异常直接抛出，不存在捕获错误后默认为空的分支；本轮未逐类注入catalog/权限错误，不冒称该矩阵已实测。
+
+核对Context7 [pg_depend](https://www.postgresql.org/docs/18/catalog-pg-depend.html) 的pinned依赖省略语义及本数据库subscription过滤。查阅[PG18 transam.h](https://github.com/postgres/postgres/blob/REL_18_STABLE/src/include/access/transam.h)和[varsup.c](https://github.com/postgres/postgres/blob/REL_18_STABLE/src/backend/access/transam/varsup.c)：FirstNormalObjectId=16384及正常生成/回绕避开initdb范围有源码依据，不能只据当前样本最大OID推断。默认plpgsql、系统/public默认状态的独立空库对照通过。
+
+结构采用index/search→双向trace→snippet，相关9条修复/依赖/证据源码路径均metadata_match且直读。图谱仍为best-effort；正例矩阵不证明所有Postgres对象类别已经穷尽。
+
+### Spec：原类型路径修复，但F1/P2仍未闭合
+
+原enum-only坏路径已经非零并保持history不存在；domain/composite以及其余版本化案例也通过。**新增实证触发为仅含用户access method的数据库；沿用F1/P2的“非空对象绕过备份”问题，暂不关闭，#23仍建议修复后验收。**
+
+定位：`apps/api/src/database.ts:111`起的非schema目录枚举（111–123行），缺少pg_am用户对象。
+
+自有新库 `am_only`，没有schema对象或迁移历史，仅执行：
+
+```sql
+CREATE ACCESS METHOD review_heap TYPE TABLE
+HANDLER pg_catalog.heap_tableam_handler;
+```
+
+随后运行最终标准target镜像 `t22-fix-standard-migration`，连接该库并设置 `TEMPLUX_BACKUP_DIR=/proc/backup-impossible`。
+
+实际退出0，stdout `{"ok":true,"schemaVersion":"0010","applied":10}`，stderr空；之后history10行、review_heap仍为1条。备份前置未调用，恢复依据缺失；没有观察到access method被删或数据损失。证据 `test-results/t22-f1-review/am-{setup,migration,after}.*`。
+
+该对象位于单库[pg_am](https://www.postgresql.org/docs/18/catalog-pg-am.html)，CREATE ACCESS METHOD不指定namespace，handler可以直接引用系统内置函数，不会因此新增public命名对象；它不属于已排除的集群角色/tablespace或部署配置。21个正例未包含此目录，新增枚举仍将此非空库当作空库。
+
+建议补入pg_am中正常运行创建的access method判断，保留内置heap/btree等真正空库对照；增加上述真实标准target坏路径回归，断言非零且history仍不存在，以及合法备份后scratch保留该方法的对照。核对其它具体非schema对象应依据目录/源码和风险，不将未测试类别直接宣称完备，也不能以缩窄“空库”文档跳过已确认的备份前置要求。
+
+### 本轮独立执行与源码对应
+
+自有Compose项目 **t22-f1-review**，独立PG18.6库/卷/目录；没有原0004连接或应用/真人凭据。
+
+- 最终 `t22-fix-checks` 运行 `tests/migration-objects.test.mjs tests/backup.test.mjs tests/backup-faults.test.mjs`，显式隔离TEST_AUTH_DATABASE_URL：**34/34**，fail/cancel/skip0；API/Web typecheck退出0。`test-results/t22-f1-review/{targeted,typecheck}.log`。含真实迁移锁竞争、备份失败释放后可重获锁、无history及非root故障对照。
+- 主机/checks的6份源（含测试）和checks/标准target的5份编译SHA逐一一致；`integrity.json`。checks为`ad05ac6ed06f…`，实际标准target为`812dbe4f0f48…`。没有覆盖产品代码后冒充原镜像含修复。
+- 完整复跑版本化proof的**21对象**坏路径、原enum-only/no-history、三类型合法自动备份→scratch、空库、无pending及0008升级对照，全部通过。`standard-proof.log`，进程退出0。
+- proof为了隔离仅使用ignored副本改自有项目/网络/hostRoot，原版本化测试及产品源码不改。工具壳沿用旧t22-management提供Docker/pg，实际迁移始终调用新标准target；测试只读挂载，不增加生产入口。
+- scratch确认类型目录相等、enum标签draft/active、domain正值及负值约束拒绝、composite(name=proof,amount=7)；归档1912字节，scratch历史表不存在，证明归档先于10项迁移。真实空库applied10、无pending applied0，0008坏路径仍0008、合法根applied2。
+
+初次并行启动日志目录尚未生成使类型检查重定向失败，随后目录就绪后完整命令退出0；这是审查编排错误，不作为产品缺陷或通过证据。除上述新增pg_am触发外，本轮无其它新增发现。未重跑288/UI、备份保留/外部全矩阵或生产构建；初审未改范围证据继续有效，开发未逐分支故障和全DDL类别局限继续保留。
+
+### 收尾
+
+自有数据库容器/网络/卷及private目录的dump/key已删除，保留公开复现脚本/日志；未创建浏览器或交付凭据。`cleanup.log`、`original-status.json`确认原服务ready/connected/schema **0004**。没有修改实现、迁移历史、原.env、presentation、部署、Ego31、真人权限或飞书；仅追加本附录，本地报告提交，不push/关票。T03真实组织人工验收、后续恢复CLI/会话撤销及平台/TLS/所有版本DDL限制保持。
