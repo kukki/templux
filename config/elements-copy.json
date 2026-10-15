@@ -70,5 +70,18 @@
   "noticeContent": "通知正文",
   "noticeRemaining": "剩余显示时间",
   "noticePaused": "已暂停",
-  "noticeOmitted": "已省略的等待通知："
+  "noticeOmitted": "已省略的等待通知：",
+  "openImage": "预览图片",
+  "imagePreview": "图片预览",
+  "closeImage": "关闭图片预览",
+  "imageUnavailable": "图片暂不可用",
+  "imageLoading": "正在读取图片",
+  "imageStage": "图片，等比适配",
+  "imageStageZoom": "图片，可用加减号缩放、方向键移动、0恢复适配",
+  "previousImage": "上一张",
+  "nextImage": "下一张",
+  "zoomOutImage": "缩小图片",
+  "zoomInImage": "放大图片",
+  "imageScale": "相对适配比例",
+  "fitImage": "适配视口"
 }

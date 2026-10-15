@@ -101,5 +101,20 @@
   "noticeLongTitle": "长内容示例",
   "noticeLongBody": "这段合成说明用于验证窄屏阅读和键盘滚动，所有内容仅存在当前页面。",
   "noticeBurstTitle": "合成提示",
-  "noticeWaitingCapacity": "等待容量"
+  "noticeWaitingCapacity": "等待容量",
+  "imageTitle": "图片预览与图库",
+  "imageIntro": "这里的图片均由代码生成，不含业务照片。点击已加载图片预览，按 Escape、关闭或点击外侧遮罩返回。",
+  "imageGallery": "启用图库",
+  "imageZoom": "启用缩放拖动",
+  "imageSingleTitle": "单图与可选图库",
+  "imageFallbackTitle": "当前图片的备选源",
+  "imageFailedTitle": "全部源失败",
+  "imageEmptyTitle": "没有可用源",
+  "imageAltA": "合成蓝色方格，横向画布 A",
+  "imageAltB": "合成棕色圆环，纵向画布 B",
+  "imageAltC": "合成黄色对角线，宽幅画布 C",
+  "imageFallbackAlt": "合成画布 A：按顺序尝试缺失源、损坏源和有效源",
+  "imageFailedAlt": "独立失败示例，不会切到其它图库图片",
+  "imageEmptyAlt": "无图片来源的占位示例",
+  "imageZoomNote": "启用后用按钮或加减号缩放，拖动或方向键移动；切图和视口变化恢复适配。不提供图片编辑。"
 }
