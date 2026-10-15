@@ -111,6 +111,7 @@ export async function migrate(pool: pg.Pool, beforeChange?: () => Promise<unknow
         OR EXISTS (SELECT 1 FROM pg_extension WHERE oid>=16384)
         OR EXISTS (SELECT 1 FROM pg_language WHERE oid>=16384)
         OR EXISTS (SELECT 1 FROM pg_cast WHERE oid>=16384)
+        OR EXISTS (SELECT 1 FROM pg_am WHERE oid>=16384)
         OR EXISTS (SELECT 1 FROM pg_transform)
         OR EXISTS (SELECT 1 FROM pg_foreign_data_wrapper)
         OR EXISTS (SELECT 1 FROM pg_foreign_server)

@@ -69,3 +69,9 @@ pg_dump custom归档必须非空且有PGDMP头，工具exit0，无诊断，pg_re
 不属于schema的对象另外检查数据库目录：用户扩展、语言、cast、transform、FDW/server/user mapping、event trigger、publication、本数据库subscription、large object及default ACL。initdb系统默认对象、默认public空schema和默认plpgsql不会令真正空库触发备份。扩展即使安装在pg_catalog仍识别；对包含内置记录的extension/language/cast目录，按Postgres的FirstNormalObjectId=16384区分正常运行创建对象与initdb记录（[PG18源码说明](https://github.com/postgres/postgres/blob/REL_18_STABLE/src/include/access/transam.h)）。模板项目对象使用public或自定义schema，不向保留的系统schema写业务对象。集群共享角色、tablespace及部署配置仍不属于单库逻辑备份范围；目录读取权限不足或目标版本缺少目录会阻断，不退化为空库。本查询按PostgreSQL18验证；pg_dump工具可读源9.2–18不代表模板迁移支持这一整个版本区间。非空检测只决定备份前置，不等于每种对象均已包含在归档；标准pg_dump范围、角色/权限和扩展恢复前提仍需分别核对。
 
 判定只在有pending时执行；真正新空库跳过备份，无pending仍跳过，即使当前备份路径不可用。已有类型库备份失败必须保持原对象、无新历史表或记录；合法路径须先发布可读automatic归档才迁移。该修复不改变迁移锁→备份锁→根锁顺序，不自动停写、不中途新增迁移，也不修改历史SQL。独立类型的真实标准镜像/坏路径/归档scratch及34项定向证据见[T22修复验收](../discovery/t22-fix-acceptance.md)。
+
+### T22 F1 第二轮补齐：访问方法
+
+自定义table/index access method也是单库非schema对象。补查pg_am的正常运行OID（>=16384），内置heap/btree等initdb记录不计入已有用户结构。这与PG18.6 pg_dump的selectDumpableAccessMethod使用同一OID边界，不按AM名字猜测；读取目录报错仍在原查询中向外失败，不退化为空库。非空检测不保证每个对象/插件能在任意目标恢复，角色/表空间和插件二进制等前提仍按单库备份范围另行准备。
+
+本轮以PG18.6 pg_dump.h的DumpableObjectType及pg_dump.c的相关选择/输出函数作有界核对：独立非schema根对象为extension、procedural language、cast、access method、transform、FDW/server、default ACL、large object、event trigger、publication、subscription；本次明确遗漏为AM，其余已有对应目录检查。user mapping虽非独立DO根，已有检查且随server输出；关系/类型/函数等命名对象与索引/约束/策略、复制关系等子对象另由schema或父对象识别。数据、统计及归档边界不是新增独立根；数据库根元数据也不能以“数据库存在”作为非空判断。这是该版本源码类别的有界核对，不宣称穷尽所有DDL、所有属性变化、插件或未来版本。源码映射与实际36项、标准target/scratch证据见[T22 AM补齐验收](../discovery/t22-am-fix-acceptance.md)。

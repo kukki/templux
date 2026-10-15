@@ -130,3 +130,7 @@ HANDLER pg_catalog.heap_tableam_handler;
 ### 收尾
 
 自有数据库容器/网络/卷及private目录的dump/key已删除，保留公开复现脚本/日志；未创建浏览器或交付凭据。`cleanup.log`、`original-status.json`确认原服务ready/connected/schema **0004**。没有修改实现、迁移历史、原.env、presentation、部署、Ego31、真人权限或飞书；仅追加本附录，本地报告提交，不push/关票。T03真实组织人工验收、后续恢复CLI/会话撤销及平台/TLS/所有版本DDL限制保持。
+
+## AM补齐开发交付（待独立复核）
+
+本轮访问方法RED→GREEN、PG18.6单库非schema对象的有界核对及标准target/恢复证据见 [t22-am-fix-acceptance.md](t22-am-fix-acceptance.md)。保留前述初审和复核结论，F1是否关闭待独立复核。

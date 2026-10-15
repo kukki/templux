@@ -1,5 +1,7 @@
 // SQL fixtures only for isolated database-catalog regression tests.
 export const migrationObjectCases=[
+ ['table_am','CREATE ACCESS METHOD fix_heap TYPE TABLE HANDLER pg_catalog.heap_tableam_handler'],
+ ['index_am','CREATE ACCESS METHOD fix_btree TYPE INDEX HANDLER pg_catalog.bthandler'],
  ['enum',"CREATE TYPE public.fix_status AS ENUM ('draft','active')"],
  ['domain','CREATE DOMAIN public.fix_positive AS integer CHECK (VALUE>0)'],
  ['composite','CREATE TYPE public.fix_pair AS (name text,amount integer)'],
