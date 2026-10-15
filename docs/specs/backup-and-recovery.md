@@ -133,3 +133,7 @@ docker compose run --rm --no-deps --entrypoint /opt/pg-tools/bin/psql \
 在**消费者隔离且block保留**下，正确引用SQL identifier并显式`ALTER DATABASE "目标" ALLOW_CONNECTIONS true`，仅供管理核验。核对精确历史、数据、runId审计及全部旧session/OAuth/link清空；未知COMMIT可能实际完成。若决定保留失败前数据，须在业务写屏障下同事务清理旧证明、设置offline/gate递增及强审计，确认提交后复核。任何核验/审计失败重新禁连接并保留block。只有核验完成才按runId归属清理block，最后另行显式maintenance-resume；允许连接本身不等于恢复完成。该手工流程需要独占宿主运维控制，不是自动灾备编排；NOCREATEDB管理库救援及原库审计失败的完整回路见T23验收记录。
 
 T23复用的对象检测对user mapping改用公开`pg_user_mappings`视图，只检查存在性，不读umoptions；原始pg_user_mapping对普通角色受限，不能把权限错误当空库。[官方说明](https://www.postgresql.org/docs/18/view-pg-user-mappings.html)。恢复任意代码/clean/权限选项依据[pg_restore](https://www.postgresql.org/docs/18/app-pgrestore.html)，单事务错误停止依据[psql](https://www.postgresql.org/docs/18/app-psql.html)。当前库身份不可读取/不可连接时独立模式同样拒绝，不能猜测它与目标不同；不是无条件灾难切换功能。
+
+### T23 F1：恢复参数缺值前检
+
+四个取值选项必须使用分开的`--option value`；不支持`--option=value`。值为空、EOF或下一个`--flag`时均在Docker前失败，失败标记不会因后面参数完整而被覆盖。先独立识别合法`--json`，因此其位于缺值之前或之后都只输出一个错误JSON；人工模式错误写stderr。参数值以`--`开头时拒绝，不以`--`分隔符等临时形式绕过；若文件本名为`--selected.dump`，提供实际完整绝对路径，例如`/approved/--selected.dump`。包含空格的合法绝对路径保持单一参数，容器仍统一验证归档、SHA、权限和目标，不扩大宿主恢复逻辑。菜单和顶层`--help`仍按既有转交规则处理，不新增help功能。开发宿主回归：`python3 tests/restore-wrapper.test.py`（标准库/假Docker，不改变产品CLI的Shell+Docker依赖）。
