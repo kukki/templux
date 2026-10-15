@@ -1,7 +1,7 @@
 import {mkdirSync,existsSync,readFileSync,lstatSync,rmSync,mkdtempSync,writeFileSync} from 'node:fs';
 import {join,resolve} from 'node:path';import {tmpdir} from 'node:os';import {spawnSync} from 'node:child_process';
 import {verifyProject,sha,isExactVersion} from '../release/verify.mjs';
-import {safePath,overlaps,entry,writeEntry,list,projectFiles,json,writeJSON,digestPath,secret} from './files.mjs';
+import {safePath,overlaps,entry,writeEntry,list,projectFiles,json,writeJSON,digestPath,secret,assertSeparated} from './files.mjs';
 import {mergeEntry,sameEntry} from './merge.mjs';import {runChecks} from './checks.mjs';
 // New business/config files remain project owned. A new template path is not automatically eligible.
 export const managed=p=>['Dockerfile','compose.yaml','templux','.dockerignore','.gitignore'].includes(p)||/^tools\/[a-z0-9-]+\.mjs$/.test(p)||/^apps\/(api|web)\/tsconfig\.json$/.test(p)||['apps/web/next.config.ts','apps/web/next-env.d.ts','apps/web/server.mjs','apps/web/app/layout.tsx','apps/web/app/page.tsx','apps/web/app/api/[...path]/route.ts'].includes(p)||/^apps\/web\/app\/(account|admin|audit|examples|login|protected)\/page\.tsx$/.test(p);
@@ -21,6 +21,7 @@ function patch(current,candidate,paths,out){
 export async function propose({current,target,targetVersion,targetSha,output,trustProjectCode=false,behavior,timeout=180000}){
  current=safePath(current);target=safePath(target);output=safePath(output);
  if(!isExactVersion(targetVersion)||!/^[a-f0-9]{64}$/.test(targetSha??'')||[current,target].some(p=>overlaps(p,output))||overlaps(current,target)||existsSync(output))throw new Error('invalid version/hash or unsafe/existing output');
+ assertSeparated([current,target],output);
  if(!Number.isSafeInteger(timeout)||timeout<100||timeout>600000)throw new Error('invalid timeout');
  const currentVerified=verifyProject(current),targetProject=join(target,'project'),targetVerified=verifyProject(targetProject),m=json(current,'vendor/manifest.json'),t=json(target,'manifest.json'),complete=json(target,'complete.json');
  if(targetVerified.version!==targetVersion||targetVerified.manifestSha256!==targetSha||sha(entry(target,'manifest.json').bytes)!==targetSha||complete.version!==targetVersion||complete.manifestSha256!==targetSha)throw new Error('target release identity invalid');
