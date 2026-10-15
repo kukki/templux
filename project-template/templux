@@ -1,0 +1,65 @@
+#!/bin/sh
+set -eu
+TEMPLUX_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+# Reject incomplete scripted restore before even probing/building a Docker image.
+TEMPLUX_RESTORE_TARGET_KEY=''
+if [ "${1-}" = restore ]; then
+  TEMPLUX_RESTORE_MODE=''; TEMPLUX_RESTORE_TARGET=''; TEMPLUX_RESTORE_ARCHIVE=''; TEMPLUX_RESTORE_SHA=''
+  TEMPLUX_RESTORE_CONFIRM=0; TEMPLUX_RESTORE_OVERWRITE=0; TEMPLUX_RESTORE_EXPECT=''; TEMPLUX_RESTORE_JSON=0
+  TEMPLUX_RESTORE_VALID=1
+  # Error formatting must not depend on whether an earlier option lacks its value.
+  for TEMPLUX_RESTORE_ARG in "$@"; do
+    if [ "$TEMPLUX_RESTORE_ARG" = --json ]; then TEMPLUX_RESTORE_JSON=1; fi
+  done
+  for TEMPLUX_RESTORE_ARG in "$@"; do
+    if [ -n "$TEMPLUX_RESTORE_EXPECT" ]; then
+      case "$TEMPLUX_RESTORE_ARG" in
+        ''|--*) TEMPLUX_RESTORE_VALID=0;;
+        *)
+          case "$TEMPLUX_RESTORE_EXPECT" in
+            mode) TEMPLUX_RESTORE_MODE=$TEMPLUX_RESTORE_ARG;; target) TEMPLUX_RESTORE_TARGET=$TEMPLUX_RESTORE_ARG;;
+            archive) TEMPLUX_RESTORE_ARCHIVE=$TEMPLUX_RESTORE_ARG;; sha) TEMPLUX_RESTORE_SHA=$TEMPLUX_RESTORE_ARG;;
+          esac
+          TEMPLUX_RESTORE_EXPECT=''; continue;;
+      esac
+      TEMPLUX_RESTORE_EXPECT=''
+    fi
+    case "$TEMPLUX_RESTORE_ARG" in
+      --mode) TEMPLUX_RESTORE_EXPECT=mode;; --target) TEMPLUX_RESTORE_EXPECT=target;;
+      --archive) TEMPLUX_RESTORE_EXPECT=archive;; --sha256) TEMPLUX_RESTORE_EXPECT=sha;;
+      --mode=*|--target=*|--archive=*|--sha256=*) TEMPLUX_RESTORE_VALID=0;;
+      --confirm) TEMPLUX_RESTORE_CONFIRM=1;; --overwrite) TEMPLUX_RESTORE_OVERWRITE=1;; --json) TEMPLUX_RESTORE_JSON=1;;
+    esac
+  done
+  case "$TEMPLUX_RESTORE_MODE" in original|independent) :;; *) TEMPLUX_RESTORE_VALID=0;; esac
+  case "$TEMPLUX_RESTORE_TARGET" in current) :;; env:*)
+    TEMPLUX_RESTORE_TARGET_KEY=${TEMPLUX_RESTORE_TARGET#env:}
+    case "$TEMPLUX_RESTORE_TARGET_KEY" in ''|*[!A-Z0-9_]*|[0-9_]*) TEMPLUX_RESTORE_VALID=0;; esac;;
+    *) TEMPLUX_RESTORE_VALID=0;; esac
+  if [ -z "$TEMPLUX_RESTORE_ARCHIVE" ] || [ -z "$TEMPLUX_RESTORE_SHA" ] || [ "$TEMPLUX_RESTORE_CONFIRM" = 0 ] || [ "$TEMPLUX_RESTORE_OVERWRITE" = 0 ] || [ -n "$TEMPLUX_RESTORE_EXPECT" ]; then TEMPLUX_RESTORE_VALID=0; fi
+  if [ "$TEMPLUX_RESTORE_VALID" = 0 ]; then
+    if [ "$TEMPLUX_RESTORE_JSON" = 1 ]; then echo '{"ok":false,"error":"restore requires explicit --mode, --target, --archive, --sha256, --confirm and --overwrite before Docker; values must be separate arguments and cannot start with -- (archive example: /approved/--selected.dump)"}'; else echo 'restore requires explicit --mode, --target, --archive, --sha256, --confirm and --overwrite before Docker; values must be separate arguments and cannot start with -- (archive example: /approved/--selected.dump)' >&2; fi
+    exit 1
+  fi
+fi
+# Explicit paired container-owner override for independently verified bind-mount mappings.
+if [ "${TEMPLUX_HOST_UID+x}" != "${TEMPLUX_HOST_GID+x}" ]; then
+  echo 'TEMPLUX_HOST_UID/GID 必须成对提供。' >&2; exit 1
+fi
+for TEMPLUX_OWNER_VALUE in "${TEMPLUX_HOST_UID-$(id -u)}" "${TEMPLUX_HOST_GID-$(id -g)}"; do
+  case "$TEMPLUX_OWNER_VALUE" in ''|*[!0-9]*|0[0-9]*) echo '宿主属主覆盖必须为规范非负整数。' >&2; exit 1;; esac
+  if [ "${#TEMPLUX_OWNER_VALUE}" -gt 10 ] || [ "$TEMPLUX_OWNER_VALUE" -gt 4294967294 ]; then
+    echo '宿主属主覆盖超出UID/GID范围。' >&2; exit 1
+  fi
+done
+TEMPLUX_AUTH_AVAILABILITY=$(docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" \
+  run --build --quiet-build --rm --no-deps auth-config-probe) || TEMPLUX_AUTH_AVAILABILITY=''
+if [ -n "$TEMPLUX_RESTORE_TARGET_KEY" ]; then set -- -e "$TEMPLUX_RESTORE_TARGET_KEY" management "$@"; else set -- management "$@"; fi
+if [ "${TEMPLUX_RESTORE_ADMIN_URL+x}" = x ]; then set -- -e TEMPLUX_RESTORE_ADMIN_URL "$@"; fi
+exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" \
+  run --build --quiet-build --rm --no-deps \
+  -e "TEMPLUX_AUTH_AVAILABILITY_JSON=$TEMPLUX_AUTH_AVAILABILITY" \
+  -e "TEMPLUX_PROJECT_DIR=$TEMPLUX_ROOT" \
+  -e "TEMPLUX_HOST_UID=${TEMPLUX_HOST_UID-$(id -u)}" -e "TEMPLUX_HOST_GID=${TEMPLUX_HOST_GID-$(id -g)}" \
+  -v "$TEMPLUX_ROOT:$TEMPLUX_ROOT:ro" \
+  "$@"

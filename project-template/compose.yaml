@@ -1,0 +1,192 @@
+name: ${TEMPLUX_PROJECT_NAME:-project-app}
+
+x-auth-environment: &auth-environment
+  AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS-90}
+  AUDIT_CLEANUP_BATCH_SIZE: ${AUDIT_CLEANUP_BATCH_SIZE-1000}
+  AUDIT_CLEANUP_MAX_BATCHES: ${AUDIT_CLEANUP_MAX_BATCHES-10}
+  AUDIT_CLEANUP_INTERVAL_SECONDS: ${AUDIT_CLEANUP_INTERVAL_SECONDS-3600}
+  RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
+  RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
+  PASSWORD_PROXY_HOSTS: ${PASSWORD_PROXY_HOSTS-web}
+  FEISHU_APP_ID: ${FEISHU_APP_ID:-}
+  FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
+  FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
+  FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
+  FEISHU_REDIRECT_URI: ${FEISHU_REDIRECT_URI:-}
+  APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:31000}
+  DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-PROD}
+  AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
+  AGENT_IDLE_TIMEOUT_SECONDS: ${AGENT_IDLE_TIMEOUT_SECONDS:-600}
+  AGENT_SESSION_MAX_SECONDS: ${AGENT_SESSION_MAX_SECONDS:-43200}
+  HEARTBEAT_INTERVAL_SECONDS: ${HEARTBEAT_INTERVAL_SECONDS:-30}
+  PERSON_IDLE_TIMEOUT_SECONDS: ${PERSON_IDLE_TIMEOUT_SECONDS:-600}
+  PERSON_SESSION_MAX_SECONDS: ${PERSON_SESSION_MAX_SECONDS:-43200}
+
+x-database-environment: &database-environment
+  DATABASE_URL: ${DATABASE_URL:-postgresql://templux:templux-local-only@database:5432/templux}
+
+x-runtime-logging: &runtime-logging
+  driver: json-file
+  options:
+    max-size: "${RUNTIME_LOG_MAX_BYTES-10485760}"
+    max-file: "${RUNTIME_LOG_MAX_FILES-10}"
+    compress: "false"
+
+services:
+  database:
+    logging: *runtime-logging
+    image: postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+    environment:
+      POSTGRES_DB: templux
+      POSTGRES_USER: templux
+      POSTGRES_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
+    volumes:
+      - database:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U templux -d templux"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    logging: *runtime-logging
+    build:
+      context: .
+      target: api
+    environment:
+      <<: [*database-environment, *auth-environment]
+      TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/project/maintenance/release.json
+      TEMPLUX_CONFIG_PATH: /opt/project/config/presentation.json
+    volumes:
+      - maintenance:/opt/project/maintenance:ro
+      - ./config:/opt/project/config:ro
+    ports:
+      - "127.0.0.1:${TEMPLUX_API_PORT:-31800}:8080"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 8s
+      retries: 10
+    restart: unless-stopped
+
+  entry:
+    logging: *runtime-logging
+    build:
+      context: .
+      target: api
+    command: ["node", "tools/entry.mjs"]
+    environment:
+      <<: *database-environment
+      ENTRY_TRUSTED_PROXY_CIDRS: ${ENTRY_TRUSTED_PROXY_CIDRS-}
+      RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
+      RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
+      TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/project/maintenance/release.json
+      TEMPLUX_CONFIG_PATH: /opt/project/config/presentation.json
+    volumes:
+      - maintenance:/opt/project/maintenance:ro
+      - ./config:/opt/project/config:ro
+    ports:
+      - "127.0.0.1:${TEMPLUX_HTTP_PORT:-31000}:8080"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 8s
+      retries: 10
+    restart: unless-stopped
+
+  web:
+    logging: *runtime-logging
+    build:
+      context: .
+      target: web
+    environment:
+      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-PROD}
+      COMPONENT_EXAMPLES_ENABLED: ${COMPONENT_EXAMPLES_ENABLED-auto}
+      API_INTERNAL_URL: http://api:8080
+      RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
+      RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
+      WEB_ENTRY_PROXY_HOSTS: entry
+      WEB_TRUSTED_PROXY_CIDRS: ${WEB_TRUSTED_PROXY_CIDRS:-}
+      TEMPLUX_CONFIG_PATH: /opt/project/config/presentation.json
+    volumes:
+      - ./config:/opt/project/config:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 8s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    logging: *runtime-logging
+    build:
+      context: .
+      target: migration
+    environment:
+      <<: *database-environment
+      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-project-app}
+      TEMPLUX_BACKUP_DIR: /opt/project/backups
+      TEMPLUX_BACKUP_RETAIN: ${TEMPLUX_BACKUP_RETAIN-5}
+      TEMPLUX_HOST_UID: ${TEMPLUX_HOST_UID-0}
+      TEMPLUX_HOST_GID: ${TEMPLUX_HOST_GID-0}
+    volumes:
+      - ${TEMPLUX_BACKUP_DIR-./backups}:/opt/project/backups
+    profiles: ["tools"]
+    entrypoint: ["node", "tools/migrate.mjs"]
+
+  auth-config-probe:
+    logging: *runtime-logging
+    build:
+      context: .
+      target: api
+    environment: *auth-environment
+    profiles: ["tools"]
+    entrypoint: ["node", "tools/auth-config-probe.mjs"]
+
+  management:
+    logging: *runtime-logging
+    build:
+      context: .
+      target: management
+    environment:
+      <<: *database-environment
+      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-PROD}
+      AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
+      RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
+      RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS-90}
+      AUDIT_CLEANUP_BATCH_SIZE: ${AUDIT_CLEANUP_BATCH_SIZE-1000}
+      AUDIT_CLEANUP_MAX_BATCHES: ${AUDIT_CLEANUP_MAX_BATCHES-10}
+      AUDIT_CLEANUP_INTERVAL_SECONDS: ${AUDIT_CLEANUP_INTERVAL_SECONDS-3600}
+      COMPONENT_EXAMPLES_ENABLED: ${COMPONENT_EXAMPLES_ENABLED-auto}
+      TEMPLUX_BACKUP_DIR: /opt/project/backups
+      TEMPLUX_BACKUP_RETAIN: ${TEMPLUX_BACKUP_RETAIN-5}
+      TEMPLUX_CREDENTIAL_DIR: /opt/project/credentials
+      TEMPLUX_BACKUP_BIND_DIR: ${TEMPLUX_BACKUP_DIR-./backups}
+      FEISHU_APP_ID: ${FEISHU_APP_ID:-}
+      FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
+      FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
+      TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/project/maintenance/release.json
+      TEMPLUX_CONFIG_PATH: /opt/project/config/presentation.json
+      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-project-app}
+      TEMPLUX_HTTP_PORT: ${TEMPLUX_HTTP_PORT:-31000}
+      TEMPLUX_API_PORT: ${TEMPLUX_API_PORT:-31800}
+      TEMPLUX_DB_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
+    volumes:
+      - ${TEMPLUX_BACKUP_DIR-./backups}:/opt/project/backups
+      - maintenance:/opt/project/maintenance
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config:/opt/project/config
+      - ${TEMPLUX_CREDENTIAL_DIR:-./credentials}:/opt/project/credentials
+    profiles: ["tools"]
+
+  checks:
+    build:
+      context: .
+      target: checks
+    profiles: ["tools"]
+
+volumes:
+  maintenance:
+  database:

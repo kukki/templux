@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "roles": {
+    "admin": {
+      "label": "\u7ba1\u7406\u5458",
+      "permissions": [
+        "application:read",
+        "accounts:manage",
+        "audit:read"
+      ]
+    },
+    "user": {
+      "label": "\u666e\u901a\u7528\u6237",
+      "permissions": [
+        "application:read"
+      ]
+    },
+    "reviewer": {
+      "label": "Project reviewer",
+      "permissions": [
+        "application:read",
+        "records:read"
+      ]
+    }
+  }
+}

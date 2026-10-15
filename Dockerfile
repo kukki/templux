@@ -13,6 +13,9 @@ COPY database database
 COPY tests tests
 COPY shared shared
 COPY config config
+COPY tools tools
+COPY project-template project-template
+COPY release.config.json release.config.json
 
 FROM source AS api-build
 RUN npm run build --workspace @templux/api
@@ -44,6 +47,7 @@ RUN npm ci --omit=dev --workspace @templux/web
 COPY --from=web-build --chown=node:node /opt/templux/apps/web/.next apps/web/.next
 COPY apps/web/next.config.ts apps/web/next.config.ts
 COPY apps/web/server.mjs apps/web/server.mjs
+COPY apps/web/project-server.mjs apps/web/project-server.mjs
 COPY apps/web/public apps/web/public
 COPY shared shared
 COPY config config
@@ -71,3 +75,6 @@ ENTRYPOINT ["node", "/opt/templux/apps/api/dist/manage.js"]
 FROM api-build AS checks
 COPY --from=pg-tools /opt/pg-tools /opt/pg-tools
 CMD ["npm", "test"]
+
+FROM checks AS release-tools
+CMD ["node", "tools/release/build.mjs", "/release"]
