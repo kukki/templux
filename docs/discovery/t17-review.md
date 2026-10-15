@@ -66,3 +66,48 @@
 Ego61已finish({keep:[]})一次，自有组件容器删除。t17-independent-cleanup.log显示仅原三服务healthy；original-status.json为ready/connected/schema0004。无新DB/凭据、SQL、迁移、原部署重启或构建，.env/presentation/Ego31/真人/飞书均未动；仅本审查报告本地提交，未push/关工单。
 
 Chromium触控协议不等于物理手机/全部OS/软键盘/读屏或远端HTTPS图片矩阵；native图错误不提供HTTP认证语义，abort不保证终止远端传输。T03真实飞书组织人工验收仍另列未完成。当前建议先修上述发现，再定向复核，不能因正例通过直接完成#18验收。
+
+## F1/F2/F3 定向复核附录（2026-10-15）
+
+固定范围 `b6074876c76744cf14c0c8f662cdab899de9e4ee..4fa24cb4f41dcf413bdada55a1ef92cd97b68513`，开始HEAD为上界、工作区干净。读取全部8文件差异、修复验收及更新合同，保留初审历史。同一审查者依次双轴，**Standards 0新增；Spec F1/P2、F2/P2关闭，F3/P3部分修复但仍存，未新增独立编号问题**。建议补齐F3后再按#18完整验收。
+
+### F1/P2 关闭
+
+最终路径序列化后拒绝双斜杠前缀并重新解析origin。独立复用版本化用例相同的16输入，真实挂载控制器产出8拒绝/8接受，再在Ego63浏览器URL API按HTTP及HTTPS两种base解析；literal、编码大小写及混合dot段均拒，合法本地query/hash/内部重复斜杠/编码斜杠仍保持origin，显式HTTPS保持协议且无凭据。证据`t17-fix-independent-source-table.json`与`t17-fix-independent-browser-policy.json`；**只有字符串/URL解析，没有向候选主机发请求**。原初审本地绕过已关闭，没有将其描述为SSRF或权限提升。
+
+### F2/P2 关闭
+
+控制器cancelActive区分初始缩略图拥有的请求与非初始图库请求。初始图关闭/切走保留同一次候选与token，完成只恢复入口，不自动打开；非初始仍取消并换token。invalidate/end仍取消初始加载，旧token不恢复新实例；初始图在B显示期间完成不会重置B变换。
+
+独立新增7组真实React/native dialog验证按钮/Escape/遮罩关闭、源revision替换、卸载、ending、全部失败：关闭时backup未abort，请求数4→4（含StrictMode初始基数），完成后明确重开；替换/销毁/end拒旧结果，全部失败终态无新请求。59专项另覆盖初始图切走的持有、非初始取消和其它图变换保持。证据`t17-fix-independent-fallback.json`。初始资源生命周期补充符合持续缩略图的职责，不是重试已失败候选或放宽晚结果校验。
+
+### F3/P3 仍存：图片区外的第二触点未纳入取消判定
+
+- **已修部分**：两个触点都落stage时取消drag及capture，剩余触点不继续，全部释放后新手势恢复；pointercancel和主动丢capture后可恢复。独立版本化场景得到pan120→双指仍120→新手势180→cancel后210→lostcapture后不动→新手势230，真实事件轨迹见`t17-fix-independent-touch.json`。
+- **剩余定位**：`apps/web/app/components/elements/image-preview.tsx:28`仅stage.onPointerDown将pointerId加入集合并检查数量/nonprimary；`:14`仅全局监听up/cancel，没有在预览其它区域的down时发现第二触点。`:29`仍认集合size1，允许原指移动。
+- **独立实际复现**：4×放大，首指在图内拖动至panX120；第二指按在**同一弹窗的image-dialog-caption**（isPrimary:false），首指再移80px，panX变200。捕获轨迹为image-full down→stage move→caption nonprimary down→stage主指move，没有cancel/lostcapture。不是第二指未派发或未等待渲染：每次CDP输入后等两帧再读。见`t17-fix-independent-outside-second-pointer.json`。
+- **合同/影响**：更新合同明确“第二触点或非primary触点加入即取消既有拖动”，没有把它限制成两个触点必须都落图片stage。首指仍在拖动，另一指落可滚动说明区是预览内部有效交错；目前仍意外平移。与原F3同一取消边界，继续P3，不另计F4；没有声称越界、缩放或关闭错误。
+- **建议**：在模态预览范围（包括caption/工具/框内空白）的down统一跟踪接触并取消已有drag，而不是只在stage登记；跟全局up/cancel配对，直到所有相关接触结束才恢复新手势。补stage+caption/工具区第二指及剩余指继续移动对照，保留单指、鼠标、焦点/触屏遮罩零点穿与销毁清理。不能仅以两个stage触点测试通过关闭F3。
+
+### 独立验证与源码对应
+
+旧templux-checks镜像**只读挂最终shared、React view及image测试**，不是新生产镜像。fixture仅挂自有开发容器路由，API指向本机端口1；没有身份/DB。宿主与容器controller/view/fixture SHA256一致，controller/view另docker cp后cmp逐字节退出0；证据`t17-fix-independent-{container,source}-hashes.log`。
+
+| 执行 | 实际结果/证据（test-results/） |
+| --- | --- |
+| checks `node --test tests/image-preview.test.mjs tests/notifications.test.mjs tests/presentation.test.mjs tests/editor.test.mjs tests/editor-deadline.test.mjs` | **59/59，失败/取消/跳过0**；t17-fix-independent-targeted.log |
+| 挂最终shared/view的checks `npm run typecheck` | API/Web退出0；t17-fix-independent-typecheck.log |
+| 自有组件Web workspace typecheck | 含fixture退出0；t17-fix-independent-fixture-typecheck.log |
+| 新关闭7组+多指1组+原7组真实组件 | **15组通过**；fallback.json/touch.json/original.json（均t17-fix-independent前缀）；包含原触屏恢复焦点/底层click0 |
+| 16源策略浏览器最终解析 | 8拒/8接受，无候选网络请求；browser-policy.json |
+| 额外stage+caption两指交错 | F3剩余复现；outside-second-pointer.json |
+
+原7组件只增加等待对应rev=1/rev=2的loader effect请求再取回执，仍断言旧完成不启用新源、新完成才启用，没有把revision DOM更新当loader已经启动，也没有放宽产品结果。核对开发red日志、保留原组合中rev观察失败及无接触touchCancel清理报错记录，最终场景未屏蔽其它错误。本次独立15组全部退出0，没有以旧失败日志冒充最终成功。
+
+结构search→双向trace→snippet核对cancelActive仅close/select调用；9依赖路径coverage均metadata_match，无报告缺口，best-effort仍非完整性证明，全部修复源码直接读。复用初审Context7 Pointer Events主指/capture/cancel官方语义，无需新框架API；未重跑209、SQL身份/凭据、生产构建、正常密码或截图。
+
+### 清理与边界
+
+Ego63已finish({keep:[]})一次，t17-fix-review-components已删除；t17-fix-independent-cleanup.log仅原三服务healthy，original-status.json为ready/connected/schema0004。原部署无重启/迁移，.env/现用presentation/Ego31/真人/飞书保持，未push/关票；只追加本审查报告。旧生产镜像不因本次挂载验证自动获得修复。
+
+Chromium原生dialog/触控协议与可控loader不等于物理多点硬件、远端自然故障、全OS/读屏或真实SQL身份；209及较早布局截图保留原源码点，T03真实组织人工仍另列。本次F1/F2可验收，F3仍需定向修正复核。
