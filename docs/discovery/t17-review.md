@@ -111,3 +111,38 @@ Chromium触控协议不等于物理手机/全部OS/软键盘/读屏或远端HTTP
 Ego63已finish({keep:[]})一次，t17-fix-review-components已删除；t17-fix-independent-cleanup.log仅原三服务healthy，original-status.json为ready/connected/schema0004。原部署无重启/迁移，.env/现用presentation/Ego31/真人/飞书保持，未push/关票；只追加本审查报告。旧生产镜像不因本次挂载验证自动获得修复。
 
 Chromium原生dialog/触控协议与可控loader不等于物理多点硬件、远端自然故障、全OS/读屏或真实SQL身份；209及较早布局截图保留原源码点，T03真实组织人工仍另列。本次F1/F2可验收，F3仍需定向修正复核。
+
+## F3 模态范围最终复核附录（2026-10-15）
+
+固定范围 `48ff52c448c5cb6710790d6f8a6f5840a771a923..fc7fb428b09f900464f0e320518f06b33413c973`；开始HEAD为上界、工作区干净。已读全部5文件差异、modal-pointer验收与合同，保留前两轮历史。独立双轴结论：**Standards 0新增；Spec剩余F3/P3关闭，0新增；F1/F2保持关闭。结合初审及两轮复核，建议T17按#18验收。**
+
+### 修复与实际判断
+
+`image-preview.tsx:25`的dialog.onPointerDownCapture统一登记模态内主键触点；stage的`:28`仅检查blocked后启动drag，不重复登记。第二触点先取消原drag/释放capture并清遮罩候选，dialog冒泡down在blocked时不建立dismiss；全局up/cancel与lostcapture继续收尾。没有把第二指只限stage，也没有定时器补跳/焦点。正常工具click、单指遮罩兼容事件保护保持。
+
+独立Ego65运行版本化modalSecondTouch三组：caption、工具栏output、模态外侧edge均首指pan120→第二指移动后仍120→剩余接触仍120→全结束后新手势180；普通工具按钮恢复scale1。记录真实nonprimary down、原capture丢失及up轨迹，每次输入后等两帧才读pan，不仅凭事件名称判断成功。原stage双指/cancel/lostcapture组合得到120→多指120→新手势180→cancel后210→丢capture不动→新手势230。原F3及其caption剩余条件均已覆盖。
+
+关闭持有7组和原7组也独立复跑通过：初始backup同一次请求关闭后继续（请求数4→4，不自动重开）；替换/end/卸载拒旧完成，全失败终态；原触屏遮罩恢复eligible opener且底层click0，图库边界/旧error、源代次、卸载与会话结束保持。F1/F2控制器本轮未改，59专项继续含源规范化/同token/取消/终态对照；不要求重做上一轮无候选网络请求的16项浏览器URL矩阵。
+
+### 本次独立执行与源码点
+
+复用旧checks，只读挂最终shared、view及image测试；实际开发容器另挂版本化fixture，API指向本机端口1，无身份或DB。不是新生产镜像，也不声称旧镜像原生含本轮补丁。controller/view/fixture宿主与容器SHA256一致，controller/view另docker cp后cmp逐字节退出0；证据`t17-modal-independent-{source,container}-hashes.log`。
+
+| 执行/证据（test-results/） | 实际结果 |
+| --- | --- |
+| 挂载最终源checks `node --test tests/image-preview.test.mjs tests/notifications.test.mjs tests/presentation.test.mjs tests/editor.test.mjs tests/editor-deadline.test.mjs` | **59/59，失败/取消/跳过0**；t17-modal-independent-targeted.log |
+| 同源挂载checks `npm run typecheck` | API/Web退出0；t17-modal-independent-typecheck.log |
+| 自有组件容器Web workspace typecheck | 含fixture退出0；t17-modal-independent-fixture-typecheck.log |
+| modalSecondTouch | **3组通过**；t17-modal-independent-modal.json |
+| multiTouchCancellation | **1组通过**；t17-modal-independent-stage.json |
+| closeInitialFallback及controlledImages | **7+7组通过**；t17-modal-independent-fallback.json/original.json |
+
+18组件组合命令退出0。本轮未重跑209全套、SQL身份/凭据、生产构建或截图；旧209仍为初次触屏修正前源码点，旧布局截图也没有改称最终截图。开发modal-red的200≠120与组合green证据已核对，独立结果以上表为准。
+
+按search→trace→snippet核对PreviewSession；snippet预算截断的17–35行直接读完整源码。9条依赖coverage metadata_match/无报告缺口，best-effort不证明完备。Context7取得React官方responding-to-events/common文档：Capture先于子元素处理和冒泡，即使子元素stopPropagation仍可观察。这与本次统一模态登记的事件顺序相符；没有依赖未经核对的新API。
+
+### 清理、验收与限制
+
+Ego65已finish({keep:[]})一次，自有t17-modal-review-components删除；t17-modal-independent-cleanup.log仅原三服务healthy，original-status.json为ready/connected/schema0004。无数据库/凭据、迁移或原部署重启；.env/实际presentation/Ego31/真人/飞书均保持，未push/关票，只追加本报告。
+
+本次确认代码及可独立测试的#18合同，无剩余本票发现。Chromium/CDP不等于物理手机/全OS/读屏；可控loader不冒充自然远程解码故障，业务图片鉴权、远端域/许可及原生产构建部署仍按初审合同与项目责任。T03真实组织人工验收继续另列未完成，不以本票替代。
