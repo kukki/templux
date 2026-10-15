@@ -56,3 +56,36 @@
 开发172/172发生于download过滤修正前；最终源码32项/typecheck/构建和边界浏览器另列，**未将172冒充最终全套**。MDN及开发实证说明beforeunload可请求取消但该Ego环境实际未显示原生框；本次不宣称原生框通过，也不将该已声明平台限制列作缺陷。
 
 Ego49已finish({keep:[]})，自有组件与未使用的工具库已删除，证据independent-cleanup.log/db-cleanup.log。原三服务healthy，API ready/schema0004，未迁移/重启原服务。.env/原presentation/真人/Ego31/实现不动，不push/关工单。T03真实组织人工仍未完成另列；所有浏览器/OS输入法/软键盘/辅助技术/TLS及原生关闭限制继续保留。取消不保证远端写入回滚，真实项目仍须后端最终验证。
+
+## 附录：F1/F2修复独立复核（2026-10-15）
+
+固定范围 `46c9142b0d320b89ec7a977c38b657adc185945f..ce3cd50e5bbaba43b10bb29a93756036cccca4ed`。开始时HEAD为上界、工作区干净；读取全部七文件差异、修复验收和合同补充，保留初审历史。结构search/trace/snippet核对EditLink与recheckExposed，相关修复/测试/合同逐路径coverage均metadata_match/无报告缺口，另直接读源码；best-effort限制不变。
+
+**Standards：0项新增。Spec：原F1/P2与F2/P3关闭；新发现F3/P2。建议修复F3再按#15完整验收。**
+
+### 原发现关闭证据
+
+- F1：捕获与EditLink共用解析后href的origin/path/search判断；真实React相对hash、完整同页hash、对象hash及原生a均确认0次，Hash draft/dirty=true保持，地址实际更新hash。
+- F2：成功只复查已暴露的当前错误，fields响应合并仍适用的快照服务端错误。实际组件Beta挂起→改空blur→旧saved，Required、aria-invalid=true、就近错误、当前空/dirty均保持；改Gamma后错误和aria-invalid清除。新增纯回归还验证多字段、未触碰非法字段不提前暴露、交叉校验、当前本地错误优先及未变字段服务端错误合并。
+- 原controlledEditor的11个状态点再次通过。真实route/search/外部取消各确认一次且保留Gamma/dirty，download/_blank/Meta修饰点击零确认且保留；接受search离开确认一次并回已存Beta/clean。上述下载/新窗消费者主动阻止实际副作用，不声称真实外站或下载验收。
+
+### F3（P2）：消费者取消EditLink点击后，捕获层已经重置编辑
+
+- **位置**：`apps/web/app/components/elements/edit-navigation.tsx:33`（document capture提前requestLeave/reset），与`:45`转发消费者onClick的执行顺序冲突。
+- **复现**：自有隔离组件页在原fixture基础上只加真实React消费者 `<EditLink href="/account" onClick={event=>event.preventDefault()}>Prevented route</EditLink>`。页面为 `/t14-component?leave=1`，已存Beta，输入Prevented draft使dirty=true；受控confirm计数并返回true，点击该链接。结果**确认1次、URL完全不变、当前值却回Beta且dirty=false**。消费者确实阻止了导航，但document捕获在消费者处理前已经丢弃编辑。
+- **证据**：`test-results/t14-fix-independent-prevented-click.json`，自有Ego51，实际组件/原生click路径。不是伪造href或只根据源码推测；属于本次复核新发现的原有捕获路径问题，不声称是本修复新引入的回归。
+- **影响/建议**：明确不导航的消费者仍触发离开确认，接受后没有离开却丢掉草稿。Next Link消费者应先有机会取消click，再对真正onNavigate作统一确认；让捕获层与EditLink协调避免提前reset/重复确认。补消费者onClick preventDefault时零确认、URL/值/dirty保持，正常转发及真实离开仍一次确认；同时保留hash/download/target/修饰键和session-ending优先。这里不要求通用可取消popstate或改变原生beforeunload合同。
+
+### 本次独立命令与证据范围
+
+| 验证 | 实际结果（test-results/） |
+| --- | --- |
+| checks `node --test tests/editor.test.mjs tests/search.test.mjs tests/multiselect.test.mjs tests/list-state.test.mjs tests/presentation.test.mjs` | **36/36，fail/cancel/skipped0**；t14-fix-independent-targeted.log |
+| checks `npm run typecheck` | API/Web退出0；t14-fix-independent-typecheck.log |
+| 自有组件容器workspace Web typecheck（含新增测试消费者） | 退出0；t14-fix-independent-fixture-typecheck.log |
+| 实际浏览器controlledEditor、hashLinks、newerValidation、leavingBoundaries | 全部版本化断言通过；t14-fix-independent-components.json；另加消费者阻止场景发现F3 |
+| editor.mjs/edit-navigation.tsx镜像与工作区SHA256 | 全相同、diff退出0；independent-image-hashes.log/source-hashes.log |
+
+只启动现有checks镜像的自有 `t14-fix-review-components`，API_INTERNAL_URL指向不可用本机端口9，不接原API/SQL，无新数据库/凭据。原fixture及新增消费者仅挂自有dev路由，未修改实现。现成场景使用公开DOM输出/错误节点/URL及受控confirm计数，不冒充生产身份或原生对话框验收。未重复172全套、SQL权限矩阵、生产构建或无关截图；原真实401/撤权优先证据仍为初审已核对开发材料，新增代码显式sessionIsEnding取消路径源码保留，本次没有再触发真实身份失效。
+
+Ego51已finish({keep:[]})、自有组件容器删除，t14-fix-independent-cleanup.log；原三服务healthy、ready/schema0004。未改.env/presentation/Ego31/真人、未迁移/重启原服务、未push/关工单。T03真实组织人工与原生beforeunload/未接入历史遍历/跨平台局限继续保留；本次仅追加审查文档，整体验收待F3修正。
