@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "source": {"kind": "directory", "root": "/source"},
+  "intervalSeconds": 86400,
+  "allowPrerelease": false,
+  "trustProjectCode": false
+}

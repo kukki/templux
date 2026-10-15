@@ -83,3 +83,6 @@ FROM release-tools AS upgrade-tools
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["node", "tools/upgrade/cli.mjs"]
+
+FROM upgrade-tools AS updates-tools
+ENTRYPOINT ["node", "tools/updates/cli.mjs"]

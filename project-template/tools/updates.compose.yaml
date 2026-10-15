@@ -1,0 +1,17 @@
+# Opt in separately. No business depends_on, no socket, no env_file/global installation.
+name: ${TEMPLUX_UPDATE_PROJECT_NAME:-project-updates}
+services:
+  scheduler:
+    image: ${TEMPLUX_UPDATE_IMAGE:?set approved immutable image ID or digest}
+    init: true
+    command: ["schedule", "--current", "/input/current", "--config", "/input/current/config/updates.json", "--state", "/state", "--output", "/output"]
+    environment:
+      - TEMPLUX_UPDATE_TOKEN
+    volumes:
+      - ${TEMPLUX_UPDATE_CURRENT:?set nonsecret source checkout}:/input/current:ro
+      - ${TEMPLUX_UPDATE_SOURCE_DIR:?set authorized release source directory}:/source:ro
+      - ${TEMPLUX_UPDATE_STATE_DIR:?set external project state}:/state
+      - ${TEMPLUX_UPDATE_OUTPUT_DIR:?set external proposal directory}:/output
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: "no"

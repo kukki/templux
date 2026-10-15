@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+project_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+fail() { echo '{"ok":false,"status":"updates_wrapper_configuration_required"}'; echo 'updates wrapper: set exact tool image, external state/output paths and project config/updates.json' >&2; exit 1; }
+[ -n "${TEMPLUX_UPDATE_IMAGE-}" ] && [ -n "${TEMPLUX_UPDATE_STATE_DIR-}" ] && [ -n "${TEMPLUX_UPDATE_OUTPUT_DIR-}" ] || fail
+case "$TEMPLUX_UPDATE_IMAGE" in sha256:*) image_digest=${TEMPLUX_UPDATE_IMAGE#sha256:} ;; *@sha256:*) image_digest=${TEMPLUX_UPDATE_IMAGE##*@sha256:} ;; *) fail ;; esac
+[ "${#image_digest}" -eq 64 ] || fail
+case "$image_digest" in *[!0-9a-f]*) fail ;; esac
+case "$TEMPLUX_UPDATE_STATE_DIR:$TEMPLUX_UPDATE_OUTPUT_DIR" in /*:/*) ;; *) fail ;; esac
+[ -f "$project_dir/config/updates.json" ] || fail
+[ -d "$TEMPLUX_UPDATE_STATE_DIR" ] && [ -d "$TEMPLUX_UPDATE_OUTPUT_DIR" ] || fail
+TEMPLUX_UPDATE_STATE_DIR=$(CDPATH= cd -- "$TEMPLUX_UPDATE_STATE_DIR" && pwd -P)
+TEMPLUX_UPDATE_OUTPUT_DIR=$(CDPATH= cd -- "$TEMPLUX_UPDATE_OUTPUT_DIR" && pwd -P)
+overlap() { case "$1/" in "$2/"*) return 0 ;; esac; case "$2/" in "$1/"*) return 0 ;; esac; return 1; }
+if overlap "$project_dir" "$TEMPLUX_UPDATE_STATE_DIR" || overlap "$project_dir" "$TEMPLUX_UPDATE_OUTPUT_DIR" || overlap "$TEMPLUX_UPDATE_STATE_DIR" "$TEMPLUX_UPDATE_OUTPUT_DIR"; then fail; fi
+if [ -n "${TEMPLUX_UPDATE_SOURCE_DIR-}" ]; then [ -d "$TEMPLUX_UPDATE_SOURCE_DIR" ] || fail; fi
+set -- --current /input/current --config /input/current/config/updates.json --state /state --output /output "$@"
+if [ -t 0 ] && [ -t 1 ]; then tty_flags='-it'; else tty_flags=''; fi
+# All expansions carrying paths/arguments are quoted. Token VALUE is never argv.
+if [ -n "${TEMPLUX_UPDATE_SOURCE_DIR-}" ]; then
+ exec docker run --rm --init $tty_flags --cap-drop=ALL --security-opt=no-new-privileges --env TEMPLUX_UPDATE_TOKEN -v "$project_dir:/input/current:ro" -v "$TEMPLUX_UPDATE_SOURCE_DIR:/source:ro" -v "$TEMPLUX_UPDATE_STATE_DIR:/state" -v "$TEMPLUX_UPDATE_OUTPUT_DIR:/output" "$TEMPLUX_UPDATE_IMAGE" "$@"
+fi
+exec docker run --rm --init $tty_flags --cap-drop=ALL --security-opt=no-new-privileges --env TEMPLUX_UPDATE_TOKEN -v "$project_dir:/input/current:ro" -v "$TEMPLUX_UPDATE_STATE_DIR:/state" -v "$TEMPLUX_UPDATE_OUTPUT_DIR:/output" "$TEMPLUX_UPDATE_IMAGE" "$@"
