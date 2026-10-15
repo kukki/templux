@@ -27,12 +27,12 @@
 
 ## Tasks
 
-- [ ] Test and implement narrow protected project interface.
-- [ ] Test validation; implement explicit export staging, npm pack, exact checked manifest.
-- [ ] Supply owned skeleton, lock/baseline and independent Docker targets.
-- [ ] Real artifact-only SQL/HTTP/browser/tools consumption and invalid combination controls.
-- [ ] Relevant regression/typecheck, artifact/source evidence and cleanup.
-- [ ] Local commit/Team delivery for independent review.
+- [x] Test and implement narrow protected project interface (including real COMMIT waiting and lock-after-change validation).
+- [x] Test validation; implement explicit export staging, npm pack, exact checked manifest.
+- [x] Supply owned skeleton, lock/baseline and independent Docker targets.
+- [x] Real artifact-only SQL/HTTP/browser/tools consumption and invalid combination controls.
+- [x] Relevant regression/typecheck, artifact/source evidence and cleanup (16专项、105核心、7实际闭环及CDP截图).
+- [x] Local implementation commit66aa7c2 plus acceptance delivery for TL independent review.
 
 ## Rulings
 
