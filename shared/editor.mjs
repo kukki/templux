@@ -5,6 +5,7 @@ export function createEditor({initial,normalize,validate,failureMessage}) {
  let state=Object.freeze({values:copy(initial),errors:copy({}),formError:'',dirty:!same(normalize(initial),baseline),saving:false,status:'idle'});
  const listeners=new Set();
  const publish=patch=>{const next={...state,...patch};state=Object.freeze({...next,dirty:!same(normalize(next.values),baseline)});for(const listener of listeners)listener();};
+ const recheckExposed=values=>{const validation=validate(normalize(values)),errors={};for(const key of fields)if(state.errors[key]&&validation[key])errors[key]=validation[key];return errors;};
  const cancel=()=>{generation++;controller?.abort();controller=null;publish({saving:false,status:'idle'});};
  return {
   getSnapshot:()=>state,
@@ -25,9 +26,9 @@ export function createEditor({initial,normalize,validate,failureMessage}) {
    if(result.kind==='saved'){
     baseline=copy(normalize(copy(result.values)));
     const values=revision===submittedRevision?baseline:state.values;
-    publish({values,saving:false,status:same(normalize(values),baseline)?'saved':'idle',errors:copy({}),formError:''});
+    publish({values,saving:false,status:same(normalize(values),baseline)?'saved':'idle',errors:copy(recheckExposed(values)),formError:''});
    }else if(result.kind==='fields'){
-    const current=normalize(state.values),applicable={};for(const key of fields)if(current[key]===submitted[key]&&result.errors[key])applicable[key]=result.errors[key];
+    const current=normalize(state.values),applicable=recheckExposed(state.values);for(const key of fields)if(!applicable[key]&&current[key]===submitted[key]&&result.errors[key])applicable[key]=result.errors[key];
     publish({saving:false,status:'error',errors:copy(applicable),formError:Object.keys(applicable).length?'':failureMessage});
    }else if(result.kind==='ended'){cancel();}
    else publish({saving:false,status:'error',formError:result.message||failureMessage});

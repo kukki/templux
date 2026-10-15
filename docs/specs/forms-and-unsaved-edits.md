@@ -24,7 +24,7 @@ T14 / 工单 #15，父规格故事79–80；沿用 ADR0012、0020及 session-lif
 | error / forbidden + message | 表单错误；不改变基线及权限 |
 | ended | 已由统一会话流程启动退出，不显示成功 |
 
-未在等待期间编辑时，成功用确认值规范当前输入；有新编辑时保持当前值，只推进保存快照基线。因此旧响应不能覆盖新输入或将仍dirty的状态报成saved。返回字段错误只附到仍与提交值相同的字段；新值不会承受旧值错误。reset、cancel、销毁和session-ending会abort并使旧响应代次失效，即使传输忽略abort也不能改变控制器。卸载后不保存到本地存储或恢复草稿。
+未在等待期间编辑时，成功用确认值规范当前输入；有新编辑时保持当前值，只推进保存快照基线。因此旧响应不能覆盖新输入或将仍dirty的状态报成saved。成功返回只复查当前已经显示错误的字段，不清掉较新输入的有效错误，也不让尚未暴露的其它字段提前报错。返回字段错误只附到仍与提交值相同且没有当前本地错误的字段，并与当前已经显示、复查后仍有效的错误合并；新值不会承受旧值错误。reset、cancel、销毁和session-ending会abort并使旧响应代次失效，即使传输忽略abort也不能改变控制器。卸载后不保存到本地存储或恢复草稿。
 
 保存期间的外部写入由消费者管理：AbortSignal不保证服务器取消写入，不能自动重试结果不明的写操作。消费者不得在控制器接受结果之前用晚返回覆盖其它实体或当前编辑；示例延迟保存遵守signal。失败保留输入；未改变初始内容就尝试失败时，dirty仍为false，失败本身不制造修改。
 
@@ -35,7 +35,7 @@ T14 / 工单 #15，父规格故事79–80；沿用 ADR0012、0020及 session-lif
 编辑路由将 `EditNavigationProvider` 放在整个页面壳之外。`useEditor`注册控制器；未来弹窗/面板可使用相同controller和 `requestLeave(action)`，不依赖示例。一次离开只确认一次；取消保留当前编辑，确认放弃会reset所有注册编辑后执行action。
 
 - Provider捕获普通a和Next Link主键同窗点击；Ctrl/Command/Shift新窗口、下载及仅hash导航不离开当前编辑，不提醒。点击真正离开时使用浏览器确认框，明确“放弃”与“取消保留”。
-- `EditLink`使用Next受支持的onNavigate；命令式 `router.push/replace/back/forward`须显式包在 `requestLeave(()=>router.…())`。不能从其它模块直接调用router并假定全局拦截。
+- `EditLink`使用Next受支持的onNavigate，从onClick读取真实呈现锚点的解析后href，与捕获层共用同一路由/search判断；相对hash、完整同页hash及对象形式hash均不确认或reset草稿。真正路由/search离开仍统一确认一次。命令式 `router.push/replace/back/forward`须显式包在 `requestLeave(()=>router.…())`。不能从其它模块直接调用router并假定全局拦截。
 - 原生刷新、关闭、跨文档back/forward使用dirty期间才注册的beforeunload。浏览器只在其允许且有用户交互的条件下显示通用原生提示，不能指定文案或保证手机杀进程时弹出。
 - **App Router没有通用可取消的popstate守卫**。本合同不保证未经接入的同文档浏览器工具栏back/forward；需要可靠离开保护的编辑入口应使用普通文档导航，或提供上述已接入的back/forward按钮。不得用历史哨兵、pushState复制记录、异步回滚URL伪造取消。本票示例提供普通返回锚点、EditLink及命令式路由消费者，隔离组件验证受控back/forward。
 - 列表search/filter/pagination不注册编辑状态；纯replaceState偏好更新不触发离开保护。
