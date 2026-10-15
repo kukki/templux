@@ -1,0 +1,22 @@
+// SQL fixtures only for isolated database-catalog regression tests.
+export const migrationObjectCases=[
+ ['enum',"CREATE TYPE public.fix_status AS ENUM ('draft','active')"],
+ ['domain','CREATE DOMAIN public.fix_positive AS integer CHECK (VALUE>0)'],
+ ['composite','CREATE TYPE public.fix_pair AS (name text,amount integer)'],
+ ['range','CREATE TYPE public.fix_range AS RANGE (subtype=integer)'],
+ ['table','CREATE TABLE public.fix_table(value text)'],['sequence','CREATE SEQUENCE public.fix_sequence'],
+ ['view','CREATE VIEW public.fix_view AS SELECT 1 AS value'],
+ ['function',"CREATE FUNCTION public.fix_fn() RETURNS integer LANGUAGE sql AS 'SELECT 1'"],
+ ['procedure',"CREATE PROCEDURE public.fix_proc() LANGUAGE sql AS 'SELECT 1'"],
+ ['collation',"CREATE COLLATION public.fix_collation (provider=libc,locale='C')"],
+ ['operator','CREATE OPERATOR public.## (FUNCTION=int4pl,LEFTARG=int4,RIGHTARG=int4)'],
+ ['text_search','CREATE TEXT SEARCH DICTIONARY public.fix_dictionary (TEMPLATE=pg_catalog.simple)'],
+ ['custom_schema','CREATE SCHEMA project_empty'],
+ ['custom_schema_type',"CREATE SCHEMA project; CREATE TYPE project.fix_status AS ENUM ('x')"],
+ ['extension','CREATE EXTENSION hstore WITH SCHEMA pg_catalog'],
+ ['large_object','SELECT lo_create(0)'],['foreign_wrapper','CREATE FOREIGN DATA WRAPPER fix_fdw NO HANDLER'],
+ ['publication','CREATE PUBLICATION fix_publication'],
+ ['cast','CREATE CAST (integer AS date) WITH INOUT'],
+ ['language','CREATE LANGUAGE fix_pl HANDLER plpgsql_call_handler INLINE plpgsql_inline_handler VALIDATOR plpgsql_validator'],
+ ['default_acl','ALTER DEFAULT PRIVILEGES GRANT SELECT ON TABLES TO PUBLIC'],
+];

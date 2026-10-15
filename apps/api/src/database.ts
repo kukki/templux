@@ -96,7 +96,31 @@ export async function migrate(pool: pg.Pool, beforeChange?: () => Promise<unknow
     const applied = history ? await client.query<AppliedMigration>('SELECT version, checksum FROM public.templux_migrations ORDER BY version') : {rows: [] as AppliedMigration[]};
     validateHistory(applied.rows, expected);
     if (applied.rows.length < expected.length) {
-      const existing = (await client.query("SELECT EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname !~ '^pg_' AND c.relkind IN ('r','p','v','m','S','f') AND NOT (n.nspname='public' AND c.relname='templux_migrations')) OR EXISTS(SELECT 1 FROM pg_namespace WHERE nspname NOT IN ('public','information_schema') AND nspname !~ '^pg_') OR EXISTS(SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public') AS present")).rows[0]?.present || applied.rows.length > 0;
+      // Schema dependency records cover named objects, including standalone types,
+      // operators, collations and text-search objects; a relkind list does not.
+      // Non-schema object catalogs are checked separately. 16384 is PostgreSQL's
+      // FirstNormalObjectId: initdb objects (including default plpgsql) are below it.
+      const existing = (await client.query(`SELECT
+        EXISTS (SELECT 1 FROM pg_namespace WHERE nspname NOT IN ('public','information_schema') AND nspname !~ '^pg_')
+        OR EXISTS (
+          SELECT 1 FROM pg_depend d JOIN pg_namespace n
+            ON d.refclassid='pg_namespace'::regclass AND d.refobjid=n.oid
+          WHERE n.nspname='public'
+            AND NOT (d.classid='pg_class'::regclass AND d.objid=COALESCE(to_regclass('public.templux_migrations')::oid,0))
+        )
+        OR EXISTS (SELECT 1 FROM pg_extension WHERE oid>=16384)
+        OR EXISTS (SELECT 1 FROM pg_language WHERE oid>=16384)
+        OR EXISTS (SELECT 1 FROM pg_cast WHERE oid>=16384)
+        OR EXISTS (SELECT 1 FROM pg_transform)
+        OR EXISTS (SELECT 1 FROM pg_foreign_data_wrapper)
+        OR EXISTS (SELECT 1 FROM pg_foreign_server)
+        OR EXISTS (SELECT 1 FROM pg_user_mapping)
+        OR EXISTS (SELECT 1 FROM pg_event_trigger)
+        OR EXISTS (SELECT 1 FROM pg_publication)
+        OR EXISTS (SELECT 1 FROM pg_subscription WHERE subdbid=(SELECT oid FROM pg_database WHERE datname=current_database()))
+        OR EXISTS (SELECT 1 FROM pg_largeobject_metadata)
+        OR EXISTS (SELECT 1 FROM pg_default_acl)
+        AS present`)).rows[0]?.present || applied.rows.length > 0;
       if (existing) {
         if (!beforeChange) throw new OperationError('已有结构存在待迁移项，必须先完成受控备份。');
         await beforeChange();

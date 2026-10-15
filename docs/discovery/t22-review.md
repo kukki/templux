@@ -77,3 +77,7 @@ Context7核对[Postgres18 pg_type](https://www.postgresql.org/docs/18/catalog-pg
 自有t22-review容器、网络、数据卷及临时备份根已删除（含本轮dump/key/参考记录）；未创建浏览器、真人账号或凭据。保留ignored公开脚本和日志。开发原有700/600归档不修改。`cleanup.log`及`original-status.json`确认原服务仍ready/connected/schema **0004**；原.env、现用presentation、部署、Ego31、真人及飞书不动，无push/关票；提交仅本报告。
 
 Standards0 / Spec1(P2)，建议先修F1再验收。未重复288、生产构建或全平台/外部TLS矩阵；未物理注入最后fsync后ACK丢失、等待15分钟超时或验证所有PG版本/全局角色扩展恢复。逻辑备份不是停写证明，容量与异地留存由部署负责；签名/校验不防已授权宿主篡改。T03真实组织人工验收及后续恢复/会话撤销继续单列。
+
+## 开发修复交付（待独立复核）
+
+F1的RED→GREEN、空库定义、标准migration实际SQL/备份恢复和最终专项记录见 [t22-fix-acceptance.md](t22-fix-acceptance.md)。本附记不更改上述初审结论或替代复核。

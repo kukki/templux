@@ -61,3 +61,11 @@ pg_dump custom归档必须非空且有PGDMP头，工具exit0，无诊断，pg_re
 包装器默认仍传实际 `id -u/-g`。显式覆盖必须成对且为规范0–4294967294整数；空、负、前导零、超界在调用Docker前拒绝。相同覆盖也影响既有凭据/init的目标属主，不能把为备份核实的映射当作其它部署已验收。
 
 当前macOS绑定映射实际呈现容器0:0、宿主501:20，即使chown501:20返回成功，容器stat仍0:0。默认严格检查会拒绝而非自动降为root。仅在独立核实该映射后可用 `TEMPLUX_HOST_UID=0 TEMPLUX_HOST_GID=0 ./templux backup --confirm --json`，再在宿主 `stat -f '%u %g %Lp' backups backups/backup-*/archive.dump` 独立验证实际501:20及0700/0600；其它平台不能照抄。Linux volume已单列实际1001:1001/0600验证，不忽略真实属主或权限错误。
+
+### T22 F1 修复：空库与已有对象定义
+
+不能只按表/视图relkind或函数判断空库。迁移锁内、所有迁移元数据修改前，通过pg_depend的schema依赖识别public里的命名对象：独立enum/domain/composite/range以及关系、过程、运算符、排序规则、文本搜索等不再依赖手写关系类型枚举。自定义用户schema即使尚无对象也视为已有结构。单独的空工具历史表仍为初始化元数据；有已应用历史时一律走原pending保护。
+
+不属于schema的对象另外检查数据库目录：用户扩展、语言、cast、transform、FDW/server/user mapping、event trigger、publication、本数据库subscription、large object及default ACL。initdb系统默认对象、默认public空schema和默认plpgsql不会令真正空库触发备份。扩展即使安装在pg_catalog仍识别；对包含内置记录的extension/language/cast目录，按Postgres的FirstNormalObjectId=16384区分正常运行创建对象与initdb记录（[PG18源码说明](https://github.com/postgres/postgres/blob/REL_18_STABLE/src/include/access/transam.h)）。模板项目对象使用public或自定义schema，不向保留的系统schema写业务对象。集群共享角色、tablespace及部署配置仍不属于单库逻辑备份范围；目录读取权限不足或目标版本缺少目录会阻断，不退化为空库。本查询按PostgreSQL18验证；pg_dump工具可读源9.2–18不代表模板迁移支持这一整个版本区间。非空检测只决定备份前置，不等于每种对象均已包含在归档；标准pg_dump范围、角色/权限和扩展恢复前提仍需分别核对。
+
+判定只在有pending时执行；真正新空库跳过备份，无pending仍跳过，即使当前备份路径不可用。已有类型库备份失败必须保持原对象、无新历史表或记录；合法路径须先发布可读automatic归档才迁移。该修复不改变迁移锁→备份锁→根锁顺序，不自动停写、不中途新增迁移，也不修改历史SQL。独立类型的真实标准镜像/坏路径/归档scratch及34项定向证据见[T22修复验收](../discovery/t22-fix-acceptance.md)。
