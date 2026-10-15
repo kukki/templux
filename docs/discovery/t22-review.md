@@ -134,3 +134,41 @@ HANDLER pg_catalog.heap_tableam_handler;
 ## AM补齐开发交付（待独立复核）
 
 本轮访问方法RED→GREEN、PG18.6单库非schema对象的有界核对及标准target/恢复证据见 [t22-am-fix-acceptance.md](t22-am-fix-acceptance.md)。保留前述初审和复核结论，F1是否关闭待独立复核。
+
+## F1 最终独立复核：访问方法
+
+固定范围 `393c1f1b0b2ee4b1f145b494fc9041834f6e0af2..9bf283effcf887d58b4cde717ecbeecc7e4e811e`。读取全部6文件差异、交付及合同；唯一产品变化是existing查询新增pg_am正常OID判断，无新迁移或历史SQL改写。原两轮结论保留为历史。
+
+### Standards / Spec
+
+- **Standards新增0项**。新增一行沿用原查询/错误传播，未改锁、pending、备份调用或元数据顺序；没有按AM名字特判。
+- **Spec新增0项，F1/P2关闭。** 结合初审及两轮独立复核，建议按#23已定义范围验收；不替代T03真人飞书或后续恢复CLI/会话撤销验收。
+
+原复现直接重跑：自有 `am_original` 只有 `review_heap`、handler为内置heap_tableam_handler。最终标准target + `/proc/backup-impossible` 退出1，JSON为备份失败；之后history不存在、AM仍1条。`test-results/t22-am-review/original-{setup,migration,after}.*`。原“非空对象跳过备份”路径已经阻断，不把方法仍存在说成发生过数据损失。
+
+### 官方源码的有界核对
+
+Context7核对[pg_am](https://www.postgresql.org/docs/18/catalog-pg-am.html)与[CREATE ACCESS METHOD](https://www.postgresql.org/docs/18/sql-create-access-method.html)。独立从官方REL_18_6下载[pg_dump.h](https://github.com/postgres/postgres/blob/REL_18_6/src/bin/pg_dump/pg_dump.h)和[pg_dump.c](https://github.com/postgres/postgres/blob/REL_18_6/src/bin/pg_dump/pg_dump.c)，读取DumpableObjectType、选择/提取/输出AM函数及g_last_builtin_oid；源SHA与开发所读相同，见 `pg-source-sha.log`。
+
+pg_dump对无namespace的AM按initdb保留OID区别内置，g_last_builtin_oid为FirstNormalObjectId−1；新增 `oid>=16384` 与此边界一致。table/index handler输出对应两种AM类型。版本化空库实测内置heap/btree存在仍跳备份。
+
+将该版本DumpableObjectType中的独立非schema根逐类映射到现有目录：extension/language/cast/AM、transform、FDW/server、default ACL、large object、event trigger、publication/subscription；user mapping随server输出且已有检查。namespace命名对象由schema依赖处理；attach/default/index/统计/rule/trigger/constraint/policy/复制关系等依附父对象；数据及归档边界不当作额外独立根。**在这个有界版本/根清单内未发现另一目录映射缺口**，不把它表述为所有DDL属性、未来版本或插件ABI的完备性证明。单库与集群角色/tablespace、环境文件边界保持。
+
+图查询按index/search→trace→snippet，7条修复/测试/合同路径覆盖检查均metadata_match并直读；仍是best-effort。catalog缺失/权限错误的抛出路径源码核对保持，没有声称本轮逐项注入该类故障。
+
+### 独立命令与实际结果
+
+只使用自有 **t22-am-review** Compose/PG18.6/卷及目录，显式隔离TEST_AUTH_DATABASE_URL。
+
+- 最终镜像运行 `node --test --test-concurrency=1 tests/migration-objects.test.mjs tests/backup.test.mjs tests/backup-faults.test.mjs`：**36/36**，fail/cancel/skip0；`targeted.log`。真实迁移锁竞争/失败释放、原备份/非root子进程故障包含其中。
+- `t22-am-checks npm run typecheck`：API/Web退出0；`typecheck.log`。标准target pg_dump实际18.6，`pg-version.log`。
+- 4份源（含测试）主机/checks、4份编译checks/标准target逐一SHA一致，`integrity.json`。实际标准target `t22-am-standard-migration` 为 `f709789071fe…`，checks为 `dac8bb70deef…`；不是挂产品补丁到旧镜像后验收。
+- 完整复跑版本化proof **23对象**坏路径均非零且history不存在；table/index AM合法automatic归档后applied10，1593字节dump真实scratch恢复后的AM类型/内置handler相等，scratch无history，证明归档前置。
+- 原三类型1912字节scratch目录、enum标签、domain正/负约束、composite值继续通过；真正空库heap/btree对照applied10、无pending applied0，已有0008坏路径保持0008、合法根applied2。
+- 以上见 `standard-proof.log`，驱动退出0。仅ignored副本调整自有project/network，tests只读挂载；旧management镜像仅提供Docker/pg工具，实际所有迁移均调用最终标准target。不修改正式测试或产品文件。
+
+### 清理与剩余限制
+
+自有容器、网络、数据卷及private目录内dump/key已删除，无浏览器/真人凭据；保留公开日志/脚本。`cleanup.log` / `original-status.json`确认原ready/connected/schema **0004**；原.env、presentation、部署、Ego31、真人/飞书不动，仅追加本报告、本地提交，无push/关票。
+
+本轮不机械重跑288/UI、生产构建或初审未改的保留/权限/外部库矩阵；沿用已独立核对证据。AM恢复使用内置handler注册的合成方法，不代表任意C插件或跨版本ABI恢复；未声称每个非schema分支故障、全部PG版本/TLS/平台均已实验。T03人工、后续恢复/会话撤销及原备份边界继续单列。
