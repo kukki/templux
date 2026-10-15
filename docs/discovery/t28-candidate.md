@@ -40,3 +40,18 @@ A先用公开`@templux/web/state/copy`和`/elements/clipboard`组合局部原型
 审查必须绑定候选commit/patch/hash和以上证据，作者核对不代替独立审查。批准后才生成本机隔离0.1.1-t28.1；来源是恢复的正式0.1.0选定源和原骨架，加受审三文件及明确发布元数据工具overlay。稳定198文件均可从原commit逐字节恢复（stable-source-audit.json）；原数据/认证/资产不变，不继承历史.2/.3标签/资产或main新增T27项目样板。
 
 必要发布overlay仅复用既有release build/verify的准确SemVer、from支持边、完成前校验，准确列两个工具hash和派生项目验证器差异；它不包含提案引擎/发现/调度功能。主版本/协议1/config1/schema0010/Node24/Next16组合不变。B自行选择准确目标，T26生成候选并在一次性副本完整apply/vendor全等、实际API/Web构建与页面受益，业务/config/version保持。当前尚未执行此依赖审查步骤，不宣称全票完成。
+
+## 补齐的发布工具审查范围
+
+候选另列 `compatibility-tools.patch` 及两个工具文件/hash；它们在本票工程基线已存在，但**相对正式0.1.0**仍是新增兼容差异，不能省略审查。
+
+| 路径/精确行为差异 | 执行及产物落点 |
+| --- | --- |
+| tools/release/build.mjs：接受准确SemVer、检查upgradeFrom显式边；manifest加入from；complete写入前调用verifyProject | producer执行；文件内容不进入core/web tar、不进入消费项目；其SHA进入source inventory |
+| tools/release/verify.mjs：新增isExactVersion，原只接受0.1.0改为准确版本，原同组合/包名/manifest SHA/包字节/SHA512/声明/安装校验仍在 | producer调用；复制为消费项目`.templux/verify.mjs`，会随T26候选交付；不进入core/web运行tar、也不是认证授权入口 |
+
+`tests/scenarios/t28-target.mjs`是明确测试producer，必须先取得与固定candidateCommit一致的独立审批记录，才准备源并调用既有release build。审批记录不是加密授权系统；实际独立结论及其证据由TL提供，作者不能自行制造。无真实批准时，producer拒绝且无新版本目录。
+
+`tests/scenarios/t28-stable-inputs.py`按正式manifest白名单从66aa7c2取回恰好198文件，逐项SHA/原模式；目标目录新建，不拷整仓或项目配置。producer验证无额外/缺失/链接、每个SHA，移除选定scope后仅重建此集合，再叠加三项受审产品和两项列明工具，要求变更集合**恰好五项**。原先main多出的T27项目启动器/配置/Compose不进入。重编API及完整发布校验；版本/from是明确发布overlay。来源commit为受审候选，manifest source.files精确表示“正式基线+列明补丁/工具”，不冒充整个main Git树。root其他工具只承担构建工具，不入包/骨架。
+
+最终审查以更新后的candidate.json、两份patch、五文件/hash和producer脚本为准；先前仅三文件的初始包保留历史，不作为完整发布审批包。
