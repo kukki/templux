@@ -55,3 +55,38 @@
 Ego69已finish({keep:[]})一次，自有组件容器删除。t19-independent-cleanup.log仅原三服务healthy，original-status.json为ready/connected/schema0004。无迁移、原部署重启、.env/现用presentation/Ego31/真人/飞书变更，仅本地审查文档提交，未push/关闭#20。
 
 Chromium/CDP视口和触控不代表物理触屏、真实输入法/软键盘、全OS/读屏或后台调度；原生Popover支持需项目平台验证，服务端最终授权/版本及持久保存核验始终归项目。T03真实飞书组织人工验收仍另列未完成。当前建议先修F1，再独立定向验收。
+
+## F1 注册归属定向复核附录（2026-10-15）
+
+固定范围 `a8f4bcf76ab0d6246fd0c0f5398792956658c902..3147ae0ed8ea4c8744a01769e68eaa4ac84e48ca`；开始HEAD为上界且工作区干净。读取全部5文件差异、修复验收和合同补充，保留初审历史。同一审查者依次双轴：**Standards 0新增；Spec F1/P2关闭，0新增。结合初审及本次复核，建议T19按#20验收。**
+
+### 修复核对
+
+`shared/overlays.mjs:22`为每次registerClose创建唯一token，订阅回调/cleanup同时检查token、expectedEpoch和未ended；不再将稳定source身份等同注册身份。`:16`先清registration/boundary再执行退订，旧退订同步通知不再发布；subscribe同步通知使owner失效时，返回的退订函数立即执行，当前cleanup幂等。仍拒绝第二个未清理的活动边界，dirty/request/blocked及公共接口不变。新增合同明确稳定对象可跨epoch或在同epoch清理后重注册，没有要求消费者换对象规避。
+
+独立使用初审原`t19-reused-boundary-repro.mjs`、正确断言不改，最终控制器下退出0。新5项实际执行覆盖同source跨epoch、同epoch重注册、不同source对照、invalidate/end与退订同步通知、subscribe同步通知引发owner失效。检查snapshot对象身份/通知次数、旧callback/重复cleanup不生效、当前解除锁后request真正执行、退订恰一次；不是只把blocked手动改回或仅检查不抛异常。
+
+### 独立命令与实际组件
+
+复用旧templux-checks，**最终shared/tests只读挂载**；不是新生产镜像，也不声称旧镜像本身含修复。自有组件容器另挂最终elements与版本化fixture，TEMPLUX_CONFIG_PATH指向共享默认文件、API指向本机端口1，无DB/凭据；从启动即使用最终源码，无CSS热缓存变化。controller/panel/EditSession宿主与容器SHA256一致，controller另docker cp后cmp逐字节退出0，见`t19-fix-independent-{source,container}-hashes.log`。
+
+| 独立执行/证据（test-results/） | 实际结果 |
+| --- | --- |
+| 原初审可复跑脚本，最终shared挂载 | **退出0**；t19-fix-independent-original-green.log（无断言错误输出） |
+| `docker run --rm -v "$PWD/shared:/opt/templux/shared:ro" -v "$PWD/tests:/opt/templux/tests:ro" templux-checks node --test --test-concurrency=1 tests/overlays.test.mjs tests/editor.test.mjs tests/editor-deadline.test.mjs tests/presentation.test.mjs tests/image-preview.test.mjs` | **63/63，失败/取消/跳过0**；t19-fix-independent-targeted.log |
+| 同最终shared挂载checks `npm run typecheck` | API/Web退出0；t19-fix-independent-typecheck.log |
+| 自有组件容器Web workspace typecheck | 含fixture退出0；t19-fix-independent-fixture-typecheck.log |
+| 版本化panelEditing | **4组通过**；t19-fix-independent-editing.json |
+| 版本化panelPointers | **4组通过**；t19-fix-independent-pointers.json |
+
+Ego71在HTTP200并观察DOM后运行两组入口，真实原生dirty确认接受/拒绝、保存锁UI/API/Escape/重复提交、字段错误解锁、超时未知/明确核验/新草稿、ending拒晚commit；指针覆盖标题+正文/resize+关闭工具多指、取消/capture丢失、视口/epoch与新手势恢复，以及受控API不支持提示。共8组件全部退出0；可控save不是真实远端写。布局与锚定/视口算法未改，沿用初审独立8布局，不重复无关矩阵。
+
+graph search→trace→snippet核对registerClose归属逻辑，9依赖路径coverage metadata_match/无报告缺口，best-effort不证明完备；动态图未列caller不推断无消费者，另直接读Provider/编辑器接入。Context7 React官方useSyncExternalStore文档确认subscribe返回对应cleanup、无变更快照须稳定；本次token隔离来自项目合同与实际交错验证，不把React文档误称为token实现要求。
+
+已核对开发原脚本RED→GREEN、新5项基线4失败/不同source对照原本通过及最终63/8记录。准备脚本/配置路径与未完整结束的工具调用不当作最终行为失败或通过；本次独立上述执行均完整返回。未重跑240、SQL/正常密码/CLI撤权、生产构建或截图，原240及初审开发身份/114ms证据保留原源码与执行范围。
+
+### 清理、验收与局限
+
+Ego71已finish({keep:[]})一次，自有t19-fix-review-components已删除；t19-fix-independent-cleanup.log仅原三服务healthy，original-status.json为ready/connected/schema0004。无新数据库/凭据、原部署迁移或重启；.env/实际presentation/Ego31/真人/飞书均未动，只追加本审查文档，未push/关票。
+
+当前无剩余本票发现。组件/单调代次与Chromium触控协议不保证物理手机、真实软键盘、全部浏览器/读屏/后台调度；本次未产生截图或像素验收。旧工具镜像不会因挂载测试自动升级原服务；真实项目仍须后端最终授权/目标版本与保存核验。T03真实组织人工验收继续另列未完成。
