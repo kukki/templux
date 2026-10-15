@@ -85,3 +85,57 @@ codebase-memory按index→search→双向trace→snippet核对propose/runChecks/
 所有工具容器 `--rm` 已退出；fixture临时目录在finally删除。没有创建Compose/DB/卷、.env、真实密码/Cookie、归档/key或Chrome；候选node_modules/dist/.next缓存已清理。仅保留安全输入/应用副本、测试产物及ignored脚本/JSON证据（`cleanup.json`），不改原safe证据。
 
 原0004部署、.env、presentation、Ego31、真人与飞书未操作。本轮不要求恶意脚本沙箱、不推广到Linux/WSL全矩阵或任意业务；目前三项P2应修复后再验收。仅新增本报告并本地提交，不改实现、不push、不关#27。
+
+## F1/F2/F3 定向复核附录（2026-10-15）
+
+固定修复范围 `02e80c575fc7e52700cb83009cdd1d92d02b53a4..39ff1d632123049f4743d8bb16cff7e09b543714`，运行实现 `c12e5589328bc6178044302954b26408ce05a154`。完整读取修复验收、合同补充及10文件差异，保留以上初审记录。仍由同一独立审查者依次完成双轴。
+
+### 双轴结论
+
+| 轴 | 复核结论 |
+| --- | --- |
+| Standards | **0项新增发现**。新增内部delivery模块集中最终快照/生成许可/补丁等价，未新增现用项目apply或部署能力。 |
+| Spec | **F1/F2/F3全部关闭，0项新增发现**。三套原始反例RED→GREEN，最终源/补丁/报告在真实项目和独立副本等价。 |
+
+结合初审与本次复核，**建议 #27 按约定范围验收**。不替代T03真实人工、任意项目/跨schema累计路径或恶意脚本沙箱验收，不关闭工单。
+
+### 修复语义与独立反例复跑
+
+证据根为 ignored `test-results/t26-fix-review/`。只使用最终工具镜像 `sha256:4fdd7b1beac86129049147336aa04bbe641a1db109434ee2e3e44cbeb05358d6`，8份upgrade/release源与主机逐一SHA相等（`source-image.json`）。
+
+- **F1关闭：** `propose` 捕获预备完整交付快照；检查完成后使用工具自身验证逻辑核对installed组合，清理指定缓存，再恢复越界变更并列manual，复验准确包/锁/基线。report.final完整库存来自实际交付，恢复后的文件不会继续被标成检查成功可直接应用。
+- 生成许可仅有两处：lock成功步骤接受其package-lock结果；web-build成功步骤仅接受**此前也为已知默认**的Next16声明变成固定已知默认文本，且mode不变。不是所有Next文件或所有受管骨架都可任意变动。后续late修改锁或声明仍拒绝；未知生成源需人工处理。
+- 三个版本化repro均以最终驱动只读挂到原路径，对旧 `t26-upgrade-tools` 得exit1（GREEN断言准确失败），对最终 `t26-fix-tools` 得exit0。`red-green.json`保存六次状态及驱动SHA，`*-red/green.stdout/.stderr`保留输出。literal旧RED由真实patch check失败触发，未依赖缺少新报告字段。
+- 原late tar/业务version例均7passed但manual/directfalse；tar恢复后可verify，业务version保持1.0.0。另独立补充10代表：scripts/其它依赖/config/business/baseline/verifier/npm锁/组合锁/新文件/晚新增Next声明；均有对应 `delivery-mutated-by-check`，恢复或删除，最终包可验。workspace除共享file依赖外与原JSON结构相同。`late-representatives.json/.mjs`。
+- 宿主实际调用CLI的late-version对照 **exit2、stdout单JSON、ok/directlyApplicable=false、manual=1**，即使原七项passed也不报成功（`late-cli.json`）。不把直接函数返回值冒充进程退出码。
+- **F2关闭：** 补丁取current完整交付与candidate集合并集，实际删除旧独有baseline路径。原删除例check/apply0、应用副本无旧baseline；下一提案为正常unsupported-path而非baseline损坏。65专项还覆盖目标删除旧配置基线而保留项目当前配置。
+- **F3关闭：** Git `--no-prefix`直接生成头部，不重写diff正文。原COPY字面量完整保留，真实check/apply0；65专项覆盖a/a、b/b、真实空格文件名、执行模式。无法由Git文本patch表达的非执行权限变化列patch-equivalence/manual、directfalse，未虚称等价。
+
+### 最终专项、真实Next与工具外完整等价
+
+```sh
+docker run --rm --entrypoint node t26-fix-tools --test \
+  tests/upgrade-merge.test.mjs tests/upgrade.test.mjs tests/upgrade-checks.test.mjs \
+  tests/release.test.mjs tests/project-interface.test.mjs tests/project-web-server.test.mjs
+docker run --rm --entrypoint npm t26-fix-tools run typecheck
+```
+
+独立 **65/65**，fail/skip/cancel0，10.68秒；API/Web typecheck退出0（`special.log`、`typecheck.log`）。fixture API/Web快速命令与真实Next案例分开；不将这些回归数扩为身份/332全量。
+
+从保留的非秘密T26输入另建自有当前副本，独立运行版本化真实项目驱动，仅调整自有输入/证据目录：
+
+- 成功提案exit0、7项实际passed，包含真实npm锁/ci、工具组合、typecheck、API与Next生产构建、行为。Web约9.15秒；已知Next声明正常接受、缓存清理不误报，内部patchValidation passed/82文件。
+- 缺baseline、文本冲突、semantic exit23三例均exit2/不可直接应用；冲突不跑检查，semantic失败停止后续，输入hash/mode保持。`real-project-proof.json/.log`。
+- 最终镜像真实readonly输入与writable同源bind别名对照exit1、无输出目录，`bind-alias.json`。
+- **工具外**再建立完整一次性副本，真实 `git apply --check`、apply、精确两vendor SHA核验与旧包替换；然后独立枚举全部文件SHA/mode。应用副本=candidate=report.final.files，**完整82文件集合/字节/模式一致**，业务API/业务页/config/角色/根业务package仍原字节；副本finally删除。`external-apply.json`。
+- 以实际candidate每个文件重新构造库存、按报告顺序编码重算tree SHA为 `1816cb213507d1d4f5c6e8ec81c0f2ab2bc4ac9b046321ae0f8b83fcdd543459`，与report.final一致。patch SHA为 `055918628c963e3cb03bfd8aa5199dd05d00edc27121dd8ee2ac2865e92b48aa`，也与实际patch匹配。未只信内部passed标记。
+
+### 保留范围、来源与清理
+
+15个本次证据路径coverage均metadata_match；按search→双向trace→snippet核对delivery关键函数并直接读全部修复源，Tier2/best_effort不作完备保证。沿用已核对的官方Git no-prefix/apply及Next NODE_ENV资料；未引入其它框架API或SQL变化。
+
+正式0.1.0 manifest/两包SHA、原消费者79文件及mode、自有输入80文件及mode均独立复核不变；测试目标仍为原0.2.0-t26.1 overlay和原manifest SHA，不冒称新稳定发布。初审报告、T24原脚本及SQL历史在固定修复范围无差异。本附录只追加，保留历史结论。
+
+自有输入临时副本、工具外应用副本已删除；repro/检查容器全部--rm退出，内部fixture/patch临时区finally清理。只留安全新提案与日志/驱动，无DB/卷/.env/密码Cookie/归档key/Chrome创建（`preservation-cleanup.json`）。原0004部署、.env、presentation、Ego31、真人及飞书未操作。
+
+本轮不重跑SQL身份105、浏览器或生产API/Web镜像；沿用此前明确证据。许可针对当前锁定Next16已知输出；其它生成物、无法表达的mode、外部并发修改或不同平台需人工/额外验收，不声称任意代码沙箱或所有平台兼容。T03人工pending继续单列。仅本地提交追加报告，无实现改动、push或关票。
