@@ -56,6 +56,20 @@ pg_dump custom归档必须非空且有PGDMP头，工具exit0，无诊断，pg_re
 
 父规格故事56允许显式外部备份参考：`migrate --external-backup-reference RECORD --confirm` 或 `./templux start --external-backup-reference RECORD --confirm --json`。仅在确有pending/已有结构时，以0600签名 `external-UUID.json` 持久记录原参考、当前目标指纹、verified:false，再跳过重复dump；写记录失败仍阻断迁移。普通输出仅记录ID/unverified状态，不回显参考。它不是自动备份失败后的隐式fallback，也不声明验证了外部产物。操作者对恢复可用性负责；不调用云API。
 
+### T24：升级闭环与重试边界
+
+`start`构建当前发布的标准api/web/entry/migration目标，启动Compose DB，再以同一Compose项目/环境运行一次性migrate；只有该进程退出0（包含最终schemaVersion验证）才执行应用up。配置外部DATABASE_URL时迁移和应用使用该目标，不自动切回Compose内库；本地database仍会启动，但不因此成为迁移目标。Web只消费就绪状态，永不自行迁移。
+
+宿主`TEMPLUX_BACKUP_DIR`是Docker daemon使用的bind源，容器`TEMPLUX_BACKUP_DIR=/opt/templux/backups`是工具写入位置；二者不能混用。management通过内部`TEMPLUX_BACKUP_BIND_DIR`保留宿主原值，仅在调用子Compose时将其还原为插值变量；相对路径按相同project-directory解析，空格不拆词。直接自建management容器并编排Compose的项目亦须提供该宿主投影；不编排Compose的备份命令只使用容器写入路径。该投影不是秘密或权限凭据，宿主操作者须核对真实挂载及属主。
+
+这是显式部署步骤，不是在线升级协调器。已有业务运行时，维护者先评估迁移兼容性、停写窗口与可恢复点；需要停写时按T21显式halt并检查结果，不能仅因dump快照一致就继续不受控业务写。`start`不会自动停止旧容器；失败阻断的是本次后续启动，不能据此声称之前运行的进程已停止。T21 offline/gate/释放回执和T23 restore-block不会被migrate/start清除；即使容器已健康且start退出0，入口也可能仍维护503，开放须遵循明确resume/恢复核验合同。
+
+每项SQL及该项history记录同一事务，**不是整个待迁移批次一个事务**。例如0009已提交、0010失败，0009仍保留；失败项事务正常ROLLBACK时其SQL和history不提交。全部项已提交但后置结构校验失败时，history可能已到目标版本，仍不启动。history checksum/未知版本失败在备份及元数据变更之前阻断。标准失败JSON为`ok:false`，migration诊断stderr为`migration_failed`，start另报告非零容器结果；这些输出没有声明全批回滚，操作者须检查实际history/结构和对应备份，不能仅凭退出码推断已提交数量。原始SQL/连接诊断不透传。
+
+安全重试顺序：确认原进程退出/连接断开、私有目录锁及产物结果→核对history前缀和checksum/实际schema→确认失败事务已回滚且待执行SQL仍来自原受审发布→明确再次start/migrate。正常失败释放迁移/备份锁，不抢遗留根锁。已确认已提交的迁移不会重复执行；无pending仍验证schema且不再次备份。SQL结果/COMMIT未知、checksum不符、后置验证失败或遗留锁无法解释时，不自动重试/删除history/修改已应用SQL/自动restore；保持维护闭合，按T23恢复报告及明确目标恢复流程人工处理。迁移只取migration→backup→根目录锁，不取维护操作锁、不发布入口回执；恢复按T23顺序协调，外部DDL及其它运维必须由部署方串行安排。
+
+可复跑旧0008→0010、失败启动阻断、外部参考/目标、并发锁与会话持久性见[T24验收](../discovery/t24-acceptance.md)。本票不交付源码升级候选/共享包发布设施，也不更改自动保留5的现有合同。
+
 ### 宿主UID映射
 
 包装器默认仍传实际 `id -u/-g`。显式覆盖必须成对且为规范0–4294967294整数；空、负、前导零、超界在调用Docker前拒绝。相同覆盖也影响既有凭据/init的目标属主，不能把为备份核实的映射当作其它部署已验收。

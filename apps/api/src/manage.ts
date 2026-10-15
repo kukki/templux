@@ -31,7 +31,13 @@ async function compose(args: string[]): Promise<void> {
   if (!directory || !isAbsolute(directory)) throw new OperationError('缺少容器管理项目目录。');
   await new Promise<void>((resolve, reject) => {
     const child = spawn('docker', ['compose', '--project-directory', directory,
-      '-f', `${directory}/compose.yaml`, ...args], { stdio: ['ignore', 2, 2] });
+      '-f', `${directory}/compose.yaml`, ...args], {
+      stdio: ['ignore', 2, 2],
+      // Compose runs against the host daemon: its bind source is a host path,
+      // whereas the management tool itself writes through the container path.
+      env: { ...process.env, ...(process.env.TEMPLUX_BACKUP_BIND_DIR !== undefined
+        ? { TEMPLUX_BACKUP_DIR: process.env.TEMPLUX_BACKUP_BIND_DIR } : {}) },
+    });
     child.on('error', () => reject(new OperationError('无法调用 Docker Compose。')));
     child.on('exit', (code, signal) => code === 0 ? resolve()
       : reject(new OperationError(`容器操作未完成${signal ? `（${signal}）` : `（退出码 ${code}）`}。`)));
