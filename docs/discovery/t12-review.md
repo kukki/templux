@@ -50,3 +50,35 @@
 TaskSpace44已finish({keep:[]})，自有凭据目录及三个工具服务删除。补充计数准备因TL最新收尾指令取消，准备阶段仅新建同隔离工具服务并再次删除，未新建第二浏览器空间；t12-followup-cleanup.log。原三个服务仍healthy，原API ready/schema0004，无迁移/重启。.env/原presentation/真人/Ego31/实现保持，不push/关闭工单。
 
 前台浏览器计时不保证后台精确1秒或网络完成；本票沿T11composition证据，未重跑人工OS候选窗。未验收全部浏览器、旧Popover、软键盘、辅助技术、TLS或宿主矩阵。多筛选器仍由采用者聚合提交，动态选项须迁移值或重挂载；真实后台授权/来源/字段/分页由项目提供。T03真实飞书组织人工仍未完成且另列，不被密码测试替代；后续分页排序不列作T12缺陷。
+
+## 附录：F1/P3 修复独立复核（2026-10-15）
+
+固定范围 `4fda286b674ec895ba5247a2d62d4466aff23ede..551c80a72efba1e206228dc3916d27dc377f34bc`；恢复任务时HEAD仍为上界且工作区干净。读取修复验收、合同补充、全部五文件差异及新fixture/scenario。初审历史保留。
+
+**Standards：0项新增发现。Spec：F1关闭，0项新增发现。结合初审与本次复核，T12可按#13验收。**
+
+产品唯一修改删除SearchList.apply提前setState(loading)；搜索提交仍更新term/revision、invalidate，另一条件pending时保留原waiting。实际effect获准run时由createLatestQuery发布loading。默认400/1000、提前关闭、独立pending、取消/generation/closed及正式身份处理未改变。结构search→trace→snippet核对协调器，修复、fixture/scenario、依赖及Dockerfile等coverage均metadata_match/无报告缺口，结论保持best-effort，并直接读取。
+
+### 本次独立实际组件验证
+
+只新建 `t12-review-components` 自有checks容器，用现有镜像/源文件挂载运行Next dev，fixture仅挂到该容器的app/t12-component/page.tsx；仅测试next.config允许127.0.0.1开发资源。没有改原部署/Next配置，没有建测试数据库。按既有ego-browser流程新建自有TaskSpace46，先观察DOM，然后导入版本化 `tests/scenarios/search-filter-browser.mjs`，执行 `combinedState(page)` 和 `directCases(page)`；全部断言通过。
+
+| 场景 | 独立实际观察（load为本轮增量） |
+| --- | --- |
+| 双计时交错 | 452.8ms waiting/busy=false/load0；1101.4ms loading/true/load1，term alpha、selected test；完成后正确空/false |
+| 仅搜索 | 452.8ms loading/true/load1，alpha/全选；完成Alpha/false |
+| 仅筛选 | 452.4ms waiting/false/0；1101.8ms loading/true/1，空搜索/test；完成正确空 |
+| 500ms提前关闭 | 452.9ms waiting/false/0；651.2ms已loading/true/1，alpha/test；完成正确空，不等1000ms |
+| 旧成功迟到 | 702.3ms仍waiting/false/新增0，没有旧成功发布；1100.8ms新load1；完成正确空 |
+| 旧错误迟到 | 701.4ms仍waiting/false/新增0，没有旧错误发布；1101.3ms新load1；完成正确空 |
+
+证据 `test-results/t12-fix-independent-components.json`。实际load入口向DOM output记录id/term/selected/time；StrictMode初始两个调用先作为基数，断言本轮增量，不以aria-busy倒推计数。fixture的可控Promise故意忽略abort，旧请求仍实际活动并由测试按钮成功/失败结束；因此迟到用例检查发布保护而非只检查abort调用。这里是实际React组件/合成Promise，**不是正式业务HTTP或SQL调用次数**。初审的452.6ms错误状态在本轮相同边界已改为waiting。
+
+### 其它独立执行及证据边界
+
+- checks `node --test tests/multiselect.test.mjs tests/search.test.mjs` **9/9，fail/cancel/skipped0**，包括实际HTTP过期响应和真实容器CLI配置入口；t12-fix-independent-logic.log。
+- checks `npm run typecheck` API/Web退出0；自有组件容器 `npm run typecheck --workspace @templux/web` 含挂载fixture亦退出0；independent-typecheck.log、independent-fixture-typecheck.log。
+- 单独启动最终生产Web镜像自有 `t12-review-production`（31044），HTTP `/t12-component` **404**。Dockerfile生产仅复制编译Web、运行模块/shared/config，apps中没有fixture/scenario入口引用；测试页仅靠自有开发容器显式挂载，不能形成生产认证或业务旁路。
+- 已核对开发 red/green/components、targeted/typecheck及production-browser证据：开发修复后14/14正式隔离0008/API/Web、正常密码生产页面453ms waiting→1004ms实际读取状态→1088ms正确空且测试页404。本次复用该正式身份回归证据，**没有独立重跑14项权限矩阵/生产密码页或完整suite**；一行UI修复风险已由独立六组件场景、9项逻辑与类型检查覆盖，不重复无关SQL/构建/截图。
+
+TaskSpace46已finish({keep:[]})，自有两个容器删除；t12-fix-independent-cleanup.log。仅原api/database/web仍healthy，原API ready/schema0004，无数据库迁移或原服务重启；未改.env/presentation/真人/Ego31、未push/关工单。T03真实人工、前台计时、OS输入法/旧Popover/跨平台/TLS等初审局限继续保留。首次恢复前的额度暂停没有产生实现修改，本附录为恢复后的实际执行结果。
