@@ -2,7 +2,7 @@
 
 供新项目复用、也可独立启动的通用模板项目。基于 Supplieroom、Skoope、Catchouse 提取共通能力，业务与数据由各项目保有。
 
-首版规格与29项实施任务已发布。当前已实现 T01–T13：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存、受保护控件示例入口、统一搜索/只读列表、整行多选列表筛选及分页/三态排序/刷新恢复。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
+首版规格与29项实施任务已发布。当前已实现 T01–T14：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存、受保护控件示例入口、统一搜索/只读列表、整行多选列表筛选、分页/三态排序/刷新恢复及普通表单/未保存离开保护。真实飞书组织人工验收仍另列；导航、完整控件及其它后续任务尚未完成，不能视为完整首版。
 
 ## 启动
 
@@ -126,7 +126,7 @@ DEV/UAT默认从账号页进入 /examples，PROD默认关闭；COMPONENT_EXAMPLE
 
 /examples新增名称/编号搜索及五列只读合成列表。搜索字段、读取/匹配实现由采用项目显式提供，默认整段trim、忽略大小写、任一指定字段包含；400ms停顿、清空/Enter及中文输入按合同触发。加载、读取失败、无资格与成功空结果分开，空结果保留表头和搜索；窄屏只在表容器横滚。异步旧结果在新输入意图产生时失效，不等新请求发出。
 
-通用组件位于components/elements，不依赖examples；fields/matches/load及列/稳定ID必填，无默认全字段搜索或业务API。呈现配置elements.search可完整覆盖delayMs和showButton，旧文件未写分支补400/false；1–1000ms、按钮默认隐藏，已有值重启加载。详见 [搜索与只读列表合同](docs/specs/search-and-readonly-list.md) 和 [T11验收](docs/discovery/t11-acceptance.md)。编辑按后续票交付。
+通用组件位于components/elements，不依赖examples；fields/matches/load及列/稳定ID必填，无默认全字段搜索或业务API。呈现配置elements.search可完整覆盖delayMs和showButton，旧文件未写分支补400/false；1–1000ms、按钮默认隐藏，已有值重启加载。详见 [搜索与只读列表合同](docs/specs/search-and-readonly-list.md) 和 [T11验收](docs/discovery/t11-acceptance.md)。普通表单见下述T14合同，表格行编辑按后续票交付。
 
 ### 多选与列表筛选（T12）
 
@@ -135,3 +135,7 @@ DEV/UAT默认从账号页进入 /examples，PROD默认关闭；COMPONENT_EXAMPLE
 ### 分页、排序与刷新恢复（T13）
 
 显式采用PagedList/view后提供默认10条及5/10/15/20/25/50、完整分页和合法页码下拉。名称/编号示例排序支持升/降/基础三态，表头与下拉同步，排序/数量改变回1；page/pageSize/sort写地址并replace当前历史，刷新恢复且校验规范化。窄屏直接保留上页/位置/下页，其余可展开。旧pagination分支缺controls补默认全显示；项目可完整配置五项可选入口。53条纯合成数据及53/12/0情景支持组合/收缩/空验证，无业务API/表。详见 [分页排序合同](docs/specs/pagination-sort-url.md) 与 [T13验收](docs/discovery/t13-acceptance.md)。
+
+### 普通表单与未保存编辑（T14）
+
+普通字段名称持续显示在上方，首次失焦/提交校验，错误修改及时复查。`useEditor`/`createEditor`提供规范化dirty基线、字段/表单错误、保存快照与晚返回失效；`EditNavigationProvider`/`requestLeave`接入站内导航与会话强制退出。浏览器原生离开提示受平台限制，未接入的同文档历史遍历不保证拦截。受保护`/examples`提供纯内存成功/错误/延迟保存、保留与放弃；真实消费者仍需服务端最终校验。详见 [表单与离开保护合同](docs/specs/forms-and-unsaved-edits.md) 与 [T14验收](docs/discovery/t14-acceptance.md)。

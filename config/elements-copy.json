@@ -39,5 +39,7 @@
   "ascending": "升序",
   "descending": "降序",
   "sortBy": "按",
-  "sortAction": "排序"
+  "sortAction": "排序",
+  "discardChanges": "放弃未保存的修改并离开？选择取消可保留编辑。",
+  "saveFailed": "保存失败，修改已保留。请确认结果后再试。"
 }
