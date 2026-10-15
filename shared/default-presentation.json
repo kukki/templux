@@ -24,7 +24,7 @@
   },
   "navigation": { "orientation": "vertical", "initialExpanded": true, "allowCollapse": true },
   "elements": {
-    "pagination": { "pageSize": 10, "pageSizes": [5, 10, 15, 20, 25, 50] },
+    "pagination": { "pageSize": 10, "pageSizes": [5, 10, 15, 20, 25, 50], "controls": { "total": true, "size": true, "edges": true, "pages": true, "jump": true } },
     "search": { "delayMs": 400, "showButton": false },
     "multiselect": { "delayMs": 1000 },
     "notifications": { "durationMs": 15000, "desktopVisible": 3, "narrowVisible": 1 }

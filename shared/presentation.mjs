@@ -19,6 +19,7 @@ export function themePreset(name) {
 export function validatePresentation(value) {
   // Additive, defaultable branch: preserve existing schema1 files; explicit bad values still fail.
   for(const key of ['search','multiselect'])if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,key))value={...value,elements:{...value.elements,[key]:structuredClone(defaults.elements[key])}};
+  if(value?.elements?.pagination&&typeof value.elements.pagination==='object'&&!Array.isArray(value.elements.pagination)&&!Object.hasOwn(value.elements.pagination,'controls'))value={...value,elements:{...value.elements,pagination:{...value.elements.pagination,controls:structuredClone(defaults.elements.pagination.controls)}}};
   function shape(actual, expected, path) {
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual) || actual.length === 0 || actual.length > 20 || actual.some(v => !Number.isInteger(v) || v < 1 || v > 1000)) {

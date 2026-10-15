@@ -283,3 +283,7 @@ Supplieroom `src/shared/ui/image-preview-dialog.tsx` 的 `ImagePreviewDialog`：
 ## T12实施细化（2026-10-15）
 
 整行多选、受控选项/值与列表延迟/关闭应用、搜索组合及可省配置合同见 [多选与列表筛选](multiselect-and-list-filter.md)，行为证据见 [T12验收](../discovery/t12-acceptance.md)。保留前述来源与规范历史，不将后续分页排序声称已实现。
+
+## T13实施细化（2026-10-15）
+
+完整分页、显式单字段三态排序、地址校验/刷新恢复及窄屏/可选入口合同见 [分页排序与URL](pagination-sort-url.md)，证据见 [T13验收](../discovery/t13-acceptance.md)。保留原来源/规范历史，不将后续编辑控件声称已交付。

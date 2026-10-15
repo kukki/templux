@@ -1,0 +1,33 @@
+# T13 分页、单字段排序与URL合同
+
+依据#14/#1、ADR0012/0013及T11/T12。通用Pagination/PagedList在components/elements，纯状态与排序在shared/list-state；示例单向采用，不新增业务API/SQL或认证入口。
+
+## 数据与采用接口
+
+SearchList可选view={settings:elements.pagination,sorting?:{fields,baseCompare}}，默认无view时维持原T11只读呈现。PagedList接收ListState<Row>、显式列/稳定rowKey/caption及view。它只对完整、获授权、已匹配的成功结果排序/切片，不触发其它业务读取，不把部分服务端页当完整范围。真实后台分页项目需自己的总数/读取/并发/权限适配，不用此内存适配冒充服务端分页；浏览器URL与过滤均不授权限。
+
+启用sorting须明确非空唯一字段key/label/compare，字段须对应可见列，baseCompare提供稳定基础次序；未启用不添加排序能力。比较器返回有限数字，不变更原数组；选中字段值相等用baseCompare稳定打破并列，采用者应按稳定ID定义基础次序。基础模式也使用baseCompare，不依赖网络返回偶然顺序。本票仅一个字段，不强制每列排序。
+
+下拉和表头共用同一sort状态：新字段asc、同字段asc→desc→base，取消回基础次序；下拉也可直接选升/降/基础。表头只有配置字段有按钮，活动列aria-sort为ascending/descending；其它列保持普通表头。排序和每页大小改变回1；没有编辑入口。
+
+## 分页和呈现配置
+
+默认pageSize10，pageSizes[5,10,15,20,25,50]，覆盖默认须属于无重复合法集合（1–1000、最多20项）。新增elements.pagination.controls={total:true,size:true,edges:true,pages:true,jump:true}：已有分页分支未写controls补默认；显式null/空/部分/类型/未知字段非法拒绝，不重写项目文件。项目已有值修改后重启读新快照，新分支需部署支持代码；不声称旧镜像可识别。
+
+Pagination为受控组件，接受合法state、total:number|null、settings、onChange。默认总数/当前记录范围、页位置、首页/上页/有省略号页码组/下页/末页、数量和全部合法页码下拉。页码按钮窗口有界；跳页下拉枚举合法页，对完整内存读取范围的容量由项目控制。边界禁用，当前页aria-current=page。空成功为0条/范围0–0，逻辑页1/总页1，边界禁用；保留表头跨列空提示、搜索筛选、数量入口。未完成结果total=null显示总数待读取/页数—，不冒称空或0，导航/跳页禁用但数量仍可调整。
+
+窄屏≤700px直接保留上页/当前总页/下页，其余允许项目配置的内容收纳到更多分页选项details，键盘/触屏可展开。隐藏可选部分只改变入口，不替代参数校验或授权。所有列仍仅表容器横滚，页整体不横溢出，沿品牌变量。共享文案集中于elements-copy。
+
+## 页面地址
+
+默认一个URL管理列表，保留page、pageSize、sort三项；sort=base或显式field:asc/field:desc。采用者应避免同路由多个列表争用这些键，更多列表或其它存储形式可使用纯helper另建明确接入。默认不保存搜索词/业务筛选，不使用localStorage/跨设备偏好。
+
+page/pageSize要求规范正整数字符串和safe integer；size须属于项目集合，sort须是配置字段和方向，否则分别回1/项目默认/base。重复参数取首个值，再写回单值规范形式；空、负、浮点、科学计数、超大、未知方向/字段不作为有效状态。total尚未知时保留合法页码；成功总数确定后校正至1..max(1,ceil(total/size))，数据减少/筛选为空也一致，不提前用loading当0重置刷新恢复的末页。
+
+Next useSearchParams读取当前地址，所有入口与规范化通过官方支持的原生history.replaceState(null,'',href)更新同一历史条目，不push、不请求业务路由、不把每次调整堆历史。写入只更改三键，保留其它参数值与hash；框架处理其内部历史状态，不自行伪造Next私有字段。刷新、路由参数变化或历史恢复均重新校验，显示与规范地址一致；无效地址不能绕过正式后端最新会话/角色检查。
+
+## 既有输入与失败语义
+
+搜索/筛选仍先作用完整来源结果，T12两种pending、立即invalidate、generation/closed和迟到成功/错误拒绝保持。PagedList只呈现当前ListState，不将waiting误标loading，不把error/forbidden当空；新的URL页/排序在结果到达后作用最新条件，不产生第二条业务取数通道。401仍由SessionGuard/session-client立即退出，不等分页/计时；网络/业务403沿现有错误/无资格语义保留页面。
+
+示例扩为53条独立合成记录（保留先前三条），53/12/0情景展示减少/空，名称/编号可排序、其余列不可排，基础按合成ID；原有慢/竞态/错误/无资格仍是纯浏览器源。重置恢复合成数据和搜索筛选，地址三项偏好保留；刷新恢复地址三项但不顺带恢复搜索筛选。

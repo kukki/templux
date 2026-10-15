@@ -20,14 +20,14 @@
   "duration": "普通通知显示秒数",
   "visible": "通知可见条数（桌面 / 窄屏）",
   "defaultsNote": "示例采用项目的品牌与元素默认值。完整控件演示将逐步开放。",
-  "searchTitle": "搜索与只读列表",
-  "searchNote": "只按名称和编号搜索。这些读取情景只影响独立样例，不改变你的账号权限。",
+  "searchTitle": "搜索、筛选与列表",
+  "searchNote": "只按名称和编号搜索。排序、分页和读取情景仅影响独立样例，不改变你的账号权限。",
   "searchName": "名称",
   "searchCode": "编号",
   "category": "类别",
   "description": "说明",
   "reference": "参考标记",
-  "listCaption": "三条独立合成记录 · 只读",
+  "listCaption": "独立合成记录 · 只读",
   "searchHint": "输入名称或编号",
   "scenario": "示例读取情景",
   "normal": "正常读取",
@@ -35,5 +35,6 @@
   "race": "较早查询延迟",
   "readError": "读取失败",
   "forbidden": "无权查看",
-  "showSearchButton": "显示搜索按钮"
+  "showSearchButton": "显示搜索按钮",
+  "sampleCount": "合成记录数量"
 }

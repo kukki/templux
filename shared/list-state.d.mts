@@ -1,0 +1,10 @@
+import type {Presentation} from './presentation.mjs';
+export type ListViewState={page:number;pageSize:number;sort:string};
+export type SortField<Row>={key:string;label:string;compare:(a:Row,b:Row)=>number};
+export function validatePagination(settings:Presentation['elements']['pagination']):void;
+export function validateSortFields<Row>(fields:readonly SortField<Row>[]):void;
+export function parseListState<Row>(params:{get:(key:string)=>string|null},settings:Presentation['elements']['pagination'],fields:readonly SortField<Row>[],total?:number|null):ListViewState;
+export function writeListState(href:string,state:ListViewState):string;
+export function cycleSort(current:string,key:string):string;
+export function orderRows<Row>(rows:readonly Row[],sort:string,fields:readonly SortField<Row>[],baseCompare:(a:Row,b:Row)=>number):Row[];
+export function pageNumbers(total:number,current:number):(number|null)[];
