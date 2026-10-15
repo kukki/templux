@@ -52,3 +52,11 @@ export TEMPLUX_UPDATE_SOURCE_DIR=/approved/releases
 最后只交一份原current→最终candidate的补丁/变化报告/vendor替换清单；保留steps/报告追溯每个manifest/源码标识和检查。再次执行完整临时git apply/vendor/文件集合字节模式门禁，所有步及最终门禁通过才directlyApplicable。不写原源码/lock/vendor/baseline/.env；新版baseline仅最终候选供审查。维护者在一次性副本采用最终整件，再实际构建/业务验证并安排原有备份/维护/迁移部署流程，不自动应用。
 
 每项目atomic mkdir lock，状态/输出不与任何输入重叠（含bind别名）。成功receipt key包含当前允许源/基线/vendor全SHA/模式、catalog SHA、准确目标/公开配置及工具源码hash；重复需复核**整个提案**（含中间报告/候选、最终patch/vendor/REVIEW）库存SHA和准确最终包，损坏报previous_artifact_invalid，不凭目录存在复用。缓存只为本attempt下载的公开文件，finally删除；提案独占UUID目录，失败目录留供核验，不自动清理未知或人工数据。写receipt或result失败不能假称持久成功；可能已有可审查提案，但仍需人工确认状态。
+
+## T27 审查修正：长周期与锁内自动到期判断
+
+自动schedule与人工check共用state的操作锁。自动调用**取得锁后**读取并验证最新attempt，再决定是否写本次attempt及请求来源；未到期返回内部`deferred`（delayMs、attemptKey、clockRollback），释放锁并单调等待后重试。延期不会写attempt或请求catalog，不计入max-runs，不伪报一次检查成功；等待状态可由state/result.json核验。schedule stdout仍只报告实际尝试/失败，`startedAt`取真实持久attempt的`attemptedAt`（取得锁前失败则为调用时间）。人工check显式立即执行，不受自动周期阻挡；失败attempt亦使之后自动等待重算。两个调度器即使同时醒来，也不能绕过锁内期限；人工在睡眠中或醒后取得锁前更新，旧等待回执失效。
+
+周期仍支持1–2678400秒。所有等待含锁竞争退避，都以单调时间计算剩余，分成≤2147483647ms的Node可取消片段，不把31天直接交给会溢出为1ms的setTimeout。取消拒绝原生等待并解除timer，不以吞掉其它等待异常当正常结束；强杀残锁仍人工核验。回拨时最多等待一个完整单调周期；仅匹配同一持久attempt内容指纹的已完成回拨等待回执可结束此等待，防锁内每次重算未来时间而永远延期。其它人工/调度写入（含同毫秒不同attempt ID）改变指纹，必须重新判断期限。该回执只是工具内部状态，不是凭据、配置或CLI跳过开关，不授予项目权限。
+
+attempt必须为合法正整数时间与非空ID对象；坏JSON/null/无效字段不视为空状态。自动读取/发布失败不能请求来源或报成功；result持久化失败向上报错，锁仍释放。锁竞争或attempt发布前失败的持续调度也按配置周期退避，避免异常状态形成紧循环。未来周期无需改变上限或默认每日值。修正证据见[T27修复验收](../discovery/t27-fix-acceptance.md)，初审历史保持。
