@@ -58,3 +58,7 @@ Ego新标签需newPage，直接p2句柄未创建的尝试保留；高层自动�
 未重复最终全255、物理触屏/真实软键盘/读屏/全浏览器；最终60与实际页面/截图对应最终镜像，初始255时间点分开。未承诺跨设备、所有浏览器无首帧几何变化或未接入history可取消；不新增权限/业务范围编辑。依照codebase-memory图查询及覆盖并直读相关源码（best effort），Context7核对Next onNavigate/usePathname、原生dialog/focus及storage事件。
 
 公开证据与三份真实测试密码匹配扫描、原服务status、工具清理记录在`t20-secret-scan.json`、`t20-original-status.json`、`t20-cleanup.log`。交付前删除自有Ego72/agent-browser会话、组件容器、password/SSR/tmpfs测试服务和受限凭据目录；原三服务保持healthy/schema0004，未改.env/现用presentation/真人权限/飞书或发送通知。新镜像保留供独立审查。
+
+## 初审后定向修复
+
+T20 F1遮罩跨区域拖动修复及独立于原始矩阵的最终验证点见[T20修复验收](t20-fix-acceptance.md)。原初审记录保持不变。

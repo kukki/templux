@@ -1,0 +1,2 @@
+export type BackdropPointer={pointerId:number;pointerType:string;button:number;clientX:number;clientY:number};
+export function createBackdropGesture():{down:(event:BackdropPointer&{isPrimary:boolean},onBackdrop:boolean)=>void;move:(event:BackdropPointer)=>void;up:(event:BackdropPointer,onBackdrop:boolean)=>void;cancel:(event:BackdropPointer)=>void;lost:(event:BackdropPointer)=>void;click:(event:BackdropPointer,onBackdrop:boolean)=>boolean;reset:()=>void};
