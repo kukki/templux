@@ -56,3 +56,41 @@
 Ego73 自有页面已 finish，`t20-review-components` 已删除。原服务未重启、重建或迁移；结束时 `/api/status` 为 ready、database connected、schemaVersion `0004`，见 `t20-independent-original-status.json` / `t20-independent-cleanup.log`。未修改 .env、presentation、部署、真人权限或 Ego31，没有推送或关闭工单。
 
 未重复 255 全套、生产构建、身份矩阵或全平台浏览器；受控 storage 故障不等同所有隐私模式，Chromium 键鼠/组件结果不保证物理触屏、所有软键盘或辅助技术。T03 真实组织人工 OAuth 验收仍单列待办；本次不操作或等待该链路。以上结论限定固定范围与所列证据。
+
+## F1 定向独立复核附录
+
+固定修复范围：`b264529fa87f7cb3484b18ee7d7d54adcf347c58..68e87bfc1b80726f8097c32577239d069accee2b`。读取全部 8 文件差异、修复验收及更新合同，保留以上初审历史。
+
+### Standards
+
+新增 **0 项**。手势状态提取到无浏览器依赖的共享模块并提供类型合同；ApplicationShell 只承担几何判断和原生事件接线。事件监听与生命周期清理成对，无定时补跳、click 重放、业务 API/SQL 或配置范围扩大。
+
+### Spec
+
+**F1/P3 关闭；新增 0 项。结合初审与本次复核，建议按 #21 验收。**
+
+原复现使用同一鼠标坐标独立执行：遮罩 `(385,300)` down → 标题 `(150,40)` up → click 共同祖先仍为 dialog，但最终 `open=true`、overflow 保持 hidden。修复核对了完整手势而非仅更改 click 目标判定。
+
+`createBackdropGesture` 记录活动指针、候选及已完成轻触；起终点与 click 必须指针 ID/类型一致、主键、真实遮罩几何合格，距起点不超过 5px。超限不可返回恢复；第二触点取消本次候选，须全部结束后才接受新手势。活动 capture 丢失作废，正常 pointerup 后隐式释放保留已完成轻触。关闭、断点、卸载、ending 的 layout cleanup 与 window blur 均清空状态。监听覆盖打开期间的完整指针流，内部第二触点也会被登记。
+
+通过 Context7 核对 [MDN Pointer events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events) 的隐式 capture 及 pointerup/pointercancel 后释放语义，以及 [click 共同祖先规则](https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event)。真实触屏轻触回归确认正常释放没有误禁关闭；未以纯逻辑测试代替浏览器时序证据。
+
+### 本次独立验证
+
+复用旧 checks 镜像 `sha256:54624e8a05378346234f0c012df011128372f1a14260285cdf1b8508f17d7c2d`，**只读挂载最终 shared/components 和现有 fixture**；不是新生产镜像或生产构建验收。自有端口 31043、工具路由 `/t20-component`，内部 API 为不可达 `127.0.0.1:1`，没有数据库或测试身份服务。
+
+- 最终专项：原 60 项命令追加 `tests/backdrop-gesture.test.mjs`，**67/67**，fail/cancel/skip 均 0；`test-results/t20-f1-independent-targeted.log`。
+- API/Web：旧镜像只读挂最终 shared 与 Web app 后 `npm run typecheck` 退出 0；fixture 所在自有容器的 Web typecheck 退出 0；`t20-f1-independent-{typecheck,fixture-typecheck}.log`。
+- 关键源码：主机/容器 SHA-256 一致且两文件 `cmp` 均退出 0。ApplicationShell 为 `6d0054c40529fafec2f7f7b604b8d0351c08757938fe13a2024e11f781ef03d5`；手势模块为 `9ea790b90878e6277468012a752e198982619d60f9bde56d50edab6753c7b1e9`；见 `t20-f1-independent-{host,container}-hashes.log`。
+- 版本化 `drawerBackdropGestures` **12 个命名场景全部通过**：鼠标内外双向、遮罩拖动及返回、正常 mouse tap；CDP touch 内外双向、拖动、原生 cancel、标题第二指、全结束后新 touch tap；实际活动期间 releasePointerCapture。附带 Escape/桌面断点关闭、重新窄屏开启、菜单焦点和 overflow 断言通过，底层 click=0，值 Initial。结果 `t20-f1-independent-browser.log`。
+- 同日志的 `drawerGuardRegression`：dirty 导航和当前退出均弹确认，拒绝保留草稿/抽屉；遮罩关闭不丢草稿；9 次 Tab 在抽屉内；按住指针 Escape 关闭再开，旧手势不残留。
+- 同日志的 `controlledNavigationLock`：保存 blocked 不确认/不离开、logout 请求 0；公开 session-ending 事件清空抽屉、释放滚动锁并结束等待。此为真实 React 消费者与受控编辑器验证，**不是本轮真实 401/SQL 撤权重跑**。
+- 额外纯逻辑对照：精确 5px 允许、5.0001px 拒绝，错误 pointerId/type 拒绝，down/up 两阶段 reset 均清旧候选且新 tap 可用；`t20-f1-independent-boundaries.log`。blur/unmount 的监听移除与 reset 通过源码核对，不冒称本轮执行了所有原生窗口失焦矩阵。
+
+结构核对使用 search → 双向 trace → snippet；涉及的修复路径、fixture、原导航场景、合同、历史审查及相关 ADR 均做覆盖检查，均 metadata_match，并直读本次源码；仍为 best-effort 信号，不证明动态图完整性。
+
+### 沿用证据、清理与局限
+
+账号 storage/配置、布局 CSS 及原 16 张 PNG + 4 拼图没有本次修改，沿用初审核对结果。开发修复 RED/GREEN、67 项及组件日志已核对，本附录列出的独立结果与其分开。未重复历史 255 全套、截图矩阵、生产构建、SQL 身份或凭据操作。
+
+Ego75 已 finish，自有 `t20-f1-review-components` 已删除；原 API ready、数据库 connected、schemaVersion 仍 `0004`，见 `t20-f1-independent-cleanup.log` / `t20-f1-independent-original-status.json`。仅追加本审查文档，不改实现、部署、.env、presentation、真人权限、Ego31 或飞书，不 push/关票。原平台/物理触屏/辅助技术及 T03 真人 OAuth 人工验收局限继续保留；本次 CDP 触控不等同物理多指全平台验收。
