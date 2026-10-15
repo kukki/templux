@@ -4,11 +4,16 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 export const sha=(bytes,algorithm='sha256')=>createHash(algorithm).update(bytes).digest(algorithm==='sha256'?'hex':'base64');
-export const isExactVersion=v=>typeof v==='string'&&/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$/.test(v);
+// Exact supported SemVer: <=80 chars, safe core numbers; no ranges, prefixes or build metadata.
+export const isExactVersion=v=>{
+ if(typeof v!=='string'||v.length>80)return false;
+ const m=/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/.exec(v);
+ return !!m&&m[0]===v&&m.slice(1,4).every(n=>Number.isSafeInteger(Number(n)))&&!m[4]?.split('.').some(n=>/^\d+$/.test(n)&&n.length>1&&n[0]==='0');
+};
 const names=['@templux/core','@templux/web'];
 const fail=()=>{throw new Error('共享发布校验失败：需要受信清单、准确锁定版本/字节和受支持组合。');};
 const json=p=>JSON.parse(readFileSync(p,'utf8'));
-function safeFile(root,file){if(!/^[a-z0-9.-]+\.tgz$/.test(file))fail();const path=join(root,'vendor',file);for(let p=path;p!==dirname(root);p=dirname(p)){if(lstatSync(p).isSymbolicLink())fail();if(p===root)break;}const s=lstatSync(path);if(!s.isFile()||s.size<1||s.size>64*1024*1024)fail();return path;}
+function safeFile(root,file){if(!/^[A-Za-z0-9.-]+\.tgz$/.test(file))fail();const path=join(root,'vendor',file);for(let p=path;p!==dirname(root);p=dirname(p)){if(lstatSync(p).isSymbolicLink())fail();if(p===root)break;}const s=lstatSync(path);if(!s.isFile()||s.size<1||s.size>64*1024*1024)fail();return path;}
 export function verifyProject(directory,{installed=false}={}){
  try{
   const root=resolve(directory),m=json(join(root,'vendor/manifest.json')),lock=json(join(root,'templux.lock.json'));
