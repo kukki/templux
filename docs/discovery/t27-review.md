@@ -83,3 +83,53 @@ docker run --rm \
 自有累计/应用容器均 `--rm`，无残留 `templux-t27-review*` 容器；自有临时项目（含node_modules、构建缓存、state）已删除，仅保留非秘密提案/脚本/结果。未建数据库/卷/密码/token文件，未注册全局计划；原schema0004部署、.env、现用presentation、Ego31、真人/飞书未操作。
 
 修复F1/F2后应定向复核持久限频，不需机械重复SQL/浏览器全套；最终验收由TL安排。本次不修改实现、不push、不关闭#28。
+
+## 修复定向复核附录（F1/F2）
+
+### 固定范围与两轴结论
+
+复核 `76a123c4a267be0ae5d22d18a1d2c16ec6547aba..754ecb165324e26410ec9a49ed59ff6084f94c31` 全8文件差异，产品实现 `9cbc7a097a7579139b91484346d553b2326e9d2f`，最终测试点 `dbaa961fdb019d88d1583d60d783d4430e45d41f`。读取修复验收、合同补充及本文初审历史。仍由同一审查者分别执行两轴；初审结论保留为历史。
+
+- **Standards：0项新增发现。** 等待统一至 `waitFor`，自动期限统一至现有state锁内判断；无额外业务定时器、全局任务、权限或部署入口。
+- **Spec：F1、F2均关闭，0项新增发现。** 结合初审真实累计提案、外部90文件补丁及实际消费构建证据，建议 #28 按既定范围验收。T03真人飞书组织链路仍pending，与此结论独立。
+
+### 修复核对
+
+**F1关闭**：`tools/updates/schedule.mjs:4` 以 `performance.now()` 单调期限重算剩余，所有片段含 `Math.ceil` 后仍不超过2147483647ms；普通延期和锁竞争/发布前失败退避共用该等待。周期上限31天未缩小，AbortSignal贯穿每段；已取消信号不开始timer，首/第二片段取消拒绝原生等待。schedule只将信号实际取消的AbortError视为结束，其它异常继续上报。Context7当前Node24官方timer文档再次核对溢出与promise变体语义；没有把不精确的实际唤醒时间当作期限保证。
+
+**F2关闭**：`tools/updates/check.mjs:10` 同一操作锁取得后，11–17行读取validated attempt、计算自动期限，再决定延期或发布新attempt。deferred不写attempt、不请求来源，finally释放锁；schedule等待后重新取锁，延期不消耗max-runs。人工check不携自动模式，仍立即执行，但坏attempt不能被静默覆盖。回拨回执仅对同一完整attempt内容指纹有效；替换ID/内容必须重新等待，完整单调周期后允许结束未来时间导致的延期，避免永久延期。失败attempt仍限频；发布前失败/locked退避无紧循环，result发布失败不能返回成功且锁释放。该回执为工具内部调用状态，不是对不可信代码的安全沙箱。
+
+图查询按search→trace→snippet核对schedule/check/state及waitFor，9个依赖证据路径coverage均metadata_match、best_effort无记录缺口；同时直接读取完整变更及相关config/入口，未将图的无记录当作完整性证明。确认 tools/upgrade、tools/release、apps、database、project-template、Dockerfile 在本修复范围无差异，因此沿用初审累计/包/SQL证据，不重跑无关部署矩阵。
+
+### 本轮独立实际执行
+
+证据根为 **`test-results/t27-fix-review/`**；未覆盖开发的 `test-results/t27-fix/`。使用原生最终工具镜像 **`sha256:24d620ab0bd6eb5ac07e745c1695f0e7665edc41636e1c97dc010d570f373251`**，不覆产品或测试源。
+
+| 检查 | 独立结果 |
+| --- | --- |
+| 最终123专项/APIWeb类型 | `suite-types.log`：123/123、0失败/取消/跳过，随后API与Web tsc退出0。测试范围为updates-*、release、project-interface/project-web-server、upgrade/upgrade-checks/upgrade-merge。 |
+| 原反例旧镜像RED | 同一版本化 `tests/scenarios/t27-scheduler-repro.mjs` 挂载旧eb60镜像：31天周期24ms即检查、发生TimeoutOverflowWarning，人工后602ms自动检查；脚本最终断言失败。`repro-red.log`保留，不当通过。 |
+| 原反例最终GREEN | 同脚本挂最终镜像，退出0：31天等待153ms主动取消，runs0、HTTP0、attempt不变、无overflow；2秒周期人工后自动attempt间隔2010ms，HTTP仅人工和自动各一次。`repro-green.log`。 |
+| 长周期边界/取消 | 123专项含MAX−1/MAX/MAX+1/2678400000分段，受控单调时钟验证最后1ms前不完成；原生首段/第二段Abort以及大周期锁竞争取消均通过。真实31天/24小时未等待；受控边界与真实短时观测分开。 |
+| 原子期限/故障交错 | 专项含睡眠中manual、醒后锁前manual、双自动实例/两个真实scheduler、失败manual、回拨同指纹与更换指纹、真实回拨完整单调周期、坏attempt/null/JSON、attempt/result发布失败及锁释放。没有以HTTP到达间隔代替attempt开始时刻。 |
+| 独立CLI/Compose | 自有目录复跑版本化proof的审查副本，仅改证据根和Compose项目名：CLI双tick1063ms，人工立即319ms，独立进程重启后1076ms，独立Compose双tick1071ms；均是持久attempt边界。`container-proof.json`、commands.json和各stdout/stderr。无全局注册。 |
+| 镜像/原输入 | proof核对20产品工具/适配源逐字节/SHA匹配最终镜像；79/80/83原输入完整文件SHA/模式保持；0.1/.2完整发布库存相等，0.3 manifest指定SHA保持。`source-audit.json`、`container-proof.json`。 |
+| 语法/卫生 | `sh -n project-template/check-updates`、Python版本化fixture和审查副本内存compile、`git diff --check`均通过。仅审查文档纳入提交。 |
+
+实际命令主干：
+
+```sh
+docker run --rm --entrypoint sh t27-fix-final -c \
+ 'node --test tests/updates-*.test.mjs tests/release.test.mjs tests/project-interface.test.mjs tests/project-web-server.test.mjs tests/upgrade.test.mjs tests/upgrade-checks.test.mjs tests/upgrade-merge.test.mjs && npm run typecheck'
+docker run --rm -v "$PWD/tests/scenarios/t27-scheduler-repro.mjs:/repro.mjs:ro" \
+ --entrypoint node t27-fix-final /repro.mjs
+python3 test-results/t27-fix-review/container-proof.py --image t27-fix-final
+```
+
+### 证据边界与清理
+
+本轮独立使用loopback HTTP及目录来源，不代表真实外部HTTPS服务、全天周期或所有宿主平台已验收。长周期/回拨的一部分使用受控计时器和时钟；真实Node取消、短周期、进程重启及Compose另外实测。开发早期未完成MockTimers运行、中间编译错误、前轮120项未作为本轮成功依据；本轮完整123及最终镜像独立完成。
+
+累计/propose/认证SQL包未改，沿初审本审查者独立两边构建和完整外部patch等价结果，本轮不声称再次执行累计构建、SQL身份、浏览器或生产镜像构建。T26快照/最终交付门禁在123相关回归内保持通过。
+
+自有proof state/output、运行配置已删除；Compose down完成，检查无自有scheduler容器/网络或残留锁，所有docker run均--rm。没有DB凭据、token文件或业务卷；仅保留安全脚本/日志/源hash证据。原schema0004部署、.env、presentation、Ego31、真人及飞书未操作。未改实现、未push、未关闭#28；后续由TL安排验收。
