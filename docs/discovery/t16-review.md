@@ -53,3 +53,34 @@
 Ego57已finish({keep:[]})，自有容器删除，t16-independent-cleanup.log；原三服务healthy、API ready/schema0004，无迁移/重启。无数据库/凭据，.env/原presentation/Ego31/真人及飞书通知不动，未push/关票；本次只新增报告和忽略目录证据。
 
 前台/休眠单调时钟与恢复协调不保证OS休眠一致推进或后台精确15秒；Chromium视口/触控协议不等于物理手机、全OS软键盘、读屏或TLS矩阵。原生top layer/焦点跨平台仍有限制。T03真实飞书组织人工仍未完成另列，密码链路不替代。整体验收建议待F1修正后复核。
+
+## F1 定向独立复核附录（2026-10-15）
+
+固定修复范围 `5f0f28a58ecffd0918009d113ec4fe39824f844a..d6a042409f2d8c66003454912f0fce7dbdea14bf`，开始时HEAD为上界、工作区干净。已读全部5文件差异、修复验收和合同补充，保留以上初审历史。同一审查者依次双轴；本次 **Standards 0项新增、Spec F1/P2关闭，0项新增**。结合初审其它覆盖，建议T16按#17验收；T03真人组织人工待办仍另列。
+
+### 修复判断
+
+`shared/notifications.mjs:11`的内部update仍默认前置fill，仅`:28`的setLimit传refillBefore=false。在一次发布内先advance移除到期项，再应用新上限、迁移原已发布且仍存活的尾部，最后按新上限fill。没有中间发布，也没有把新补位项当作已显示历史；既有suspended恢复优先。push/close/pause/tick的默认顺序没有改动，未扩大公共API或业务范围。合同明确原有保护语义，未通过重定义“显示”掩盖原缺陷。
+
+独立执行15000及16000ms原ABC/DE条件：收缩一次仅通知订阅者一次，D显示且余量15000、E等待、suspended空；入FGH后省略E/F共2条、waiting G/H；关D下一个为G。14999ms对照保留B/C各1ms。新增5项还覆盖部分到期仅迁移存活尾部、清失效DOM暂停原因而保留余量、同键合并、已有暂停区在过期扩展时优先恢复。断言已发布快照、被丢ID和下一项，不仅检查内部状态名称。
+
+### 本次独立实际执行
+
+复用旧checks依赖镜像，**不是原生已含补丁的新镜像**。专项read-only挂最终shared及notifications测试；类型检查挂最终控制器；自有开发容器挂控制器及版本化fixture，API指向不可达本机端口1，不建立数据库/凭据或身份。HTTP200后自有Ego59执行版本化notificationClock。证据均位于ignored test-results/：
+
+| 验证 | 结果与证据 |
+| --- | --- |
+| checks `node --test tests/notifications.test.mjs tests/presentation.test.mjs tests/editor.test.mjs tests/editor-deadline.test.mjs` | **45/45，失败/取消/跳过0**；t16-fix-independent-targeted.log |
+| checks `npm run typecheck` | API/Web退出0；t16-fix-independent-typecheck.log |
+| 挂fixture容器Web workspace typecheck | 退出0；t16-fix-independent-fixture-typecheck.log |
+| 额外原条件及发布次数 | 15000/16000与14999对照断言通过；t16-fix-independent-boundaries.json |
+| 原8组真实DOM组件场景 | **8/8**；t16-fix-independent-components.json；暂停并集/内部移动/合并、常规overflow、多项同时到期、收缩扩展余量及焦点、键盘关闭、end拒复用 |
+| 源对应 | 控制器、未改React视图及fixture宿主/容器SHA256一致；t16-fix-independent-{container,source}-hashes.log。控制器docker cp后cmp逐字节退出0；mounted-controller.mjs |
+
+相关8路径coverage均metadata_match、无报告缺口，best-effort不证明完整性；修复、视图、fixture、场景及新增测试另直接读取。沿用初审已取得React官方订阅/快照语义；本次无新框架API。核对开发red/green与修复验收的覆盖说明，开发证据与上表独立执行分开。**194全套为初次交付历史点，本次没有重跑194、生产构建、正常密码/SQL身份或无关截图矩阵**；本次45对应最终挂载源码。
+
+### 清理与限制
+
+Ego59已finish({keep:[]})一次，自有t16-fix-review-components已删除；t16-fix-independent-cleanup.log显示仅原三服务healthy，original-status.json为ready/database connected/schema0004。无数据库/凭据、迁移或原部署重启，.env/现用presentation/Ego31/真人/飞书通知均未动，未push/关票；只追加本审查文档。
+
+可控单调时钟与Chromium组件验证不代表真实后台精确15秒、OS休眠一致推进、物理手机/全软键盘/读屏或TLS矩阵。正常密码/生产fixture边界/SQL撤权仍沿用初审已核对开发证据，未声称本次独立重复。以上初审限制继续适用，无剩余本票阻塞发现。
