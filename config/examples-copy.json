@@ -116,5 +116,15 @@
   "imageFallbackAlt": "合成画布 A：按顺序尝试缺失源、损坏源和有效源",
   "imageFailedAlt": "独立失败示例，不会切到其它图库图片",
   "imageEmptyAlt": "无图片来源的占位示例",
-  "imageZoomNote": "启用后用按钮或加减号缩放，拖动或方向键移动；切图和视口变化恢复适配。不提供图片编辑。"
+  "imageZoomNote": "启用后用按钮或加减号缩放，拖动或方向键移动；切图和视口变化恢复适配。不提供图片编辑。",
+  "copyTitle": "复制完整内容",
+  "copyIntro": "以下均为合成文本。显示省略不改变复制内容；反馈只出现在对应按钮。",
+  "copyShort": "短值",
+  "copyLong": "长值",
+  "copyEmptyTitle": "空值",
+  "copyHide": "隐藏空值按钮",
+  "copyFailureDemo": "演示复制被拒绝",
+  "copyShortLabel": "复制合成短值",
+  "copyLongLabel": "复制合成长值",
+  "copyEmptyLabel": "复制空值示例"
 }

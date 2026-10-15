@@ -27,6 +27,7 @@
     "pagination": { "pageSize": 10, "pageSizes": [5, 10, 15, 20, 25, 50], "controls": { "total": true, "size": true, "edges": true, "pages": true, "jump": true } },
     "search": { "delayMs": 400, "showButton": false },
     "multiselect": { "delayMs": 1000 },
+    "copy": { "feedbackMs": 1500, "emptyMode": "disable" },
     "images": { "zoomPan": false, "maxScale": 4 },
     "notifications": { "durationMs": 15000, "desktopVisible": 3, "narrowVisible": 1, "queueCapacity": 50 }
   }

@@ -1,4 +1,5 @@
-export type Presentation = typeof import('./default-presentation.json');
+type Defaults = typeof import('./default-presentation.json');
+export type Presentation = Omit<Defaults,'elements'> & {elements:Omit<Defaults['elements'],'copy'> & {copy:import('./copy.mjs').CopySettings}};
 export class PresentationError extends Error {}
 export const themeNames: string[];
 export function defaultPresentation(): Presentation;

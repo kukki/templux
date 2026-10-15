@@ -83,5 +83,13 @@
   "zoomOutImage": "缩小图片",
   "zoomInImage": "放大图片",
   "imageScale": "相对适配比例",
-  "fitImage": "适配视口"
+  "fitImage": "适配视口",
+  "copyAction": "复制",
+  "copyPending": "正在复制",
+  "copySucceeded": "已复制",
+  "copyRetry": "重试复制",
+  "copyEmpty": "暂无可复制内容。",
+  "copyDenied": "浏览器未允许复制，请检查权限后重试。",
+  "copyUnsupported": "此环境不支持复制，请使用安全连接和支持剪贴板的浏览器。",
+  "copyFailed": "复制未完成，请重试。"
 }
