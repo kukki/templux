@@ -19,7 +19,7 @@ T19 / Gitea #20，父规格 #1 story91。辅助浮层和独立面板是两种元
   onClose={requestClose} /* 其余真实校验、保存、核验合同 */ />
 ```
 
-`registerClose`接受公共 `CloseBoundary`（request/getSnapshot/subscribe），将dirty取舍和blocked状态交由现有编辑器。回调同步且只在接受后执行；过期epoch的清理不可移除新面板边界。保存中UI和API均拒绝关闭、替换和重复提交；失败解锁，超时解除等待但结果未确认，明确核验且不自动重试。继续遵守[T15](row-and-dialog-editing.md)的晚返回/receipt/新编辑规则。未登记边界的普通内容直接关闭；消费者有责任为可编辑内容登记。
+`registerClose`接受公共 `CloseBoundary`（request/getSnapshot/subscribe），将dirty取舍和blocked状态交由现有编辑器。回调同步且只在接受后执行；每次registerClose分配独立注册身份并绑定epoch，稳定CloseBoundary对象可以跨目标或在同epoch清理后重新注册。旧cleanup和旧订阅回调只能作用于其所属注册，不能移除新边界、发布新snapshot或解除锁。当前cleanup幂等，只退订一次；替换/关闭/invalidate/end先撤销注册归属再退订，退订同步回调也无效。订阅建立期间若同步通知已使注册失效，迟到返回的退订函数立即释放。仍只有一个当前边界，未清理的第二个活动注册继续拒绝。保存中UI和API均拒绝关闭、替换和重复提交；失败解锁，超时解除等待但结果未确认，明确核验且不自动重试。继续遵守[T15](row-and-dialog-editing.md)的晚返回/receipt/新编辑规则。未登记边界的普通内容直接关闭；消费者有责任为可编辑内容登记。
 
 面板为 `role=dialog, aria-modal=false`，无遮罩。打开聚焦标题，Tab可离开，页面仍可操作。实际关闭且焦点仍在面板内才返回仍可用的origin；替换、已移到页面的焦点、强制会话结束均不抢回旧焦点。面板拥有焦点时对子EditSession设置manageFocus=false；其默认true继续用于既有行/模态消费者。
 

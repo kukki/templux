@@ -56,3 +56,7 @@ Context7 `/mdn/content`核对原生[Popover](https://developer.mozilla.org/en-US
 物理触屏、真实软键盘/输入法、读屏、多浏览器及后台调度未完整验证；CDP缩小可见视口不等同硬件键盘。默认Popover API不支持时明确不可用。真实项目仍需后端最终授权/版本/操作结果核验，模拟内存保存不能承诺远端取消。原T03真实飞书组织人工验收继续另列未完成。
 
 最终公开证据秘密扫描、原服务status/fixture404、资源清理与工作区状态记录见 `t19-secret-scan.json`、`t19-original-status.json`、`t19-cleanup.log`。原schema0004和API/Web未重启迁移，未改.env/现用presentation/Ego31/真人权限或飞书；自有Ego68、工具容器/独立tmpfs库及私有凭据目录在交付前移除。保留新构建镜像供独立审查，不自动部署。
+
+## 独立初审后F1修复
+
+稳定CloseBoundary复用的注册归属缺口及新增RED→GREEN、最终63专项/8实际组件范围见[t19-fix-acceptance.md](t19-fix-acceptance.md)。初审历史保留于[t19-review.md](t19-review.md)，不以原正例覆盖该缺口。
