@@ -44,3 +44,7 @@ docker exec t17-fix-components npm run typecheck --workspace @templux/web
 ## 平台与隔离边界
 
 Chromium桌面视口及CDP多触点模拟不等于真实iOS/Android硬件；未重验此前正常授权页面矩阵。后台计时、跨平台焦点/原生手势仍受浏览器限制。没有数据库/凭据必要，未启动测试SQL、未操作真人；原0004服务、`.env`、实际presentation及Ego31保持不动。只清理自有TaskSpace62与组件容器。
+
+## F3 后续范围补充
+
+独立复核确认F1/F2关闭、F3在stage外第二触点仍需修正。后续最小修复及新源码验证见[弹窗范围触点验收](t17-modal-pointer-acceptance.md)，上述15组保持其原源码点。
