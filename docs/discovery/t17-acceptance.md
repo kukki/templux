@@ -73,3 +73,7 @@ fixture通过read-only挂载运行；修改fixture长alt后，开发服务器热
 自有TaskSpace60已finish({keep:[]})一次（`t17-browser-finish.log`），删除t17-components、password-api/password-web/SSR/auth-database测试容器及私有0600凭据目录；tmpfs测试身份销毁。公开56个证据文件实际测试密码匹配0（`t17-secret-scan.json`）。原api/database/web仍healthy，status ready/schema0004、login200（`t17-final-services.json`、`t17-original-status.json`）。未重启/迁移原部署，未改.env/现用presentation、Ego31、真人权限或发送飞书通知。
 
 本机Chromium视口/触控协议不等于物理手机、所有软键盘/OS/浏览器、读屏或外部HTTPS图片矩阵。native Image只能判资源失败；业务图片HTTP身份/域许可/服务端访问仍由项目负责，不能从img error猜401。缓存只实例生命周期，abort不保证取消远端传输；不提供捏合/轮式缩放或业务照片编辑。最终未重复209完整suite或无关平台矩阵，验证点已分开。T03真实飞书组织人工验收继续另列未完成。
+
+## 初审修复补充
+
+F1/F2/F3的修前复现、最终专项/组件验证及平台边界见[修复验收](t17-fix-acceptance.md)。以上原实现证据保留其源码点，不代表修复后重跑全套。
