@@ -20,7 +20,7 @@
 - 数据库之外的文件备份属于新项目及部署环境；文档需说明范围。
 - 恢复目标校验、停写及备份清理的具体执行机制。
 
-以上为原始规范；T22交付记录见下方。恢复命令仍属于后续票。
+以上为原始规范；T22交付记录见下方。T22当时的恢复命令仍属于后续票；T23更新见本文末。
 
 ## T22 已实现：容器备份与迁移前置
 
@@ -38,7 +38,7 @@ pg_dump custom归档必须非空且有PGDMP头，工具exit0，无诊断，pg_re
 
 清单有项目名、随机根归属、配置端点/库名SHA256来源指纹、manual/automatic、ISO UTC时间、单调automatic序号、toolMajor18、custom、bytes/hash、restored:false及本地HMAC。序号在根锁内基于仍可信成功automatic递增，不依赖墙上时钟顺序；时钟回拨也不能把新成功产物淘汰。来源是配置目标指纹，不是远端服务身份认证证明；需结合受控部署配置核对。清单/密钥本身私有，不进入普通日志。
 
-这些校验确认工具可读和字节一致，**不等于已完成数据库恢复或业务语义验证**。T22验收另有真实scratch恢复核对。恢复只需标准archive.dump，不依赖本地HMAC密钥；签名只限制自动删除归属，不防已获宿主权限者篡改。代码版本/迁移历史、兼容配置、.env必要密钥、扩展、角色/权限及文件资产须另行准备。尚未交付恢复CLI、恢复后会话撤销或自动切换数据库，不能直接将scratch开放为生产。
+这些校验确认工具可读和字节一致，**不等于已完成数据库恢复或业务语义验证**。T22验收另有真实scratch恢复核对。恢复只需标准archive.dump，不依赖本地HMAC密钥；签名只限制自动删除归属，不防已获宿主权限者篡改。代码版本/迁移历史、兼容配置、.env必要密钥、扩展、角色/权限及文件资产须另行准备。T22当时尚未交付恢复CLI/恢复后会话撤销；T23在本文末更新这两项。自动切换数据库仍未交付，不能直接将scratch开放为生产。
 
 ### 自动保留、并发和失败结果
 
@@ -75,3 +75,61 @@ pg_dump custom归档必须非空且有PGDMP头，工具exit0，无诊断，pg_re
 自定义table/index access method也是单库非schema对象。补查pg_am的正常运行OID（>=16384），内置heap/btree等initdb记录不计入已有用户结构。这与PG18.6 pg_dump的selectDumpableAccessMethod使用同一OID边界，不按AM名字猜测；读取目录报错仍在原查询中向外失败，不退化为空库。非空检测不保证每个对象/插件能在任意目标恢复，角色/表空间和插件二进制等前提仍按单库备份范围另行准备。
 
 本轮以PG18.6 pg_dump.h的DumpableObjectType及pg_dump.c的相关选择/输出函数作有界核对：独立非schema根对象为extension、procedural language、cast、access method、transform、FDW/server、default ACL、large object、event trigger、publication、subscription；本次明确遗漏为AM，其余已有对应目录检查。user mapping虽非独立DO根，已有检查且随server输出；关系/类型/函数等命名对象与索引/约束/策略、复制关系等子对象另由schema或父对象识别。数据、统计及归档边界不是新增独立根；数据库根元数据也不能以“数据库存在”作为非空判断。这是该版本源码类别的有界核对，不宣称穷尽所有DDL、所有属性变化、插件或未来版本。源码映射与实际36项、标准target/scratch证据见[T22 AM补齐验收](../discovery/t22-am-fix-acceptance.md)。
+
+## T23：明确目标恢复
+
+菜单26或一行命令：
+
+```sh
+./templux restore --mode original --target current \
+  --archive /opt/templux/backups/backup-UUID/archive.dump \
+  --sha256 INDEPENDENTLY_CHECKED_64_LOWERCASE_HEX --confirm --overwrite --json
+# 目标URL从受限环境导出，不能把密码写进参数或终端历史。
+./templux restore --mode independent --target env:TEMPLUX_RESTORE_TARGET_URL \
+  --archive /opt/templux/backups/selected.dump \
+  --sha256 INDEPENDENTLY_CHECKED_64_LOWERCASE_HEX --confirm --overwrite --json
+```
+
+每次模式和目标必须明确，无默认；脚本包装器在任何Docker探测/构建前拒缺项，管理入口重复校验。菜单在容器内填写四项并确认。`current`也是显式选择：original须证明等于当前库，independent须证明不同。比较`pg_control_system().system_identifier`与数据库OID，URL拼写、主机别名、用户名或TLS查询项差异不能绕过；无法证明身份就拒绝。物理克隆可能保留相同标识/OID，此时保守拒绝独立模式，不以更换URL绕过。结果显示实际身份和目标配置键，不回显URL。
+
+确认摘要明确：覆盖归档中的对象，**不等于整库擦除**；不自动删除归档外对象，额外对象/依赖也可能令clean失败回滚。目标须已存在且由操作者准备，不创建/删除数据库、不改.env/连接、不自动部署或resume。已有用户对象时先发布manual安全备份，复用T22完整对象检测；类型、AM等不能被误当空库。备份失败在halt前拒绝；该manual不被自动保留清理。此快照不承诺包含后来提交的写入。
+
+### 可信输入、版本及权限
+
+宿主授权操作者须明确选择并信任归档。PostgreSQL恢复能执行源超级用户选择的任意代码；SHA256只验证选定字节，不验证SQL安全，模板不是SQL沙箱，不接受公众上传。输入为完整custom归档、无symlink路径、指定宿主UID/GID的0600普通文件；先复制到0700私有暂存，核对外部已确认SHA、列表和完整解码。外部归档须先安全放入专用备份挂载目录，或由授权宿主显式只读挂载；不自动挂载任意宿主目录。所有敏感暂存正常结束清理，工具/进程原始SQL与libpq诊断不进普通输出。
+
+工具固定18.6，目标支持/实测PostgreSQL18。首版只接受与当前发布**精确相同**迁移版本/checksum的完整`templux_migrations` COPY数据；旧/新/部分/无历史或INSERT改写归档拒绝，不自动升级降级。解码SQL上限512MiB，工具15分钟超时，超限或诊断在停服前拒绝。大库须另评资源和超时。兼容代码、配置、必要认证/数据库/TLS密钥、插件及业务文件仍单独准备；数据库备份不包含这些。恢复输入不需要保留归属HMAC密钥；安全备份目录仍遵守T22权限/归属合同，可用新的专用目录。
+
+操作者须有目标ALTER/CONNECT/CREATE、被替换对象的属主/扩展权限、身份函数EXECUTE及终止目标其它会话权限。预检数据库、schema/关系/类型/函数属主、服务器版本、预备事务和已有会话终止能力；特殊插件SQL仍可能在事务中失败。无CREATEDB也能恢复预先存在的目标，已实测NOCREATEDB/NOSUPERUSER属主；必要函数和终止权限由部署授予。使用no-owner/no-acl，数据库对象归恢复角色，不重建集群角色/ACL；应用人员/Agent、责任人、身份和业务角色数据保持，不擅自授予。
+
+必须预先建立**同集群不同数据库**的救援连接，默认目标URL的postgres库；不可用时以受限环境`TEMPLUX_RESTORE_ADMIN_URL`指定其它已有管理库。管理连接须可ALTER目标且集群身份匹配；目标就是postgres时必须另选管理库。权限、版本、归档、身份和救援检查尽量在halt前完成，不假设外部有建库权限。
+
+### 顺序、提交及会话
+
+原库要求entry存活，复用T21 halt等待业务写屏障、可靠审计及停止web/api，保留entry/DB。目标迁移→备份→维护操作锁协调工具并发，halt后复验offline。原库持久写入共享卷`${TEMPLUX_MAINTENANCE_RELEASE_FILE}.restore-block`（runId/hash），独立于被恢复SQL。block存在或状态未知均禁止入口释放，包括旧online/gate0的初装回退；普通maintenance-resume明确拒block，不能覆盖旧回执绕过。independent不改当前项目状态/服务/block。
+
+目标管理连接和psql恢复事务就绪后，通过救援连接设`ALLOW_CONNECTIONS=false`，终止其它目标连接，再查无残留或预备事务。新连接由数据库拒绝，被终止事务回滚；原库此前还经T21等待业务写结束。宿主超级用户/数据库属主能改变这些安全状态，不承诺抵抗同时执行越权DDL的宿主操作者。
+
+psql `-X --single-transaction --set ON_ERROR_STOP=1 --file -`在一个事务执行clean恢复、历史和维护guard校验、删除所有人员/Agent旧auth_sessions、OAuth及登录方式关联请求、SQL offline与gate/version递增、`database_restored`强审计。仅该事务内短暂online供原guard完成清理，未禁用guard，外部连接仍关闭。旧online/旧回执/旧证明不会对外生效。审计details持久记录restoreRunId、restoreSha256、restoreMode；数据/证明清理/审计一起提交。没有新增迁移或每次重启换密钥。
+
+psql确认COMMIT后，用保留连接再执行标准schemaVersion、证明清空、offline及runId审计复核。通过才重允数据库连接，再按归属移除原库block；**SQL仍offline，入口继续503**。另一次显式maintenance-resume执行健康检查、强审计和新gate回执才开放。independent未来明确接入其部署后也须该步骤；旧cookie401，新登录仍受人员/Agent环境开关、状态/角色及组织配置约束，不会因恢复启用PROD Agent。正常重启仍保留有效会话。
+
+### 结果与故障救援
+
+JSON stdout包含runId、mode、目标配置键/真实身份、stage、archiveSha256、dataCommitted、connectionsClosed、restored和accessReady；成功另有SQL state。人工输出展示同一结果；stderr为安全摘要，不含URL、密码、cookie或归档内容。参数解析前错误无runId。恢复成功为强审计；失败/输入拒绝只保证结构化运行诊断及宿主保存的报告，不伪称DB故障时失败审计已保存。
+
+事务/验证/关键审计失败会回滚，但目标仍禁连接，原库block保留。COMMIT回执丢失即`dataCommitted:"unknown"`，不凭退出码推断未提交。重允连接回执或后续步骤失败会有界重新禁连接（仅安全闭合，不重试恢复）；无法确认则`connectionsClosed:"unknown"`，不假称已关。临时清理失败报cleanupSucceeded:false。进程/宿主被杀可能留下私有暂存、block和禁连接状态；不自动抢锁、重跑或开放。
+
+救援须由宿主操作者核对runId、stage、备份、数据、历史和审计，再决定保留原数据或重新恢复。**不要直接resume、删block或自动重跑restore。** 先停止所有业务/外部消费者、隔离目标专用网络，保留原库entry block。通过已验证管理库查`pg_database.datallowconn`，不用连接已关闭目标；容器已有psql，无宿主PG客户端：
+
+```sh
+# PGHOST/PGPORT/PGUSER/TLS和只读挂载的0600 PGPASSFILE由受限环境准备；无密码argv。
+# PGDATABASE先明确为管理库；按部署另加受限passfile/证书挂载。
+docker compose run --rm --no-deps --entrypoint /opt/pg-tools/bin/psql \
+  -e PGHOST -e PGPORT -e PGUSER -e PGPASSFILE -e PGDATABASE \
+  -e LD_LIBRARY_PATH=/opt/pg-tools/lib management -X --no-password --set ON_ERROR_STOP=1
+```
+
+在**消费者隔离且block保留**下，正确引用SQL identifier并显式`ALTER DATABASE "目标" ALLOW_CONNECTIONS true`，仅供管理核验。核对精确历史、数据、runId审计及全部旧session/OAuth/link清空；未知COMMIT可能实际完成。若决定保留失败前数据，须在业务写屏障下同事务清理旧证明、设置offline/gate递增及强审计，确认提交后复核。任何核验/审计失败重新禁连接并保留block。只有核验完成才按runId归属清理block，最后另行显式maintenance-resume；允许连接本身不等于恢复完成。该手工流程需要独占宿主运维控制，不是自动灾备编排；NOCREATEDB管理库救援及原库审计失败的完整回路见T23验收记录。
+
+T23复用的对象检测对user mapping改用公开`pg_user_mappings`视图，只检查存在性，不读umoptions；原始pg_user_mapping对普通角色受限，不能把权限错误当空库。[官方说明](https://www.postgresql.org/docs/18/view-pg-user-mappings.html)。恢复任意代码/clean/权限选项依据[pg_restore](https://www.postgresql.org/docs/18/app-pgrestore.html)，单事务错误停止依据[psql](https://www.postgresql.org/docs/18/app-psql.html)。当前库身份不可读取/不可连接时独立模式同样拒绝，不能猜测它与目标不同；不是无条件灾难切换功能。

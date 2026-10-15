@@ -1,3 +1,5 @@
+import {restoreCommand} from './restore-cli.js';
+import {RestoreResultError} from './restore.js';
 import {backupCommand} from './backup-cli.js';
 import {BackupResultError,backupSettings} from './backup.js';
 import {maintenanceCommand} from './maintenance-cli.js';
@@ -16,7 +18,7 @@ import { authorizationCommand } from './auth-cli.js';
 import { initialize } from './initialize.js';
 import { loadPresentation, PresentationError } from '../../../shared/presentation.mjs';
 
-const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check', 'users', 'authorize', 'create-person', 'create-agent', 'reset-agent', 'request-login-link', 'login-links', 'complete-login-link', 'reset-person', 'maintenance-status', 'maintenance-start', 'maintenance-cancel', 'maintenance-end', 'maintenance-halt', 'maintenance-resume', 'maintenance-rescue', 'backup'] as const;
+const commands = ['start', 'status', 'stop', 'logs', 'typecheck', 'test', 'init', 'config-check', 'users', 'authorize', 'create-person', 'create-agent', 'reset-agent', 'request-login-link', 'login-links', 'complete-login-link', 'reset-person', 'maintenance-status', 'maintenance-start', 'maintenance-cancel', 'maintenance-end', 'maintenance-halt', 'maintenance-resume', 'maintenance-rescue', 'backup', 'restore'] as const;
 type Command = typeof commands[number];
 let currentCommand:Command|undefined;
 
@@ -60,7 +62,7 @@ async function main(): Promise<Record<string, unknown>> {
   const options = new Map<string, string>();
   const positional: string[] = [];
   const flagNames = ['--json', '--non-interactive', '--interactive', '--confirm', '--overwrite'];
-  const valueNames = ['--name', '--brand', '--theme', '--version', '--copyright', '--config', '--account', '--roles', '--state', '--username', '--owner', '--credential-file', '--method', '--request', '--expected-version', '--at', '--message', '--external-backup-reference'];
+  const valueNames = ['--name', '--brand', '--theme', '--version', '--copyright', '--config', '--account', '--roles', '--state', '--username', '--owner', '--credential-file', '--method', '--request', '--expected-version', '--at', '--message', '--external-backup-reference', '--mode', '--target', '--archive', '--sha256'];
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]!;
     if (flagNames.includes(arg)) {
@@ -81,13 +83,14 @@ async function main(): Promise<Record<string, unknown>> {
     }
     const prompt = createInterface({ input: stdin, output: stderr });
     try {
-      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n7. 初始化项目\n8. 校验呈现配置\n9. 查看账号\n10. 授权账号\n11. 创建人员密码账号\n12. 创建Agent密码账号\n13. 重置Agent密码\n14. 发起人员登录方式验证\n15. 查询验证请求\n16. 完成已验证关联\n17. 重置人员密码\n18. 维护状态\n19. 开始维护提醒\n20. 取消维护提醒\n21. 结束维护提醒\n22. 停止业务（保留维护入口/DB）\n23. 恢复业务（不部署）\n24. 紧急停止业务（屏障/审计未核验）\n25. 备份数据库（手动保留）\n');
-      const selection = await prompt.question('请选择 1–25：');
+      stderr.write('\nTemplux 管理菜单\n1. 启动\n2. 查看状态\n3. 停止（保留数据库）\n4. 查看日志\n5. 类型检查\n6. 运行测试\n7. 初始化项目\n8. 校验呈现配置\n9. 查看账号\n10. 授权账号\n11. 创建人员密码账号\n12. 创建Agent密码账号\n13. 重置Agent密码\n14. 发起人员登录方式验证\n15. 查询验证请求\n16. 完成已验证关联\n17. 重置人员密码\n18. 维护状态\n19. 开始维护提醒\n20. 取消维护提醒\n21. 结束维护提醒\n22. 停止业务（保留维护入口/DB）\n23. 恢复业务（不部署）\n24. 紧急停止业务（屏障/审计未核验）\n25. 备份数据库（手动保留）\n26. 恢复数据库（显式模式/目标，保持业务关闭）\n');
+      const selection = await prompt.question('请选择 1–26：');
       command = commands[Number(selection.trim()) - 1];
     } finally { prompt.close(); }
   }
   if (!isCommand(command)) throw new OperationError('无效管理命令。');
   currentCommand=command;
+  if(command==='restore')return restoreCommand(options,flags,(interactive||positional.length===0)&&!nonInteractive&&!json&&!!stdin.isTTY&&!!stderr.isTTY,compose);
   if(command==='backup')return backupCommand(options,flags,(interactive||positional.length===0)&&!nonInteractive&&!json&&!!stdin.isTTY&&!!stderr.isTTY);
   if(command.startsWith('maintenance-'))return maintenanceCommand(command,options,flags,(interactive||positional.length===0)&&!nonInteractive&&!json&&!!stdin.isTTY&&!!stderr.isTTY,compose);
   if(command==='start'||command==='config-check'){auditSettings();projectFeatures();}
@@ -144,13 +147,13 @@ try {
   try{runtimePolicy();}catch{throw new OperationError('运行日志容量配置无效。');}const result = await main();
   if(typeof result.command==='string')await recordOperation(result.command,'success');
   console.log(process.argv.includes('--json') ? JSON.stringify(result)
-    : typeof result.command==='string'&&(result.command.startsWith('maintenance-')||result.command==='backup') ? `${result.command==='backup'?'备份':'维护'}结果：\n${JSON.stringify(result,null,2)}`
+    : typeof result.command==='string'&&(result.command.startsWith('maintenance-')||result.command==='backup'||result.command==='restore') ? `${result.command==='backup'?'备份':result.command==='restore'?'恢复':'维护'}结果：\n${JSON.stringify(result,null,2)}`
     : `完成：${result.command}${result.url ? `\n访问 ${result.url}` : ''}`);
 } catch (error) {
   if(currentCommand)await recordOperation(currentCommand,'failed');
   const message = error instanceof OperationError || error instanceof PresentationError || error instanceof FeatureConfigError ? error.message : '操作失败，请检查容器及配置。';
   if(!process.argv.includes('--json'))stderr.write(`${message}\n`);
   runtimeRecord('management','error','management_failed');
-  if (process.argv.includes('--json')) console.log(JSON.stringify({ ok: false, error: message, ...(error instanceof BackupResultError ? error.result : {}) }));
+  if (process.argv.includes('--json')) console.log(JSON.stringify({ ok: false, error: message, ...(error instanceof BackupResultError || error instanceof RestoreResultError ? error.result : {}) }));
   process.exitCode = 1;
 }

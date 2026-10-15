@@ -7,6 +7,7 @@ COPY apps/web/package.json apps/web/package.json
 RUN npm ci
 
 FROM dependencies AS source
+COPY templux templux
 COPY apps apps
 COPY database database
 COPY tests tests
@@ -50,7 +51,7 @@ USER node
 CMD ["node", "apps/web/server.mjs"]
 
 FROM postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c AS pg-tools
-RUN mkdir -p /opt/pg-tools/bin /opt/pg-tools/lib && cp /usr/lib/postgresql/18/bin/pg_dump /usr/lib/postgresql/18/bin/pg_restore /opt/pg-tools/bin/ && ldd /opt/pg-tools/bin/pg_dump /opt/pg-tools/bin/pg_restore | awk '/=> \// {print $3}' | sort -u | xargs -r cp -L -t /opt/pg-tools/lib/
+RUN mkdir -p /opt/pg-tools/bin /opt/pg-tools/lib && cp /usr/lib/postgresql/18/bin/pg_dump /usr/lib/postgresql/18/bin/pg_restore /usr/lib/postgresql/18/bin/psql /opt/pg-tools/bin/ && ldd /opt/pg-tools/bin/pg_dump /opt/pg-tools/bin/pg_restore /opt/pg-tools/bin/psql | awk '/=> \// {print $3}' | sort -u | xargs -r cp -L -t /opt/pg-tools/lib/
 
 FROM api AS migration
 USER root

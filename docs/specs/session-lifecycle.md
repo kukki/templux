@@ -50,3 +50,7 @@ Context7核对[React effects/cleanup](https://react.dev/reference/react/useEffec
 fetch在响应头到达后即可完成；200响应的JSON body仍可能断流、解码失败、超时中止或语法错误。profile仅在成功response.json消费/解析的Promise上捕获这些失败并返回null，由/account、/protected、/admin显示本路由重试；不清Cookie、不误跳登录。映射及页面渲染不被广泛catch覆盖，401/403的Next redirect仍在body catch之外。
 
 使用真实Next Web和独立HTTP故障服务回归，服务只注入上游响应故障/协议元数据，没有登录、session发行或授权操作，且仅作为tools测试容器，生产镜像不包含该脚本。依据 [Next redirect控制流](https://nextjs.org/docs/app/api-reference/functions/redirect) 与 [Response.json异常](https://developer.mozilla.org/en-US/docs/Web/API/Response/json)、[响应头后body中止](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)。
+
+## T23 数据恢复
+
+容器恢复在同一恢复事务中清除所有人员/Agent持久会话及未完成OAuth/关联证明，可靠审计并设置offline后才允许后续显式开放。独立目标未来接入也拒绝旧Cookie；正常服务重启不调用此清理。恢复runId和故障闭合/人工救援见[恢复合同](backup-and-recovery.md#t23明确目标恢复)。

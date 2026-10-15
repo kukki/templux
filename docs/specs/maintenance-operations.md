@@ -47,3 +47,7 @@ rescue只用于DB无法确认等故障下的宿主显式停止web/api，不修�
 entry默认不信客户端XFF/私有IP头，按socket来源覆盖内部声明；仅项目显式ENTRY_TRUSTED_PROXY_CIDRS才接收外部反代链。Web仅信WEB_ENTRY_PROXY_HOSTS明确DNS解析出的entry peer，直连仍按原WEB_TRUSTED_PROXY_CIDRS处理且不信伪造私有头。API仍仅信PASSWORD_PROXY_HOSTS中的Web，防止所有用户被错误归为Web/entry单IP或客户端换头绕T07。Docker Desktop/NAT可能只提供宿主网关IP，需在真实入口代理部署中按现有来源合同配置；不保证凭网络拿不到的客户端原地址。
 
 默认Compose维护卷按项目名隔离，entry/API只读、management可写；不得把不同项目手工指向同一卷。回执不是身份或跨项目认证凭据。新安装无回执/gate0和已有0008安装逐步备份升级的实证见[T21验收](../discovery/t21-acceptance.md)。
+
+## T23 恢复阻断
+
+原库恢复在共享维护卷另建release.json.restore-block，独立于归档回放的SQL及旧回执。存在或无法确认时拒绝入口释放，包括gate0回退；普通maintenance-resume在启动业务前明确拒绝，不能用新回执绕过。成功完成恢复、全部旧证明撤销/强审计并核验后才按runId归属清理该block，SQL仍offline；失败保留，按[恢复救援合同](backup-and-recovery.md#结果与故障救援)处理。独立目标不改变当前部署的维护状态/卷；共享卷依然按项目隔离。

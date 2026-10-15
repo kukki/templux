@@ -10,6 +10,8 @@ export function auditDetails(input:unknown,depth=0):Record<string,unknown>{
  if(['online','offline'].includes(value.maintenancePhase as string))output.maintenancePhase=value.maintenancePhase;
  if(typeof value.noticeActive==='boolean')output.noticeActive=value.noticeActive;
  if(typeof value.plannedAt==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value.plannedAt))output.plannedAt=value.plannedAt;
+ for(const key of ['restoreRunId','restoreSha256'])if(typeof value[key]==='string'&&(key==='restoreRunId'?/^[0-9a-f-]{36}$/:/^[0-9a-f]{64}$/).test(value[key] as string))output[key]=value[key];
+ if(['original','independent'].includes(value.restoreMode as string))output.restoreMode=value.restoreMode;
  const state=value.accountState??value.state;if(['pending','active','disabled'].includes(state as string))output.accountState=state;
  for(const key of ['before','after'])if(value[key]&&typeof value[key]==='object'){const item=value[key] as Record<string,unknown>;output[key]=auditDetails(item,depth+1);}
  const selected=roles(value.roles);if(selected)output.roles=selected;

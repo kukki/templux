@@ -35,4 +35,8 @@
 
 ## T22 备份
 
-菜单25和`backup --confirm --json`、迁移工具自动备份与显式外部参考已实现，见[备份合同](backup-and-recovery.md#t22-已实现容器备份与迁移前置)。手动输出区分备份、保留与临时清理结果；失败仍可能已有成功产物。恢复CLI/自动调度尚未交付。
+菜单25和`backup --confirm --json`、迁移工具自动备份与显式外部参考已实现，见[备份合同](backup-and-recovery.md#t22-已实现容器备份与迁移前置)。手动输出区分备份、保留与临时清理结果；失败仍可能已有成功产物。T22当时未交付恢复CLI；T23更新见下方，自动调度仍未交付。
+
+## T23 恢复
+
+菜单26及 `restore --mode original|independent --target current|env:VAR --archive ABS --sha256 HEX --confirm --overwrite --json` 已实现，详见[恢复合同](backup-and-recovery.md#t23明确目标恢复)。模式/目标无默认；宿主包装器只作破坏性命令缺项前检和配置键转交，Docker前拒缺项，实际权限/身份/归档/恢复仍由容器统一校验。目标URL只通过受限环境提供，不放argv；`TEMPLUX_RESTORE_ADMIN_URL`可指定已存在救援库。未知完成不会自动重试或开放，恢复成功仍offline，须另一次明确maintenance-resume。自动定时/异地服务仍不属于此范围。
