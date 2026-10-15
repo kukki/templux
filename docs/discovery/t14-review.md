@@ -89,3 +89,35 @@ Ego49已finish({keep:[]})，自有组件与未使用的工具库已删除，证�
 只启动现有checks镜像的自有 `t14-fix-review-components`，API_INTERNAL_URL指向不可用本机端口9，不接原API/SQL，无新数据库/凭据。原fixture及新增消费者仅挂自有dev路由，未修改实现。现成场景使用公开DOM输出/错误节点/URL及受控confirm计数，不冒充生产身份或原生对话框验收。未重复172全套、SQL权限矩阵、生产构建或无关截图；原真实401/撤权优先证据仍为初审已核对开发材料，新增代码显式sessionIsEnding取消路径源码保留，本次没有再触发真实身份失效。
 
 Ego51已finish({keep:[]})、自有组件容器删除，t14-fix-independent-cleanup.log；原三服务healthy、ready/schema0004。未改.env/presentation/Ego31/真人、未迁移/重启原服务、未push/关工单。T03真实组织人工与原生beforeunload/未接入历史遍历/跨平台局限继续保留；本次仅追加审查文档，整体验收待F3修正。
+
+## 附录：F3修复独立复核（2026-10-15）
+
+固定范围 `93cc7a755f2361934ebbea2de92db46b764dc581..488f70dc42ffb4a0c3e9d7f8ad4e0b125b2b8005`，开始HEAD为上界、工作区干净。读取全部五文件差异、F3验收和更新合同，继续同一审查者双轴。结构search/trace/snippet核对EditLink/sameWindowClick，修改文件及正式消费者逐路径coverage均metadata_match/无报告缺口，保持best-effort限制并直接读源码。Context7 Next官方核对onNavigate同步取消和外部replace先于冒泡的实现语义。
+
+**Standards：0项新增。Spec：F3/P2关闭，0项新增。原F1/F2保持关闭，结合全部独立审查及复核，T14可按#15验收。**
+
+### 修复与接入范围
+
+普通a兜底移到document冒泡，尊重消费者处理后的defaultPrevented；EditLink的onClick与onNavigate消费者先有同步取消机会。Next已preventDefault的SPA点击不再重复走兜底；外部replace在Next跳转前、消费者onClick后单独守卫。保留同窗/download/修饰键/hash及sessionIsEnding优先，无定时补跳、popstate回滚或历史哨兵。
+
+已直接核对正式编辑路由：FormDemo的客户端链接采用EditLink，命令式router.push包requestLeave；页面壳品牌/返回账号为保留冒泡的普通a，Provider包住整个壳。没有遗留未经接入的普通Next Link，列表replaceState不注册编辑。因此本次没有用收窄合同掩盖正式消费者保护退化。新项目Next消费者仍必须采用EditLink，原生a需允许事件冒泡；不承诺任意第三方stopPropagation、普通Next Link已发起SPA或异步才决定取消的消费者。原未接入工具栏/原生提示平台边界继续明确。
+
+### 独立实际组件与回归
+
+仅现有checks镜像自有 `t14-f3-review-components`，fixture只读挂测试路由，API_INTERNAL_URL指向不可用本机端口1，DEV。无数据库/凭据/真实身份；Ego自有空间53，先观察DOM，再执行版本化场景。
+
+- `consumerOrdering(page)` **7场景通过**：原F3 onClick、原生a、onNavigate取消各0确认/回调各1次，URL/Prevented draft/dirty保持；普通a与外部replace拒绝各1确认、草稿保持；正常转发拒绝/接受每次仅1确认、onClick累计1→2，接受实际到?forward=1并回Alpha/clean。证据 `test-results/t14-f3-independent-ordering.json`。
+- 原 `controlledEditor` **11状态点通过**；`hashLinks`四种hash均0确认/保留Hash draft和dirty；`newerValidation`旧Beta saved后当前空值Required/aria-invalid与就近错误保持、改Gamma清错；`leavingBoundaries`路由/search/外部拒绝各1、download/_blank/Meta零、search接受一次且回已存Beta。证据 `t14-f3-independent-regressions.json`，原F1/F2未回退。
+- `forcedEnding(page)` 调用现有真实endSession：dirty且确认策略恒拒绝，仍到 `/login?reason=authorization_changed`，确认次数**0**。这是现有结束机制的组件整合，**不是后台认证、SQL撤权或组织登录验收**；仅自有sessionStorage计数键并已删除。
+- 自有Ego53已finish({keep:[]})，未操作其它空间。受控confirm用于验证回调次数/数据与URL，不冒充原生beforeunload弹框显示或外站真实访问。
+
+| 独立容器命令 | 结果/证据（test-results/） |
+| --- | --- |
+| checks `node --test tests/editor.test.mjs tests/search.test.mjs tests/multiselect.test.mjs tests/list-state.test.mjs tests/presentation.test.mjs` | **36/36，失败/取消/跳过0**；t14-f3-independent-targeted.log |
+| checks `npm run typecheck` | API/Web退出0；t14-f3-independent-typecheck.log |
+| 自有组件容器 `npm run typecheck --workspace @templux/web` | 含最终fixture退出0；t14-f3-independent-fixture-typecheck.log |
+| editor/navigation镜像与宿主SHA256 | 相同、diff退出0；independent-image-hashes.log/source-hashes.log |
+
+没有重复172完整suite、SQL权限矩阵、生产构建/截图；旧172及真实撤权/原生提示证据仍按初审准确源码与执行范围解释。组件和纯控制器不冒充正式业务写入。
+
+自有组件容器已删除，t14-f3-independent-cleanup.log；仅原三服务healthy、API ready/schema0004，未迁移/重启原服务。.env/原presentation/Ego31/真人不动，不push/关票。工作区仅审查附录，本地提交；T03真实组织人工、原生提示/未接入历史/跨平台等局限保留。
