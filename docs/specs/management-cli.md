@@ -32,3 +32,7 @@
 ## T21 已实现维护入口
 
 菜单18–24与maintenance-status/start/cancel/end/halt/resume/rescue共用容器参数/确认规则，版本和故障语义见[维护合同](maintenance-operations.md)。提醒持久化/强审计、独立entry、停写屏障与显式恢复已实现；不据此将后续备份恢复、升级任务标为完成。普通stop仍是包含入口与DB进程的全停并保留数据卷。
+
+## T22 备份
+
+菜单25和`backup --confirm --json`、迁移工具自动备份与显式外部参考已实现，见[备份合同](backup-and-recovery.md#t22-已实现容器备份与迁移前置)。手动输出区分备份、保留与临时清理结果；失败仍可能已有成功产物。恢复CLI/自动调度尚未交付。

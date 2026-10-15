@@ -10,7 +10,7 @@ export function runtimeRecord(service,level,event,fields={},destination=process.
  if(['token','user_info'].includes(fields.stage))value.stage=fields.stage;
  if(errorCodes.has(fields.errorCode)||typeof fields.errorCode==='string'&&/^[0-9A-Z]{5}$/.test(fields.errorCode))value.errorCode=fields.errorCode;
  if(['success','denied','failed'].includes(fields.result))value.result=fields.result;
- if(['start','stop','init','test','typecheck','config-check','maintenance-halt','maintenance-resume','maintenance-rescue','logs'].includes(fields.command))value.command=fields.command;
+ if(['start','stop','init','test','typecheck','config-check','maintenance-halt','maintenance-resume','backup','maintenance-rescue','logs'].includes(fields.command))value.command=fields.command;
  try{destination.write(JSON.stringify(value)+'\n');return true;}catch{return false;}
 }
 export function pinoDestination(service){return {write(line){try{const value=JSON.parse(line);runtimeRecord(service,value.level>=50?'error':value.level>=40?'warn':'info',value.event??'framework_runtime',value);}catch{runtimeRecord(service,'error','runtime_record_invalid');}}};}

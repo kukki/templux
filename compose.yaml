@@ -120,8 +120,18 @@ services:
 
   migrate:
     logging: *runtime-logging
-    image: ${TEMPLUX_PROJECT_NAME:-templux}-api
-    environment: *database-environment
+    build:
+      context: .
+      target: migration
+    environment:
+      <<: *database-environment
+      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-templux}
+      TEMPLUX_BACKUP_DIR: /opt/templux/backups
+      TEMPLUX_BACKUP_RETAIN: ${TEMPLUX_BACKUP_RETAIN-5}
+      TEMPLUX_HOST_UID: ${TEMPLUX_HOST_UID-0}
+      TEMPLUX_HOST_GID: ${TEMPLUX_HOST_GID-0}
+    volumes:
+      - ${TEMPLUX_BACKUP_DIR-./backups}:/opt/templux/backups
     profiles: ["tools"]
     entrypoint: ["node", "apps/api/dist/migrate.js"]
 
@@ -150,6 +160,8 @@ services:
       AUDIT_CLEANUP_MAX_BATCHES: ${AUDIT_CLEANUP_MAX_BATCHES-10}
       AUDIT_CLEANUP_INTERVAL_SECONDS: ${AUDIT_CLEANUP_INTERVAL_SECONDS-3600}
       COMPONENT_EXAMPLES_ENABLED: ${COMPONENT_EXAMPLES_ENABLED-auto}
+      TEMPLUX_BACKUP_DIR: /opt/templux/backups
+      TEMPLUX_BACKUP_RETAIN: ${TEMPLUX_BACKUP_RETAIN-5}
       TEMPLUX_CREDENTIAL_DIR: /opt/templux/credentials
       FEISHU_APP_ID: ${FEISHU_APP_ID:-}
       FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
@@ -161,6 +173,7 @@ services:
       TEMPLUX_API_PORT: ${TEMPLUX_API_PORT:-31800}
       TEMPLUX_DB_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
     volumes:
+      - ${TEMPLUX_BACKUP_DIR-./backups}:/opt/templux/backups
       - maintenance:/opt/templux/maintenance
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config:/opt/templux/config

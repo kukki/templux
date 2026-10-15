@@ -81,7 +81,7 @@ export async function schemaVersion(pool: pg.Pool | pg.PoolClient, expected: Mig
   return result.rows.at(-1)!.version;
 }
 
-export async function migrate(pool: pg.Pool): Promise<{ schemaVersion: string; applied: number }> {
+export async function migrate(pool: pg.Pool, beforeChange?: () => Promise<unknown>): Promise<{ schemaVersion: string; applied: number }> {
   const expected = await migrations();
   const client = await pool.connect();
   let locked = false;
@@ -92,15 +92,19 @@ export async function migrate(pool: pg.Pool): Promise<{ schemaVersion: string; a
     );
     locked = lock.rows[0]?.acquired === true;
     if (!locked) throw new OperationError('另一个迁移正在执行，请稍后重试。');
-    await client.query(`CREATE TABLE IF NOT EXISTS public.templux_migrations (
-      version text PRIMARY KEY,
-      checksum text NOT NULL,
-      applied_at timestamptz NOT NULL DEFAULT now()
-    )`);
-    const applied = await client.query<AppliedMigration>(
-      'SELECT version, checksum FROM public.templux_migrations ORDER BY version',
-    );
+    const history = (await client.query("SELECT to_regclass('public.templux_migrations') IS NOT NULL AS present")).rows[0]?.present;
+    const applied = history ? await client.query<AppliedMigration>('SELECT version, checksum FROM public.templux_migrations ORDER BY version') : {rows: [] as AppliedMigration[]};
     validateHistory(applied.rows, expected);
+    if (applied.rows.length < expected.length) {
+      const existing = (await client.query("SELECT EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname !~ '^pg_' AND c.relkind IN ('r','p','v','m','S','f') AND NOT (n.nspname='public' AND c.relname='templux_migrations')) OR EXISTS(SELECT 1 FROM pg_namespace WHERE nspname NOT IN ('public','information_schema') AND nspname !~ '^pg_') OR EXISTS(SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public') AS present")).rows[0]?.present || applied.rows.length > 0;
+      if (existing) {
+        if (!beforeChange) throw new OperationError('已有结构存在待迁移项，必须先完成受控备份。');
+        await beforeChange();
+      }
+      await client.query(`CREATE TABLE IF NOT EXISTS public.templux_migrations (
+        version text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now()
+      )`);
+    }
     for (const migration of expected.slice(applied.rows.length)) {
       await client.query('BEGIN');
       try {

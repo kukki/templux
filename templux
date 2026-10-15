@@ -1,12 +1,22 @@
 #!/bin/sh
 set -eu
 TEMPLUX_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+# Explicit paired container-owner override for independently verified bind-mount mappings.
+if [ "${TEMPLUX_HOST_UID+x}" != "${TEMPLUX_HOST_GID+x}" ]; then
+  echo 'TEMPLUX_HOST_UID/GID 必须成对提供。' >&2; exit 1
+fi
+for TEMPLUX_OWNER_VALUE in "${TEMPLUX_HOST_UID-$(id -u)}" "${TEMPLUX_HOST_GID-$(id -g)}"; do
+  case "$TEMPLUX_OWNER_VALUE" in ''|*[!0-9]*|0[0-9]*) echo '宿主属主覆盖必须为规范非负整数。' >&2; exit 1;; esac
+  if [ "${#TEMPLUX_OWNER_VALUE}" -gt 10 ] || [ "$TEMPLUX_OWNER_VALUE" -gt 4294967294 ]; then
+    echo '宿主属主覆盖超出UID/GID范围。' >&2; exit 1
+  fi
+done
 TEMPLUX_AUTH_AVAILABILITY=$(docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" \
   run --build --quiet-build --rm --no-deps auth-config-probe) || TEMPLUX_AUTH_AVAILABILITY=''
 exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" \
   run --build --quiet-build --rm --no-deps \
   -e "TEMPLUX_AUTH_AVAILABILITY_JSON=$TEMPLUX_AUTH_AVAILABILITY" \
   -e "TEMPLUX_PROJECT_DIR=$TEMPLUX_ROOT" \
-  -e "TEMPLUX_HOST_UID=$(id -u)" -e "TEMPLUX_HOST_GID=$(id -g)" \
+  -e "TEMPLUX_HOST_UID=${TEMPLUX_HOST_UID-$(id -u)}" -e "TEMPLUX_HOST_GID=${TEMPLUX_HOST_GID-$(id -g)}" \
   -v "$TEMPLUX_ROOT:$TEMPLUX_ROOT:ro" \
   management "$@"

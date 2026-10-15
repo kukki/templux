@@ -17,7 +17,7 @@ export function auditDetails(input:unknown,depth=0):Record<string,unknown>{
  if(['password','feishu'].includes(value.method as string))output.method=value.method;
  for(const key of ['owner','requestId']){const identifier=id(value[key]);if(identifier)output[key]=identifier;}
  for(const key of ['removed','retentionDays'])if(Number.isSafeInteger(value[key])&&(value[key] as number)>=0)output[key]=value[key];
- if(['start','stop','init','test','typecheck','config-check','maintenance-halt','maintenance-resume','maintenance-rescue'].includes(value.command as string))output.command=value.command;
+ if(['start','stop','init','test','typecheck','config-check','maintenance-halt','maintenance-resume','backup','maintenance-rescue'].includes(value.command as string))output.command=value.command;
  if(['invalid_credentials','login_limited','organization_denied','login_cancelled','invalid_state','provider_invalid','provider_unavailable','origin_denied','authentication_unconfigured','service_unavailable'].includes(value.reason as string))output.reason=value.reason;
  return output;
 }

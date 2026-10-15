@@ -20,4 +20,44 @@
 - 数据库之外的文件备份属于新项目及部署环境；文档需说明范围。
 - 恢复目标校验、停写及备份清理的具体执行机制。
 
-本文件只记录规范，本轮未备份或恢复任何数据库。
+以上为原始规范；T22交付记录见下方。恢复命令仍属于后续票。
+
+## T22 已实现：容器备份与迁移前置
+
+`./templux backup --confirm --json` 与菜单25为同一手动入口，缺确认立即非零；菜单会展示当前项目及容器目标并要求yes。不接受输出文件覆盖参数，目标来自专用 `TEMPLUX_BACKUP_DIR`（宿主默认 `./backups`，容器固定 `/opt/templux/backups`）。禁止共用凭据或配置目录。自定宿主路径还须排除版本管理和镜像上下文，默认backups已忽略。manual不会自动清理。只备份配置DATABASE_URL的一座数据库：不包含代码、.env、业务文件、Postgres全局角色或宿主证书。
+
+management和migration镜像携带固定18.6的pg_dump/pg_restore与运行库，API/Web不带。Compose内库和独立外部可连接库均走同一libpq协议，不要求Web/API运行或宿主PG客户端。工具只接收格式/文件参数，连接密码通过临时0700目录中的0600 PGPASSFILE，连接字段通过最小子进程环境；不把DATABASE_URL/密码放argv。工具原始stderr可能含连接信息，拒直接透传，只报告阶段/退出或超时；工具诊断包括warning也按未验证处理。15分钟工具超时终止子进程，不自动重试。
+
+支持postgres/postgresql URL，必填主机、用户和库名（未写库名按用户名），密码按URL解码；拒CR/LF/NUL/fragment/重复及未知查询项。允许显式sslmode、sslrootcert、sslcert、sslkey、sslcrl，路径须在工具容器可读，证书/私钥由部署方只读挂载；不静默删除未知TLS选项。生产外部连接应配置受信证书与verify-full，不以默认prefer声称验证了服务端身份。PG18 pg_dump官方支持源服务器9.2至18，较新主版本拒绝；本次真实验证18.6，未搭建全部历史/未来版本。建议使用兼容18或更新的目标/工具和必需扩展，不能保证向更老主版本恢复。
+
+### 发布、权限和完整性
+
+根和每件目录0700，dump/清单/归属密钥/临时文件0600；每件随机UUID目录exclusive创建，不覆盖。根各级拒符号链接，既有非空根必须已是指定属主0700；首次空专用目录才初始化权限。写入后显式fchmod/fchown到TEMPLUX_HOST_UID/GID，不让umask扩权限。结果只报告 `containerOwner`，它不是跨Docker共享文件系统验证宿主数值的承诺。
+
+pg_dump custom归档必须非空且有PGDMP头，工具exit0，无诊断，pg_restore --list和全归档到/dev/null解码通过；流式SHA256与字节数写入签名清单。dump和临时清单fsync，最后exclusive硬链接发布manifest.json作为成功标记，再移临时名、fsync目录。没有成功清单的不当成功；进程/存储异常可能留下需核验的未完成件和任务锁，绝不自动抢锁/重试。标记发布后的sync/响应失败明确“结果未确认”，不可据失败退出码假定无产物。普通失败只清理本次目录和私有连接文件，不删除既有成功。
+
+清单有项目名、随机根归属、配置端点/库名SHA256来源指纹、manual/automatic、ISO UTC时间、单调automatic序号、toolMajor18、custom、bytes/hash、restored:false及本地HMAC。序号在根锁内基于仍可信成功automatic递增，不依赖墙上时钟顺序；时钟回拨也不能把新成功产物淘汰。来源是配置目标指纹，不是远端服务身份认证证明；需结合受控部署配置核对。清单/密钥本身私有，不进入普通日志。
+
+这些校验确认工具可读和字节一致，**不等于已完成数据库恢复或业务语义验证**。T22验收另有真实scratch恢复核对。恢复只需标准archive.dump，不依赖本地HMAC密钥；签名只限制自动删除归属，不防已获宿主权限者篡改。代码版本/迁移历史、兼容配置、.env必要密钥、扩展、角色/权限及文件资产须另行准备。尚未交付恢复CLI、恢复后会话撤销或自动切换数据库，不能直接将scratch开放为生产。
+
+### 自动保留、并发和失败结果
+
+`TEMPLUX_BACKUP_RETAIN`未设置默认5，合法1–100，显式空/0/非法拒绝。仅在新的automatic成功发布后，复验**同根归属/项目/来源**成功automatic签名、完整字段/文件权限、SHA和字节，再保留最近N件；不同目标数据库历史保守保留，不跨源删除。manual、外部参考、无归属、坏签名/坏字节/改权限、额外文件或链接不参与删除。不能承诺损坏/未知件或manual的总磁盘容量。
+
+根 `.owner.json` 的密钥缺失则建立新归属，旧件不会匹配而保留；损坏、不同项目或根设备/inode身份改变则拒绝继续，不覆盖。完整目录复制、文件系统重挂载等导致身份变化时同样保守阻断，先人工核实并将旧归属文件安全另存后才建立新归属；旧件不纳入新清理。不能仅凭文件名/分类自报认领旧件，设备/inode也不是防宿主篡改认证。
+
+锁顺序为migrations（如适用）→数据库backups会话级try advisory锁→根exclusive `.lock`；冲突立即拒绝。两个数据库使用同根也由根锁排斥。正常成功/错误清理锁并释放SQL连接，数据库会话丢失不自动抢根锁。未获取T21维护锁，不自动halt/停写；标准一致快照包含快照时刻已提交数据，不含稍后业务写。升级前如需确定停写点，操作者先按T21显式维护合同操作，不能把逻辑备份当作持续复制或停写证明。
+
+清理失败退出非零但结果保留 `backupSucceeded:true, retentionSucceeded:false`；临时文件/锁清理失败另有 `cleanupSucceeded:false`，不得伪称备份没发生。迁移前自动保留失败也阻止迁移，已发布新件保留供核验。未完成的未知结果不自动重试。清理只unlink经过核对目录里的两个已知文件，再删除空目录，不递归清理未知成功件内容。
+
+### 迁移与启动
+
+实际migrate在SQL迁移锁内先验证历史与pending，再识别已有关系/应用schema/公共函数：已有结构且pending必须beforeChange成功；**备份完成前不创建或更新迁移表**。空库初始化或无pending跳过；无pending仍按既有schemaVersion校验。内部migrate调用若已有pending却没有备份回调，直接拒绝。生产独立migration入口自动备份，统一start构建工具镜像、启动DB、运行该入口成功后才启动应用；Web不负责迁移。
+
+父规格故事56允许显式外部备份参考：`migrate --external-backup-reference RECORD --confirm` 或 `./templux start --external-backup-reference RECORD --confirm --json`。仅在确有pending/已有结构时，以0600签名 `external-UUID.json` 持久记录原参考、当前目标指纹、verified:false，再跳过重复dump；写记录失败仍阻断迁移。普通输出仅记录ID/unverified状态，不回显参考。它不是自动备份失败后的隐式fallback，也不声明验证了外部产物。操作者对恢复可用性负责；不调用云API。
+
+### 宿主UID映射
+
+包装器默认仍传实际 `id -u/-g`。显式覆盖必须成对且为规范0–4294967294整数；空、负、前导零、超界在调用Docker前拒绝。相同覆盖也影响既有凭据/init的目标属主，不能把为备份核实的映射当作其它部署已验收。
+
+当前macOS绑定映射实际呈现容器0:0、宿主501:20，即使chown501:20返回成功，容器stat仍0:0。默认严格检查会拒绝而非自动降为root。仅在独立核实该映射后可用 `TEMPLUX_HOST_UID=0 TEMPLUX_HOST_GID=0 ./templux backup --confirm --json`，再在宿主 `stat -f '%u %g %Lp' backups backups/backup-*/archive.dump` 独立验证实际501:20及0700/0600；其它平台不能照抄。Linux volume已单列实际1001:1001/0600验证，不忽略真实属主或权限错误。

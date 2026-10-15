@@ -49,14 +49,24 @@ COPY config config
 USER node
 CMD ["node", "apps/web/server.mjs"]
 
+FROM postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c AS pg-tools
+RUN mkdir -p /opt/pg-tools/bin /opt/pg-tools/lib && cp /usr/lib/postgresql/18/bin/pg_dump /usr/lib/postgresql/18/bin/pg_restore /opt/pg-tools/bin/ && ldd /opt/pg-tools/bin/pg_dump /opt/pg-tools/bin/pg_restore | awk '/=> \// {print $3}' | sort -u | xargs -r cp -L -t /opt/pg-tools/lib/
+
+FROM api AS migration
+USER root
+COPY --from=pg-tools /opt/pg-tools /opt/pg-tools
+ENTRYPOINT ["node", "apps/api/dist/migrate.js"]
+
 FROM docker:29.8.2-cli AS docker-client
 FROM api AS management
 ENV TEMPLUX_REQUIRE_AUTH_PROJECTION=1
 USER root
+COPY --from=pg-tools /opt/pg-tools /opt/pg-tools
 COPY --from=docker-client /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=docker-client /usr/local/libexec/docker/cli-plugins/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose
 COPY --from=docker-client /usr/local/libexec/docker/cli-plugins/docker-buildx /usr/local/libexec/docker/cli-plugins/docker-buildx
 ENTRYPOINT ["node", "/opt/templux/apps/api/dist/manage.js"]
 
 FROM api-build AS checks
+COPY --from=pg-tools /opt/pg-tools /opt/pg-tools
 CMD ["npm", "test"]
