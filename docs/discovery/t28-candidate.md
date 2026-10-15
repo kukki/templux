@@ -65,3 +65,7 @@ A先用公开`@templux/web/state/copy`和`/elements/clipboard`组合局部原型
 补齐后的复跑入口：先在新副本/新输出目录运行t28-project.py a、t28-stable-inputs.py、t28-candidate.py；两份patch和t28-target.mjs均纳入独立审查，不能仅审三个产品文件便视为发布过程获批。已有目录exclusive创建，复跑不覆盖未知证据或来源。组件生产工具页:31130、A:31128保留供该次独立审查；Ego78/命名fallback均为自有空间，后续完成或拒绝时清理。
 
 本轮在真实独立结论之前停于候选阶段，任务保持in_progress；未执行依赖批准的producer正例或B采用。下一阶段由TL传回绑定该候选的实际结论后继续。
+
+## F1修正后的候选（待定向复核）
+
+原7f2318b候选未获批准，完整历史与初审保持。工具SemVer修正及新来源绑定见[t28-candidate-fix-acceptance](t28-candidate-fix-acceptance.md)。当前candidate目录绑定 `4d69b683f7f1edefef2d6261895de9f368869f5d`；原包已保留candidate-unapproved-7f2318b。产品三文件/patch不变，新工具patch为 `1624c34f7799555a6304f38118f59c34212ee1ebdc5f260c62151c7237974870`。原producer代码SHA保持，但批准必须绑定新candidateCommit，不存在可复用旧批准；当前仍无批准/无新版本/B采用。
