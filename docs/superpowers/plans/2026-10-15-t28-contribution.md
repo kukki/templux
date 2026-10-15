@@ -8,8 +8,8 @@
 
 - [x] Create project A from0.1.0, implement project-owned text adapter; RED generic tests and real A page proof.
 - [x] Extract helper/types plus optional CopyButton prop; tests/default compatibility/pending feedback, typecheck.
-- [ ] Prepare candidate patch/source identifiers/extraction/ownership evidence and contribution contract; local commit and TL independent review request.
-- [ ] Wait for actual independent approval before test release; independently prepare B if useful.
-- [ ] Build explicit0.1.1-t28.1 test release from reviewed candidate, exact SHA/manifest/baseline, no prior artifact overwrite.
-- [ ] B voluntary T26 proposal, full patch/vendor application equality, API/Web build and browser benefit/config ownership.
-- [ ] Final targeted/type/build/source/hash/readonly/cleanup evidence, local commits and task/TL report.
+- [x] Prepare candidate patch/source identifiers/extraction/ownership evidence and contribution contract; local commit and TL independent review request.
+- [x] Wait for actual independent approval before test release; independently prepare B if useful.
+- [x] Build explicit0.1.1-t28.1 test release from reviewed candidate, exact SHA/manifest/baseline, no prior artifact overwrite.
+- [x] B voluntary T26 proposal, full patch/vendor application equality, API/Web build and browser benefit/config ownership.
+- [x] Final targeted/type/build/source/hash/readonly/cleanup evidence, local commits and task/TL report.
