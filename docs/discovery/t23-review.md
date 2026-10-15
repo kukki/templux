@@ -90,3 +90,42 @@ docker run --rm t23-final-checks npm run typecheck
 `cleanup.log`、`cleanup-final.json`：三个自有项目容器/网络/卷已移除，两个private目录的归档、manifest、HMAC key和凭据已删除；测试PG为自有临时存储，未留新DB或角色。公开证据秘密扫描无命中（`secret-scan.json`），无自有浏览器待清理。
 
 只读原 `/api/status` 仍 ready/connected/schema **0004**（`original-status.json`）。原部署、.env、presentation、Ego31、真人及飞书未变更；仅新增本报告并本地提交，无push/关票。
+
+## F1 定向复核附录：宿主缺值与 JSON（2026-10-15）
+
+固定修复范围 `9ae6e64dd5f6b65cac31b8181d405a9409ad032b..d958b0ecc3cc4b2f1804eb4289e1bd3bf84df5a6`。保留上文初审历史，读取修复验收、补充合同及全部4文件差异，同一审查者依次完成双轴。
+
+### Standards / Spec 结论
+
+- **Standards：0项新增发现。** 唯一产品差异为 `templux` 宿主解析；测试 Python 仅开发回归依赖，正常包装器仍是 Shell/Docker。`apps/api`、`database`、`Dockerfile` 相对初审提交无差异。
+- **Spec：F1/P3关闭，0项新增发现。** 原 SHA/archive 后接 `--json`、EOF、空值均在 Docker 前 exit1，JSON模式单个 `ok:false`、stderr空；人工模式stdout空、错误写stderr。JSON独立前扫，失败标记持续，随后补齐同名参数也不覆盖失败。四个取值选项的等号语法明确拒绝，与容器语法和补充合同一致。
+- 结合初审恢复事务、闭合故障、数据/旧会话实际验收证据，**建议 #24 按本次范围验收**。不替代 T03 真实组织人工链路验收，不关闭工单。
+
+### 独立执行与证据
+
+证据根 `test-results/t23-wrapper-review/`：
+
+1. `python3 tests/restore-wrapper.test.py`：**38/38通过**，0.909秒，`host.log`。四参数空/EOF/下一JSON或其他flag/下一取值选项/空等号/完整参数后追加空等号均拒绝且假Docker调用0；合法含空格绝对路径、绝对路径中的前导`--`文件名、命名环境键、菜单、顶层help保持原参数转交。合法转交使用假Docker，不声称实际执行恢复或新增help功能。
+2. 补充 **8项通过**，`additional.json`：每个取值选项先缺值、后补完整同名值仍拒绝；每个非空 `--option=value` 也拒绝。均exit1、单错误JSON、Docker调用0。原始两个F1例包含于版本化38项。
+3. 最终脚本只读挂到旧checks实际工作目录后运行：
+
+   ```sh
+   docker run --rm \
+     -v /Users/jkoo/git/Templux/templux:/opt/templux/templux:ro \
+     -v /Users/jkoo/git/Templux/tests/restore.test.mjs:/opt/templux/tests/restore.test.mjs:ro \
+     t23-final-checks node --test \
+     --test-name-pattern='restore requires explicit|restore command refuses|wrapper incomplete' \
+     tests/restore.test.mjs
+   ```
+
+   **3/3通过，fail/skip/cancel0**，`container.log`。仅纯参数分支，未连接DB或执行恢复。
+4. `integrity.json`：主机/实际只读挂载 `templux` SHA256均 `671bf1af1d83d1038eca2797032537d27fc7cc8bfd64c804bbefd0e74eaa26c4`；测试脚本也逐字节哈希匹配。checks仍是初审镜像 `sha256:d21b638400f26bc6e84bde8827d336895a8d0720b5bb7be1647cf89142a373a1`，**未重建，镜像内原脚本不代表最终修复**。首次误挂 `/app` 的3项结果不计入最终证据；哈希断言发现路径错误后改为实际 `/opt/templux`，重新核对并复跑通过，旧日志保留 `container-wrong-mount.log`。
+5. `/bin/sh -n templux`、固定范围 `git diff --check`、`git diff --exit-code BASE..FIX -- apps/api database Dockerfile` 均exit0。无TS变化，类型检查沿初审通过证据，未声称本轮重跑类型/69 SQL/wire/332 UI/Compose恢复或构建。
+
+Shell解析和文本合同全量直接读取；6个证据路径 coverage 为 metadata_match，Tier2/best_effort不证明完整性。本轮没有需要追踪的新结构符号、库或协议API变化，无需额外框架文档查询。
+
+### 清理与限制
+
+假Docker每案由 TemporaryDirectory 清理；额外导入生成的自有 `tests/__pycache__` 已删除，一次性检查容器均 `--rm` 退出。无数据库/卷/归档/密钥/凭据创建，无浏览器。原0004部署、.env、presentation、Ego31、真人和飞书保持不动，仅追加本报告、本地提交，无push/关票。
+
+本轮宿主实际为macOS `/bin/sh`，不证明Linux/WSL全矩阵；合法参数验证的是转交而非恢复重演。初审可信归档、PG18/ABI/TLS、规模与并发边界继续适用。
