@@ -8,7 +8,7 @@ export function createNotifications({durationMs=15000,visible:limit=3,queueCapac
  const publish=()=>{snapshot=Object.freeze({visible:Object.freeze(visible.map(item)),waiting:Object.freeze(waiting.map(item)),suspended:Object.freeze(suspended.map(item)),omitted,ended});for(const listener of listeners)listener();};
  const advance=()=>{const time=now();if(!Number.isFinite(time)||time<last)throw new Error('A finite monotonic clock is required');const elapsed=time-last;last=time;for(const value of visible)if(!value.pauses.size)value.remainingMs=Math.max(0,value.remainingMs-elapsed);visible=visible.filter(value=>value.remainingMs>0);};
  const fill=()=>{while(visible.length<limit&&(suspended.length||waiting.length))visible.push(suspended.shift()??waiting.shift());};
- const update=action=>{advance();fill();const result=action();fill();publish();return result;};
+ const update=(action,{refillBefore=true}={})=>{advance();if(refillBefore)fill();const result=action();fill();publish();return result;};
  publish();
  return {
   getSnapshot:()=>snapshot,
@@ -24,7 +24,8 @@ export function createNotifications({durationMs=15000,visible:limit=3,queueCapac
   tick(){return update(()=>{});},
   pause(id,reason,paused){if(!['hover','focus'].includes(reason)||typeof paused!=='boolean')throw new Error('Invalid pause reason');return update(()=>{const value=visible.find(value=>value.id===id);if(!value)return false;if(paused)value.pauses.add(reason);else value.pauses.delete(reason);return true;});},
   close(id){return update(()=>{const all=[visible,suspended,waiting],list=all.find(values=>values.some(value=>value.id===id));if(!list)return false;list.splice(list.findIndex(value=>value.id===id),1);return true;});},
-  setLimit(value){if(!integer(value,10))throw new Error('Invalid visible notification limit');return update(()=>{limit=value;if(visible.length>limit){const removed=visible.splice(limit);for(const value of removed)value.pauses.clear();suspended.unshift(...removed);}});},
+  // Resize before promotion: only survivors of a published visible snapshot may be suspended.
+  setLimit(value){if(!integer(value,10))throw new Error('Invalid visible notification limit');return update(()=>{limit=value;if(visible.length>limit){const removed=visible.splice(limit);for(const value of removed)value.pauses.clear();suspended.unshift(...removed);}},{refillBefore:false});},
   clear(){visible=[];waiting=[];suspended=[];omitted=0;last=now();publish();},
   end(){ended=true;this.clear();},
  };

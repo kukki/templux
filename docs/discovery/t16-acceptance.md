@@ -56,3 +56,8 @@ Ego TaskSpace56、同一p1，未触碰31或用户页面。实际组件fixture仅
 TaskSpace56已finish({keep:[]})一次（`t16-browser-finish.log`）。已删除t16-components与自有password-api/password-web/SSR/auth-database测试容器，tmpfs测试身份销毁、私有0600凭据目录删除。公开37个本轮证据文件匹配实际测试密码0次（`t16-secret-scan.json`）。原api/database/web仍健康，status ready/schema0004、login200（`t16-final-services.json`、`t16-original-status.json`），未迁移/重启原服务，未改.env/实际presentation、Ego31、真人或发送飞书通知。
 
 浏览器为本机Chromium视口及触控仿真，不等于物理手机、全部软键盘/OS/读屏产品；读屏仅验证live语义和无逐帧文本变动，不声称真人读屏测试。后台/休眠仅保证恢复按单调时钟协调，非精确后台15秒，也不保证OS休眠时performance.now一致推进。无跨导航/重启恢复、维护通知或真实消息外发。T03真实飞书组织人工验收仍单列未完成，密码链路不替代它。
+
+
+## 初审后修复
+
+F1到期与断点收缩交错的队列修复及最终45项专项/实际组件证据见 [T16 F1修复验收](t16-fix-acceptance.md)。上述初次交付验证点与独立审查历史保留，不将194项旧完整suite声称为修复后重跑。
