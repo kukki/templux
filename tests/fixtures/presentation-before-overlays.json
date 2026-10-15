@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "project": { "name": "Templux", "version": "0.1.0" },
+  "brand": { "wordmark": "templux", "mark": "t.", "logo": "" },
+  "theme": {
+    "colorScheme": "light", "background": "#f5f8fc", "surface": "#ffffff",
+    "text": "#172d44", "muted": "#617489", "border": "#dce5ef",
+    "accent": "#2364ca", "accentText": "#ffffff", "success": "#28714d", "danger": "#9f442c"
+  },
+  "header": { "visible": true, "showBrand": true, "note": "通用模板项目" },
+  "footer": { "visible": true, "showVersion": true, "text": "Templux", "copyright": "" },
+  "language": "zh-CN",
+  "time": { "timeZone": "Asia/Hong_Kong", "showSeconds": true },
+  "copy": {
+    "title": "服务状态", "description": "模板项目运行状态", "home": "首页",
+    "eyebrow": "SYSTEM", "heading": "从一个可靠的起点开始。",
+    "intro": "独立运行，按需扩展。这里展示当前安装的真实服务状态。",
+    "statusTitle": "服务状态", "ready": "运行正常", "unavailable": "暂时不可用",
+    "frontend": "前端", "backend": "后端与数据库", "connected": "已连接", "recovering": "等待恢复",
+    "schemaVersion": "数据库结构版本", "version": "应用版本", "checkedAt": "检查时间",
+    "readyNote": "容器启动与数据库结构校验已通过。",
+    "unavailableNote": "后端或数据库暂时不可用，请检查容器状态。",
+    "scopeNote": "通过飞书登录查看账号状态；账号管理与控件示例将随对应任务接入。"
+  },
+  "navigation": { "orientation": "vertical", "initialExpanded": true, "allowCollapse": true },
+  "elements": {
+    "pagination": { "pageSize": 10, "pageSizes": [5, 10, 15, 20, 25, 50], "controls": { "total": true, "size": true, "edges": true, "pages": true, "jump": true } },
+    "search": { "delayMs": 400, "showButton": false },
+    "multiselect": { "delayMs": 1000 },
+    "copy": { "feedbackMs": 1500, "emptyMode": "disable" },
+    "images": { "zoomPan": false, "maxScale": 4 },
+    "notifications": { "durationMs": 15000, "desktopVisible": 3, "narrowVisible": 1, "queueCapacity": 50 }
+  }
+}

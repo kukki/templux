@@ -18,7 +18,7 @@ export function themePreset(name) {
 
 export function validatePresentation(value) {
   // Additive, defaultable branch: preserve existing schema1 files; explicit bad values still fail.
-  for(const key of ['search','multiselect','notifications','images','copy'])if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,key))value={...value,elements:{...value.elements,[key]:structuredClone(defaults.elements[key])}};
+  for(const key of ['search','multiselect','notifications','images','copy','popover','panel'])if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,key))value={...value,elements:{...value.elements,[key]:structuredClone(defaults.elements[key])}};
   if(value?.elements?.pagination&&typeof value.elements.pagination==='object'&&!Array.isArray(value.elements.pagination)&&!Object.hasOwn(value.elements.pagination,'controls'))value={...value,elements:{...value.elements,pagination:{...value.elements.pagination,controls:structuredClone(defaults.elements.pagination.controls)}}};
   if(value?.elements?.notifications&&typeof value.elements.notifications==='object'&&!Array.isArray(value.elements.notifications)&&!Object.hasOwn(value.elements.notifications,'queueCapacity'))value={...value,elements:{...value.elements,notifications:{...value.elements.notifications,queueCapacity:defaults.elements.notifications.queueCapacity}}};
   function shape(actual, expected, path) {
@@ -52,6 +52,8 @@ export function validatePresentation(value) {
   if(!Number.isInteger(value.elements.multiselect.delayMs)||value.elements.multiselect.delayMs<1||value.elements.multiselect.delayMs>1000)throw new PresentationError('多选筛选延迟必须在1至1000毫秒内。');
   if(!Number.isInteger(value.elements.images.maxScale)||value.elements.images.maxScale<1||value.elements.images.maxScale>8)throw new PresentationError('图片最大比例须为1至8的整数。');
   if(!Number.isInteger(value.elements.copy.feedbackMs)||value.elements.copy.feedbackMs<100||value.elements.copy.feedbackMs>60000||!['hide','disable'].includes(value.elements.copy.emptyMode))throw new PresentationError('复制反馈须为100至60000毫秒，空值方式须为hide或disable。');
+  if(!Number.isInteger(value.elements.popover.width)||value.elements.popover.width<160||value.elements.popover.width>800)throw new PresentationError('浮层宽度须为160至800的整数。');
+  if(!Number.isInteger(value.elements.panel.width)||value.elements.panel.width<280||value.elements.panel.width>1200||!Number.isInteger(value.elements.panel.height)||value.elements.panel.height<180||value.elements.panel.height>1200)throw new PresentationError('面板宽度须为280至1200、高度须为180至1200的整数。');
   const { pageSize, pageSizes } = value.elements.pagination;
   if (!Number.isInteger(pageSize) || !pageSizes.includes(pageSize) || new Set(pageSizes).size !== pageSizes.length) throw new PresentationError('分页默认值须属于不重复的数量集合。');
   for (const [key,n] of Object.entries(value.elements.notifications)) {

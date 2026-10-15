@@ -1,20 +1,21 @@
 'use client';
 import {useEffect,useId,useRef,useState,type ReactNode,type KeyboardEvent} from 'react';
-import type {Editor,EditorOptions,EditorSnapshot,Save,Values,Verification} from '../../../../../shared/editor.mjs';
+import type {CloseBoundary,Editor,EditorOptions,EditorSnapshot,Save,Values,Verification} from '../../../../../shared/editor.mjs';
 import {useEditor} from './use-editor';import {useEditNavigation} from './edit-navigation';import {sessionIsEnding} from '../session-client';import copy from '../../../../../config/elements-copy.json';import './edit.css';
 export type EditFields<T extends Values>=(context:{editor:Editor<T>;state:EditorSnapshot<T>})=>ReactNode;
-export type EditSessionProps<T extends Values>={targetKey:string;title:string;options:EditorOptions<T>;fields:EditFields<T>;save:Save<T>;verify?:(receipt:NonNullable<EditorSnapshot<T>['uncertain']>,signal:AbortSignal)=>Promise<Verification<T>>;onCommit:(values:T)=>void;onClose:()=>void;conflict?:boolean;returnFocus?:HTMLElement|null};
+export type EditSessionProps<T extends Values>={targetKey:string;title:string;options:EditorOptions<T>;fields:EditFields<T>;save:Save<T>;verify?:(receipt:NonNullable<EditorSnapshot<T>['uncertain']>,signal:AbortSignal)=>Promise<Verification<T>>;onCommit:(values:T)=>void;onClose:()=>void;conflict?:boolean;returnFocus?:HTMLElement|null;manageFocus?:boolean;registerClose?:(source:CloseBoundary)=>()=>void};
 export default function EditSession<T extends Values>(props:EditSessionProps<T>&{modal?:boolean}){
  const [frozen]=useState(()=>props),{editor,state}=useEditor({...frozen.options,timeoutMs:frozen.options.timeoutMs??30000,timeoutMessage:frozen.options.timeoutMessage??copy.unconfirmedEdit,lockWhileSaving:true});
  const {requestDiscard}=useEditNavigation(),dialog=useRef<HTMLDialogElement>(null),form=useRef<HTMLFormElement>(null),title=useRef<HTMLHeadingElement>(null),alive=useRef(false),verifyAbort=useRef<AbortController|null>(null),[verifying,setVerifying]=useState(false),[notice,setNotice]=useState(''),[focusRequest,setFocusRequest]=useState(0),heading=useId();
  const conflict=props.conflict||props.targetKey!==frozen.targetKey,latestConflict=useRef(conflict);latestConflict.current=conflict;
+ useEffect(()=>props.registerClose?.({request:action=>requestDiscard(editor,action),getSnapshot:editor.getSnapshot,subscribe:editor.subscribe}),[props.registerClose,editor,requestDiscard]);
  const finish=()=>{dialog.current?.close();props.onClose();};
  const close=()=>{if(editor.getSnapshot().blocked)return;requestDiscard(editor,finish);};
  useEffect(()=>{
   alive.current=true;const origin=frozen.returnFocus??(document.activeElement instanceof HTMLElement?document.activeElement:null),node=dialog.current;
-  if(frozen.modal)node?.showModal();form.current?.querySelector<HTMLElement>('input,select,textarea')?.focus();
+  if(frozen.modal)node?.showModal();if(frozen.manageFocus!==false)form.current?.querySelector<HTMLElement>('input,select,textarea')?.focus();
   const ending=()=>{editor.cancel();verifyAbort.current?.abort();node?.close();};window.addEventListener('templux:session-ending',ending);
-  return()=>{alive.current=false;verifyAbort.current?.abort();window.removeEventListener('templux:session-ending',ending);node?.close();if(!sessionIsEnding()&&origin?.isConnected)origin.focus();};
+  return()=>{alive.current=false;verifyAbort.current?.abort();window.removeEventListener('templux:session-ending',ending);node?.close();if(frozen.manageFocus!==false&&!sessionIsEnding()&&origin?.isConnected)origin.focus();};
  },[editor,frozen.modal]);
  useEffect(()=>{if(focusRequest&&alive.current&&!sessionIsEnding())form.current?.querySelector<HTMLElement>('[aria-invalid="true"],.form-error')?.focus();},[focusRequest]);
  const focusError=()=>setFocusRequest(value=>value+1);

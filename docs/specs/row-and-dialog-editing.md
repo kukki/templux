@@ -32,3 +32,7 @@ EditDialog使用原生dialog.showModal()、aria-labelledby和可见标题。初�
 ## 内存示例
 
 `/examples`默认仍无行编辑入口，勾选“启用按行编辑”后可体验保存/取消；另可打开编辑弹窗。三个合成记录与操作回执仅本页内存，正常/字段/表单/403/网络、等待约6秒、超时约1.5秒而结果约4.5秒后可核验。提交次数帮助观察显式保存与核验没有自动重试。刷新示例记录演示冲突保持。显示数据只在接受提交/明确核验后更新，远端实际数据以项目服务端为准，不把该模拟当真实业务后端。
+
+## T19外部关闭边界接入
+
+EditSession可选registerClose注册公共CloseBoundary，将requestDiscard及blocked订阅交给单个非模态面板；不复制保存/超时/dirty逻辑。可选manageFocus=false由外部面板负责进入/返回焦点，避免旧编辑器卸载抢走替换目标焦点；默认true保留原行/模态行为。具体见[面板合同](anchored-and-floating-panels.md)。

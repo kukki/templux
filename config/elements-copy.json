@@ -91,5 +91,12 @@
   "copyEmpty": "暂无可复制内容。",
   "copyDenied": "浏览器未允许复制，请检查权限后重试。",
   "copyUnsupported": "此环境不支持复制，请使用安全连接和支持剪贴板的浏览器。",
-  "copyFailed": "复制未完成，请重试。"
+  "copyFailed": "复制未完成，请重试。",
+  "popoverUnsupported": "当前浏览器不支持此浮层，请升级浏览器。",
+  "closePopover": "关闭辅助信息",
+  "movePanel": "移动面板",
+  "resizePanel": "调整面板大小",
+  "closePanel": "关闭面板",
+  "movePanelHelp": "方向键移动，Shift加速，Home恢复默认位置和大小。",
+  "resizePanelHelp": "方向键调整大小，Shift加速，Home恢复默认位置和大小。"
 }

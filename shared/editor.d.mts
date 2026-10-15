@@ -7,3 +7,5 @@ export type EditorOptions<T extends Values> = {initial:T;normalize:(values:Reado
 export type EditorSnapshot<T extends Values> = {values:Readonly<T>;errors:Readonly<Partial<Record<keyof T,string>>>;formError:string;dirty:boolean;saving:boolean;blocked:boolean;uncertain:Readonly<{attemptId:string;values:Readonly<T>}>|null;status:'idle'|'saving'|'saved'|'error'|'unconfirmed'};
 export type Editor<T extends Values> = {getSnapshot:()=>EditorSnapshot<T>;subscribe:(listener:()=>void)=>()=>void;change:(key:keyof T,value:string)=>boolean;blur:(key:keyof T)=>void;cancel:()=>void;reset:(values?:T)=>boolean;reconcile:(attemptId:string,result:Verification<T>)=>boolean;submit:(save:Save<T>)=>Promise<SaveResult<T>|{kind:'unconfirmed';attemptId:string}|undefined>};
 export function createEditor<T extends Values>(options:EditorOptions<T>):Editor<T>;
+
+export type CloseBoundary={request:(action:()=>void)=>boolean;getSnapshot:()=>{blocked:boolean};subscribe:(listener:()=>void)=>()=>void};
