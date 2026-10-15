@@ -18,8 +18,9 @@ export function themePreset(name) {
 
 export function validatePresentation(value) {
   // Additive, defaultable branch: preserve existing schema1 files; explicit bad values still fail.
-  for(const key of ['search','multiselect'])if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,key))value={...value,elements:{...value.elements,[key]:structuredClone(defaults.elements[key])}};
+  for(const key of ['search','multiselect','notifications'])if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,key))value={...value,elements:{...value.elements,[key]:structuredClone(defaults.elements[key])}};
   if(value?.elements?.pagination&&typeof value.elements.pagination==='object'&&!Array.isArray(value.elements.pagination)&&!Object.hasOwn(value.elements.pagination,'controls'))value={...value,elements:{...value.elements,pagination:{...value.elements.pagination,controls:structuredClone(defaults.elements.pagination.controls)}}};
+  if(value?.elements?.notifications&&typeof value.elements.notifications==='object'&&!Array.isArray(value.elements.notifications)&&!Object.hasOwn(value.elements.notifications,'queueCapacity'))value={...value,elements:{...value.elements,notifications:{...value.elements.notifications,queueCapacity:defaults.elements.notifications.queueCapacity}}};
   function shape(actual, expected, path) {
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual) || actual.length === 0 || actual.length > 20 || actual.some(v => !Number.isInteger(v) || v < 1 || v > 1000)) {
@@ -51,8 +52,9 @@ export function validatePresentation(value) {
   if(!Number.isInteger(value.elements.multiselect.delayMs)||value.elements.multiselect.delayMs<1||value.elements.multiselect.delayMs>1000)throw new PresentationError('多选筛选延迟必须在1至1000毫秒内。');
   const { pageSize, pageSizes } = value.elements.pagination;
   if (!Number.isInteger(pageSize) || !pageSizes.includes(pageSize) || new Set(pageSizes).size !== pageSizes.length) throw new PresentationError('分页默认值须属于不重复的数量集合。');
-  for (const n of Object.values(value.elements.notifications)) {
-    if (!Number.isInteger(n) || n <= 0 || n > 3600000) throw new PresentationError('通知默认值须为有上限的正整数。');
+  for (const [key,n] of Object.entries(value.elements.notifications)) {
+    const max=key==='durationMs'?3600000:key==='queueCapacity'?500:10;
+    if (!Number.isInteger(n) || n <= 0 || n > max) throw new PresentationError(`通知配置 ${key} 须为1至${max}的整数。`);
   }
   return structuredClone(value);
 }

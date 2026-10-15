@@ -57,5 +57,18 @@
   "sourceChangedEdit": "数据或编辑目标已变化。当前草稿已保留，请取消后重新打开最新记录。",
   "rowActions": "操作",
   "rowEditing": "当前行编辑",
-  "editingScroll": "记录及行编辑，可横向滚动"
+  "editingScroll": "记录及行编辑，可横向滚动",
+  "noticeRegion": "通知",
+  "noticeLevels": {
+    "info": "信息",
+    "success": "成功",
+    "warning": "警告",
+    "error": "错误"
+  },
+  "noticeRepeated": "重复次数",
+  "closeNotice": "关闭通知",
+  "noticeContent": "通知正文",
+  "noticeRemaining": "剩余显示时间",
+  "noticePaused": "已暂停",
+  "noticeOmitted": "已省略的等待通知："
 }
