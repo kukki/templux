@@ -1,0 +1,6 @@
+{
+  "label":"应用导航", "menu":"打开导航菜单", "close":"关闭导航菜单", "drawer":"页面导航",
+  "expand":"展开导航文字", "collapse":"收起导航文字", "skip":"跳到页面内容",
+  "account":"我的账号", "workspace":"工作区", "admin":"账号管理", "audit":"操作审计", "examples":"控件示例",
+  "person":"人员", "agent":"Agent", "logout":"退出当前会话", "logoutAll":"退出全部会话", "logoutFailed":"退出未完成，请重试。"
+}

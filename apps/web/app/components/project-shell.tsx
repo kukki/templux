@@ -1,6 +1,11 @@
+import ApplicationShell from './application-shell';
+import {EditNavigationProvider} from './elements/edit-navigation';
+import {projectFeatures} from '../../../../shared/features.mjs';
+import type {Profile} from './session';
 import type { ReactNode } from 'react';
 import type { Presentation } from '../../../../shared/presentation.mjs';
-export default function ProjectShell({ config, children }: { config: Presentation; children: ReactNode }) {
+export default function ProjectShell({ config, children, account }: { config: Presentation; children: ReactNode; account?:Profile }) {
+  if(account)return <EditNavigationProvider><ApplicationShell key={JSON.stringify([config.navigation,config.project.name,account.id])} config={config} account={account} examples={projectFeatures().componentExamples}>{children}</ApplicationShell></EditNavigationProvider>;
   return <div className="shell">
     {config.header.visible && <header>
       {config.header.showBrand && <a className="wordmark" href="/" aria-label={`${config.project.name} ${config.copy.home}`}>

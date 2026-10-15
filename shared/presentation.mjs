@@ -21,6 +21,7 @@ export function validatePresentation(value) {
   for(const key of ['search','multiselect','notifications','images','copy','popover','panel'])if(value?.elements&&typeof value.elements==='object'&&!Array.isArray(value.elements)&&!Object.hasOwn(value.elements,key))value={...value,elements:{...value.elements,[key]:structuredClone(defaults.elements[key])}};
   if(value?.elements?.pagination&&typeof value.elements.pagination==='object'&&!Array.isArray(value.elements.pagination)&&!Object.hasOwn(value.elements.pagination,'controls'))value={...value,elements:{...value.elements,pagination:{...value.elements.pagination,controls:structuredClone(defaults.elements.pagination.controls)}}};
   if(value?.elements?.notifications&&typeof value.elements.notifications==='object'&&!Array.isArray(value.elements.notifications)&&!Object.hasOwn(value.elements.notifications,'queueCapacity'))value={...value,elements:{...value.elements,notifications:{...value.elements.notifications,queueCapacity:defaults.elements.notifications.queueCapacity}}};
+  if(value?.navigation&&typeof value.navigation==='object'&&!Array.isArray(value.navigation)&&!Object.hasOwn(value.navigation,'projectKey'))value={...value,navigation:{...value.navigation,projectKey:defaults.navigation.projectKey}};
   function shape(actual, expected, path) {
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual) || actual.length === 0 || actual.length > 20 || actual.some(v => !Number.isInteger(v) || v < 1 || v > 1000)) {
@@ -35,6 +36,7 @@ export function validatePresentation(value) {
     }
   }
   shape(value, defaults, 'presentation');
+  if(!value.navigation.projectKey.trim()||value.navigation.projectKey.length>100)throw new PresentationError('导航项目键须为1至100个可见字符。');
   if (value.schemaVersion !== 1) throw new PresentationError('不支持的呈现配置版本。');
   for (const [key, color] of Object.entries(value.theme)) {
     if (key !== 'colorScheme' && !/^#[\da-f]{6}$/i.test(color)) throw new PresentationError(`配置字段 theme.${key} 必须是六位十六进制颜色。`);

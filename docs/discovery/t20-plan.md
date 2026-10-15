@@ -1,0 +1,17 @@
+# T20 Navigation shell Implementation Plan
+
+> Team-authorized autonomous inline execution; apply brainstorming, writing-plans, TDD, existing frontend tokens. No new approval/delegation gate. Independent Team review after delivery.
+
+**Goal:** Gitea#21/#1 stories61/63/64: real authenticated horizontal/vertical navigation, project/account browser memory, narrow text drawer and safe editing/session integration.
+**Architecture:** pure preference/key/menu rules; client ApplicationShell within existing EditNavigationProvider selected by server ProjectShell for verified profile only. Native modal side drawer (not T19 nonmodal panel). Reuse EditLink and normal Logout backend; no auth/API/SQL additions.
+**Design:** existing system sans, surface/background/accent tokens and compact 44px utility controls. Desktop240px text rail or72px icon rail; horizontal wrapped row using same symbols/labels. Current item accent inset rail, useful path grouping (account/work/admin), no decorative dashboard. Narrow≤760px no persistent rail, menu opens text drawer with account/current/all exit, native focus/inert plus explicit scroll lock. Header/footer project visibility remains, navigation/account always reachable even hidden brand header. No user theme/direction controls.
+**Memory:** navigation.projectKey defaulttemplux plus project.name and verified account.id encode namespace; configure unique projectKey for copies sharing name/origin. Only boolean/version in localStorage. Existing fields orientation/initialExpanded/allowCollapse kept. Missing new key defaulted, explicit invalid rejected. Identity-keyed store uses SSR project default then layout hydration of own key, never previous account's preference. allowCollapsefalse ignores reads/writes/cache; unavailable/bad storage falls to default/in-memory. Scoped storage events synchronize; logout retains nonsensitive preference for same-account relogin, ending destroys current instance. No cross-device sync.
+**Navigation safety:** one edit provider wraps nav and actual children, examples nested provider removed. EditLink checks dirty/blocked/consumer cancellation; drawer stays through rejected/blocked navigation and only closes after pathname commit (same current item closes without navigation). Logout takes same requestLeave boundary before real POST. 401/session-ending closes drawer/unlocks scroll without confirmation. Role menu derived from verified SSR profile; API permissions unchanged.
+
+## Steps
+
+- [x] RED preference/project-account isolation/storage/cross-tab/menu/legacy config+realCLI tests, then minimal pure model/config implementation.
+- [x] ApplicationShell/native drawer/header/account+logout, ProjectShell/page integration; dirty/blocked tests through actual React consumers. No examples reverse dependency.
+- [x] Targeted/typecheck/build, independent0008 normal CLI people+Agent/HTTP+password/browser identity/refresh/relogin/exit/revoke and configuration restart tests; preserve original0004.
+- [x] Four themes×two directions desktop and representative narrow screenshots, Ego first; agent-browser fallback if screenshot API times out, inspect actual files. DOM/keyboard/overlay/focus/scroll/touch and storage failure/invalid/identity hydration boundaries.
+- [x] Appropriate final full/targeted gates with exact source/image points, contract/acceptance/README; cleanup own identities/testDB/resources and local commit. No push/close/real humans/.env/actual presentation changes.

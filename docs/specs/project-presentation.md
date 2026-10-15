@@ -22,7 +22,7 @@ T02 基于父规格 #1、任务 #3 和 ADR0013 实现项目级配置，不提供
 | `language` | 合法且非空的 BCP47 语言标记；默认 zh-CN，写入 html lang 并用于通用管理时间。不会自动翻译配置里的文字。 |
 | `time` | `timeZone` 是 Intl 支持的时区，默认 Asia/Hong_Kong；`showSeconds` 默认 true。仅控制管理时间展示，不改变底层 ISO 时间及毫秒，不约束业务日期类型。 |
 | `copy` | 全部通用状态页文案集中在此，默认简体中文；替换语言时应同时替换这些文案。所有内容按纯文本渲染，不接受任意 HTML/CSS。heading、intro、scopeNote 等支持项目替换；空 scopeNote 隐藏区域。 |
-| `navigation` | orientation 为 vertical/horizontal，默认 vertical；initialExpanded、allowCollapse 为布尔值。为后续导航任务保留合同，当前公开状态页没有导航控件。 |
+| `navigation` | orientation为vertical/horizontal，默认vertical；initialExpanded/allowCollapse默认true。T20新增projectKey默认templux（旧缺省兼容，显式非法拒绝），用于浏览器项目账号隔离；见[应用导航](application-navigation.md)。公开状态页保留公共壳。 |
 | `elements.pagination` | pageSize 为整数且属于 pageSizes；集合非空、不重复、最多20项，每项1–1000。默认10及5、10、15、20、25、50。为后续按需网页元素保留合同。 |
 | `elements.notifications` | durationMs、desktopVisible、narrowVisible 为1–3600000的整数；默认15000、3、1。后续通知任务消费这些项目默认值，当前状态页不增加通知控件。 |
 

@@ -22,7 +22,7 @@
     "unavailableNote": "后端或数据库暂时不可用，请检查容器状态。",
     "scopeNote": "通过飞书登录查看账号状态；账号管理与控件示例将随对应任务接入。"
   },
-  "navigation": { "orientation": "vertical", "initialExpanded": true, "allowCollapse": true },
+  "navigation": { "orientation": "vertical", "initialExpanded": true, "allowCollapse": true, "projectKey": "templux" },
   "elements": {
     "pagination": { "pageSize": 10, "pageSizes": [5, 10, 15, 20, 25, 50], "controls": { "total": true, "size": true, "edges": true, "pages": true, "jump": true } },
     "search": { "delayMs": 400, "showButton": false },
