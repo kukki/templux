@@ -55,3 +55,13 @@ A先用公开`@templux/web/state/copy`和`/elements/clipboard`组合局部原型
 `tests/scenarios/t28-stable-inputs.py`按正式manifest白名单从66aa7c2取回恰好198文件，逐项SHA/原模式；目标目录新建，不拷整仓或项目配置。producer验证无额外/缺失/链接、每个SHA，移除选定scope后仅重建此集合，再叠加三项受审产品和两项列明工具，要求变更集合**恰好五项**。原先main多出的T27项目启动器/配置/Compose不进入。重编API及完整发布校验；版本/from是明确发布overlay。来源commit为受审候选，manifest source.files精确表示“正式基线+列明补丁/工具”，不冒充整个main Git树。root其他工具只承担构建工具，不入包/骨架。
 
 最终审查以更新后的candidate.json、两份patch、五文件/hash和producer脚本为准；先前仅三文件的初始包保留历史，不作为完整发布审批包。
+
+## 完整固定候选与停点
+
+完整候选代码点 `7f2318b68cf95eccefd17a60c2fe38795e2dd323`。产品patch SHA `26522ef2f42e3c441dcaab5352096d42f92070ed925f5c84e20f431f1bbb2383`；发布兼容patch SHA `8937f281f9e2b4f4b3e8fae1837a6e73ac69387160765b8c9981810beed5b633`；producer脚本SHA `8622e6d0ee5bcc688202352f7f361244c8ffb13443d2782bb0aa559f71eba2ee`。candidate.json绑定五文件、正式198文件/模式、A来源提取及七个镜像源/fixture核验。
+
+缺独立批准的实际producer容器退出1，stdout无成功，stderr固定拒绝，输出目录0文件（unapproved-producer.json/stdout/stderr）；尚无0.1.1产物。stable-inputs.log为198文件只读恢复输入，不是新发布。
+
+补齐后的复跑入口：先在新副本/新输出目录运行t28-project.py a、t28-stable-inputs.py、t28-candidate.py；两份patch和t28-target.mjs均纳入独立审查，不能仅审三个产品文件便视为发布过程获批。已有目录exclusive创建，复跑不覆盖未知证据或来源。组件生产工具页:31130、A:31128保留供该次独立审查；Ego78/命名fallback均为自有空间，后续完成或拒绝时清理。
+
+本轮在真实独立结论之前停于候选阶段，任务保持in_progress；未执行依赖批准的producer正例或B采用。下一阶段由TL传回绑定该候选的实际结论后继续。
