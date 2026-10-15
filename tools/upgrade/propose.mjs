@@ -15,7 +15,7 @@ const identity=(root,files)=>Object.fromEntries(files.map(p=>[p,{sha256:sha(entr
 function patch(current,candidate,paths,out){
  const temp=mkdtempSync(join(tmpdir(),'templux-patch-'));
  try{for(const [side,root]of [['a',current],['b',candidate]]){mkdirSync(join(temp,side));for(const p of paths){const e=entry(root,p);if(e&&!e.bytes.includes(0))writeEntry(join(temp,side),p,e);}}
- const r=spawnSync('git',['diff','--no-index','--no-ext-diff','--','a','b'],{cwd:temp,encoding:'utf8',timeout:10000,maxBuffer:16*1024*1024});if(r.error||![0,1].includes(r.status))throw new Error('patch generation failed');writeFileSync(join(out,'changes.patch'),r.stdout.replaceAll('a/a/','a/').replaceAll('b/b/','b/'),{mode:0o600});
+ const r=spawnSync('git',['diff','--no-index','--no-ext-diff','--no-renames','--','a','b'],{cwd:temp,encoding:'utf8',timeout:10000,maxBuffer:16*1024*1024});if(r.error||![0,1].includes(r.status))throw new Error('patch generation failed');writeFileSync(join(out,'changes.patch'),r.stdout.replaceAll('a/a/','a/').replaceAll('b/b/','b/'),{mode:0o600});
  }finally{rmSync(temp,{recursive:true,force:true});}
 }
 export async function propose({current,target,targetVersion,targetSha,output,trustProjectCode=false,behavior,timeout=180000}){
@@ -33,7 +33,7 @@ export async function propose({current,target,targetVersion,targetSha,output,tru
  const candidate=join(output,'candidate');mkdirSync(candidate,{mode:0o755});for(const p of sourceFiles)writeEntry(candidate,p,entry(current,p));
  const changed=new Set(),all=new Set([...Object.keys(b.files),...Object.keys(tb.files)]);
  for(const p of [...all].sort()){
-  if(!managed(p))continue;
+  if(!managed(p)){const old=entry(current,'.templux/baseline/project/'+p),next=entry(targetProject,'.templux/baseline/project/'+p);if(!sameEntry(old,next))report.changes.push({path:p,kind:'project-owned-not-migrated'});continue;}
   const old=entry(current,'.templux/baseline/project/'+p),now=entry(current,p),next=entry(targetProject,'.templux/baseline/project/'+p),result=mergeEntry(old,now,next);
   if(result.status==='conflict'){report.manual.push({path:p,kind:'merge',reason:result.reason});continue;}
   if(!sameEntry(now,result.entry)){if(result.entry)writeEntry(candidate,p,result.entry);else rmSync(join(candidate,p),{force:true});changed.add(p);report.changes.push({path:p,kind:!now?'add':!result.entry?'delete':'merge'});}

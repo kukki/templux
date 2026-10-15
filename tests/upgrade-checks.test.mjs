@@ -6,3 +6,4 @@ test('checks distinguish unavailable, failure and timeout and discard raw output
 });
 import {spawnSync} from 'node:child_process';
 for(const args of [[],['--current'],['--current','--target-release','x'],['--current','x','--current','y'],['--output','x','--unknown']])test('CLI invalid inputs fail one JSON stdout without values: '+JSON.stringify(args),()=>{const p=spawnSync('node',['tools/upgrade/cli.mjs',...args],{encoding:'utf8'});assert.equal(p.status,1);assert.equal(JSON.parse(p.stdout).directlyApplicable,false);assert.equal(p.stdout.trim().split('\n').length,1);assert.match(p.stderr,/upgrade_proposal_failed/);});
+test('checks do not force a development NODE_ENV onto production Next builds',async()=>assert.equal((await checked('node',['-e','process.exit(process.env.NODE_ENV===undefined?0:21)'],{cwd:'/tmp',timeout:1000})).status,'passed'));

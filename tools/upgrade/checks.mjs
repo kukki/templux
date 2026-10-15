@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 export async function checked(command,args,{cwd,timeout=180000}){
  const started=performance.now();return new Promise(resolve=>{
   let settled=false,timer;const finish=result=>{if(settled)return;settled=true;clearTimeout(timer);resolve({...result,durationMs:Math.round(performance.now()-started)});};
-  const child=spawn(command,args,{cwd,env:{PATH:process.env.PATH,HOME:'/tmp',NEXT_TELEMETRY_DISABLED:'1',NODE_ENV:'development',npm_config_cache:'/tmp/templux-npm-cache'},stdio:'ignore',detached:true});
+  const child=spawn(command,args,{cwd,env:{PATH:process.env.PATH,HOME:'/tmp',NEXT_TELEMETRY_DISABLED:'1',npm_config_cache:'/tmp/templux-npm-cache'},stdio:'ignore',detached:true});
   child.on('error',()=>finish({status:'unavailable'}));child.on('exit',(code,signal)=>finish({status:code===0?'passed':'failed',exitCode:code,signal}));
   timer=setTimeout(()=>{try{process.kill(-child.pid,'SIGKILL');}catch{}finish({status:'timeout'});},timeout);
  });
