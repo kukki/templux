@@ -2,7 +2,7 @@
 
 供新项目复用、也可独立启动的通用模板项目。基于 Supplieroom、Skoope、Catchouse 提取共通能力，业务与数据由各项目保有。
 
-首版规格与29项实施任务已发布。当前已实现 T01–T20：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存、受保护控件示例入口、统一搜索/只读列表、整行多选列表筛选、分页/三态排序/刷新恢复、普通表单/未保存离开保护、可选按行保存/编辑弹窗、顶部通知/队列/显式键合并、图片预览/可选图库、完整值复制/本地反馈、锚定浮层/单个非模态面板及横纵导航/账号记忆/窄屏抽屉。真实飞书组织人工验收仍另列；维护、备份恢复及其它后续任务尚未完成，不能视为完整首版。
+首版规格与29项实施任务已发布。当前已实现 T01–T21：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存、受保护控件示例入口、统一搜索/只读列表、整行多选列表筛选、分页/三态排序/刷新恢复、普通表单/未保存离开保护、可选按行保存/编辑弹窗、顶部通知/队列/显式键合并、图片预览/可选图库、完整值复制/本地反馈、锚定浮层/单个非模态面板、横纵导航/账号记忆/窄屏抽屉及持续维护提醒/停服维护入口。真实飞书组织人工验收仍另列；备份恢复及其它后续任务尚未完成，不能视为完整首版。
 
 ## 启动
 
@@ -23,7 +23,7 @@
 ./templux stop --non-interactive --confirm --json
 ```
 
-默认页面为 http://localhost:31000，公开状态 API 为 http://localhost:31800/api/status。端口绑定本机回环地址，不占用已有的3000或8080服务；数据库不发布宿主端口。停止保留数据库卷。
+默认页面为 http://localhost:31000，公开状态 API 为 http://localhost:31800/api/status。端口绑定本机回环地址，不占用已有的3000或8080服务；数据库不发布宿主端口。31000由独立entry服务提供，Web只在内部网络运行；普通stop停止入口、业务及DB进程并保留数据卷，不提供停服维护页。计划维护请用下述maintenance命令。
 
 启动顺序为构建前后端、启动数据库、一次性管理容器迁移并校验、启动应用并等待健康。迁移失败返回非零，不执行后续应用启动。普通重启检查已有迁移，不重复应用；Web 不自行修改结构。
 
@@ -38,7 +38,7 @@ JSON 模式 stdout 仅一个结果对象，构建进度及诊断不混入结果�
 ./templux config-check --non-interactive --json
 ```
 
-也可从无参数菜单选择7，查看目标并确认写入。修改 `config/presentation.json` 中已有公开呈现值后，执行 `docker compose restart api web` 即可生效。Logo 新资产与源码改动需重新构建。配色、页头页脚、版权版本、集中文案及管理显示时区的合同与覆盖规则见 [项目呈现配置](docs/specs/project-presentation.md)。`.env` 保存部署环境与秘密，与公开呈现配置隔离。
+也可从无参数菜单选择7，查看目标并确认写入。修改 `config/presentation.json` 中已有公开呈现值后，执行 `docker compose restart api web entry` 即可生效。Logo 新资产与源码改动需重新构建。配色、页头页脚、版权版本、集中文案及管理显示时区的合同与覆盖规则见 [项目呈现配置](docs/specs/project-presentation.md)。`.env` 保存部署环境与秘密，与公开呈现配置隔离。
 
 ## 飞书登录与首位授权
 
@@ -97,7 +97,7 @@ docker compose up -d --wait database
 
 ### 密码失败保护（T07）
 
-同来源IP和规范化用户名，首次失败15分钟内第5次失败触发从触发时起固定15分钟限制；受限提交不延长，到期正常重新尝试，成功仅清理该组合。限制存Postgres，重启/多实例共享；页面和API统一失败反馈。新增0005迁移前已有库须先备份。Web使用可靠socket入口，API仅接受受信Web实例的来源标记，外部TLS代理须显式配置 `WEB_TRUSTED_PROXY_CIDRS`；禁止信任任意客户端XFF。来源、清理、迁移及恢复步骤见 [失败限制合同](docs/specs/password-failure-limits.md)。
+同来源IP和规范化用户名，首次失败15分钟内第5次失败触发从触发时起固定15分钟限制；受限提交不延长，到期正常重新尝试，成功仅清理该组合。限制存Postgres，重启/多实例共享；页面和API统一失败反馈。新增0005迁移前已有库须先备份。Web使用可靠socket入口，API仅接受受信Web实例的来源标记，公开entry前的外部TLS代理须显式配置 `ENTRY_TRUSTED_PROXY_CIDRS`（直接Web部署仍使用 `WEB_TRUSTED_PROXY_CIDRS`）；禁止信任任意客户端XFF。来源、清理、迁移及恢复步骤见 [失败限制合同](docs/specs/password-failure-limits.md)。
 
 ### 验证关联与随机重置（T08）
 
@@ -166,3 +166,20 @@ DEV/UAT默认从账号页进入 /examples，PROD默认关闭；COMPONENT_EXAMPLE
 ### 应用导航（T20）
 
 正常已验证账号使用真实角色菜单；桌面默认纵向，可项目配置横向和初始图标模式。允许切换时按当前浏览器项目/账号记忆，禁用开关服从项目值；窄屏菜单为带文字抽屉，保留账号与当前/全部退出。导航与主动退出复用编辑守卫，强制失效释放抽屉。navigation.projectKey缺省兼容旧文件，复制项目应明确命名空间。详见[导航合同](docs/specs/application-navigation.md)与[T20验收](docs/discovery/t20-acceptance.md)。
+
+
+## 持续维护与停服入口（T21）
+
+提醒与停服分开：维护提醒在顶部独立持续显示，不占普通通知容量；到点仍提醒，只有明确取消/结束才消失，不自动停服或只读。使用宿主授权菜单18–24，或先查询版本再明确执行：
+
+```sh
+./templux maintenance-status --json --non-interactive
+./templux maintenance-start --expected-version VERSION --at 2030-05-01T22:00:00+08:00 --message '计划维护，请及时保存。' --confirm --json --non-interactive
+./templux maintenance-halt --expected-version VERSION --confirm --json --non-interactive
+./templux maintenance-resume --expected-version VERSION --confirm --json --non-interactive
+./templux maintenance-end --expected-version VERSION --confirm --json --non-interactive
+```
+
+每次从status使用最新版本。halt提交写屏障/强审计后停止Web/API，保留DB和entry提供503维护页；resume只启动并验证已有镜像，不自动部署，确认数据库提交后才发布入口释放回执。取消/end不代替恢复。SQL/审计、健康、Docker或回执失败须先核对状态与容器，不自动重试；未知状态显示不可用，不冒充计划维护或成功。DB不可达时显式`maintenance-rescue --confirm`只停止业务，并明确不证明写屏障或审计。入口/整机/网络全停不能保证页面。
+
+新增0009/0010须按已有迁移前备份规范升级，原配置和必要密钥独立准备；维护卷需持久保留。新增业务表/外部写者须接入共享SQL屏障。完整锁、公开内容、代理来源、回执和救援边界见[维护合同](docs/specs/maintenance-operations.md)，实证见[T21验收](docs/discovery/t21-acceptance.md)。真实飞书组织人工验收继续另列，不以密码测试替代。

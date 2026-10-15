@@ -55,3 +55,7 @@ Docker json-file同时设max-size/max-file，默认RUNTIME_LOG_MAX_BYTES=1048576
 tools各有自身预算，--rm结束删除；并行/保留停用容器额外占量，非整个Docker宿主全局配额。原0004服务未重建，不声称已替换其旧日志配置，正式升级/重建才启用。
 
 Docker compose logs --no-color --tail 100 api web database，或 ./templux logs --json --non-interactive 读取保留日志。CLI JSON stdout仅结果，日志/诊断stderr；无网页浏览器/导出。标准stdout/stderr预留外部采集，不强制安装平台。容量、读取与实际Docker文件验证见验收。
+
+## T21 运维扩展
+
+新增entry长期容器沿用同一json-file容量上限，四个长期服务默认各约100MiB、合计约400MiB预算，仍不是宿主全局配额或14天保证。CLI logs包含entry；维护关键状态/授权回执审计同事务，Docker动作的maintenance-halt/resume/rescue结果另最佳努力运维审计。公开提醒正文不进入审计或运行日志。完整失败/救援合同见[维护](maintenance-operations.md)，不改变既有成功登录独立审计故障例外。

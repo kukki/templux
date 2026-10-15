@@ -1,0 +1,3 @@
+import {databasePool} from './database.js';import {createMaintenanceEntry} from './maintenance-entry.js';import {presentation} from '../../../shared/presentation.mjs';import {runtimePolicy,runtimeRecord} from '../../../shared/runtime-log.mjs';
+let pool:ReturnType<typeof databasePool>|undefined;
+try{runtimePolicy();pool=databasePool();pool.on('error',()=>runtimeRecord('entry','error','database_pool_error'));const server=createMaintenanceEntry(pool,presentation());server.listen(8080,'0.0.0.0',()=>runtimeRecord('entry','info','server_started'));for(const signal of ['SIGTERM','SIGINT'])process.once(signal,()=>server.close(()=>{void pool?.end();}));}catch{runtimeRecord('entry','error','entry_start_failed');await pool?.end();process.exitCode=1;}

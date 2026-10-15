@@ -6,6 +6,10 @@ const roles=(value:unknown)=>Array.isArray(value)?value.filter(v=>typeof v==='st
 // Deliberate allowlist: never serialize arbitrary input, provider payloads or delivery metadata.
 export function auditDetails(input:unknown,depth=0):Record<string,unknown>{
  const output:Record<string,unknown>={};if(depth>3||!input||typeof input!=='object'||Array.isArray(input))return output;const value=input as Record<string,unknown>;
+ for(const key of ['maintenanceVersion','gateVersion'])if(typeof value[key]==='string'&&/^(0|[1-9][0-9]{0,18})$/.test(value[key] as string))output[key]=value[key];
+ if(['online','offline'].includes(value.maintenancePhase as string))output.maintenancePhase=value.maintenancePhase;
+ if(typeof value.noticeActive==='boolean')output.noticeActive=value.noticeActive;
+ if(typeof value.plannedAt==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value.plannedAt))output.plannedAt=value.plannedAt;
  const state=value.accountState??value.state;if(['pending','active','disabled'].includes(state as string))output.accountState=state;
  for(const key of ['before','after'])if(value[key]&&typeof value[key]==='object'){const item=value[key] as Record<string,unknown>;output[key]=auditDetails(item,depth+1);}
  const selected=roles(value.roles);if(selected)output.roles=selected;
@@ -13,7 +17,7 @@ export function auditDetails(input:unknown,depth=0):Record<string,unknown>{
  if(['password','feishu'].includes(value.method as string))output.method=value.method;
  for(const key of ['owner','requestId']){const identifier=id(value[key]);if(identifier)output[key]=identifier;}
  for(const key of ['removed','retentionDays'])if(Number.isSafeInteger(value[key])&&(value[key] as number)>=0)output[key]=value[key];
- if(['start','stop','init','test','typecheck','config-check'].includes(value.command as string))output.command=value.command;
+ if(['start','stop','init','test','typecheck','config-check','maintenance-halt','maintenance-resume','maintenance-rescue'].includes(value.command as string))output.command=value.command;
  if(['invalid_credentials','login_limited','organization_denied','login_cancelled','invalid_state','provider_invalid','provider_unavailable','origin_denied','authentication_unconfigured','service_unavailable'].includes(value.reason as string))output.reason=value.reason;
  return output;
 }

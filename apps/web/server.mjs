@@ -3,14 +3,16 @@ import {installRuntimeConsole,runtimeRecord} from '../../shared/runtime-log.mjs'
 import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
 import next from 'next';
+import {trustedPeerSource} from '../../shared/proxy-peer.mjs';
 import {trustedProxyPolicy,webClientIp} from '../../shared/client-ip.mjs';
 try {
 installRuntimeConsole('web');projectFeatures();
 const trusted=trustedProxyPolicy(process.env.WEB_TRUSTED_PROXY_CIDRS??'');
 const app=next({dir:fileURLToPath(new URL('.',import.meta.url)),dev:false,hostname:'0.0.0.0',port:3000});const handle=app.getRequestHandler();await app.prepare();
-const server=createServer((request,response)=>{
+const entrySource=trustedPeerSource(process.env.WEB_ENTRY_PROXY_HOSTS??'');
+const server=createServer(async(request,response)=>{
   try{
-    const ip=webClientIp(request.socket.remoteAddress,request.headers['x-forwarded-for'],trusted);
+    const ip=await entrySource(request.socket.remoteAddress,request.headers['x-templux-client-ip'],()=>webClientIp(request.socket.remoteAddress,request.headers['x-forwarded-for'],trusted));
     // Overwrite the caller's claim before Next constructs a NextRequest. API trusts only this server's peer address.
     request.headers['x-templux-client-ip']=ip;
     delete request.headers['x-forwarded-for'];delete request.headers['x-real-ip'];delete request.headers.forwarded;

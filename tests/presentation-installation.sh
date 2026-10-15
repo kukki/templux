@@ -53,8 +53,8 @@ import assert from "node:assert/strict";
 assert.equal((await (await fetch("http://api:8080/api/status")).json()).name,"复制验收项目");
 assert.ok((await (await fetch("http://web:3000")).text()).includes("新项目品牌"));
 console.log("Configuration remains a restart boundary PASS");'
-compose restart api web >&2
-compose up -d --wait --wait-timeout 60 api web >&2
+compose restart api web entry >&2
+compose up -d --wait --wait-timeout 60 api web entry >&2
 [ "$T02_API_IMAGE" = "$(compose images -q api)" ]
 [ "$T02_WEB_IMAGE" = "$(compose images -q web)" ]
 printf 'Restart retained API image %s and Web image %s\n' "$T02_API_IMAGE" "$T02_WEB_IMAGE"
@@ -69,8 +69,8 @@ compose run --rm --no-deps -v "$T02_COPY/config:/acceptance-config:rw" checks no
 import {readFileSync,writeFileSync} from "node:fs";
 const path="/acceptance-config/presentation.json"; const config=JSON.parse(readFileSync(path));
 config.header.visible=false; config.footer.visible=false; writeFileSync(path,JSON.stringify(config));'
-compose restart api web >&2
-compose up -d --wait --wait-timeout 60 api web >&2
+compose restart api web entry >&2
+compose up -d --wait --wait-timeout 60 api web entry >&2
 compose run --rm --no-deps checks node --input-type=module -e '
 import assert from "node:assert/strict";
 const html=await (await fetch("http://web:3000")).text();

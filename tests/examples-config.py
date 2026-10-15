@@ -16,7 +16,7 @@ for label,values,expected in CASES:
  assert (cli.returncode==0)==(expected is not None)
  name='templux-t10-config-'+label
  try:
-  subprocess.run(COMPOSE+['run','-d','--no-deps','--name',name,'-e','API_INTERNAL_URL=http://password-api:8080','web'],env=env,capture_output=True,text=True,check=True)
+  subprocess.run(COMPOSE+['run','-d','--no-deps','--name',name,'-e','API_INTERNAL_URL=http://password-api:8080','-e','WEB_ENTRY_PROXY_HOSTS=','web'],env=env,capture_output=True,text=True,check=True)
   response=None
   for attempt in range(100):
    state=json.loads(subprocess.check_output(['docker','inspect','--format','{{json .State}}',name],text=True))

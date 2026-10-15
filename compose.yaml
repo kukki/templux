@@ -56,13 +56,40 @@ services:
       target: api
     environment:
       <<: [*database-environment, *auth-environment]
+      TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/templux/maintenance/release.json
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
+      - maintenance:/opt/templux/maintenance:ro
       - ./config:/opt/templux/config:ro
     ports:
       - "127.0.0.1:${TEMPLUX_API_PORT:-31800}:8080"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 8s
+      retries: 10
+    restart: unless-stopped
+
+  entry:
+    logging: *runtime-logging
+    build:
+      context: .
+      target: api
+    command: ["node", "apps/api/dist/entry-server.js"]
+    environment:
+      <<: *database-environment
+      ENTRY_TRUSTED_PROXY_CIDRS: ${ENTRY_TRUSTED_PROXY_CIDRS-}
+      RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
+      RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
+      TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/templux/maintenance/release.json
+      TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
+    volumes:
+      - maintenance:/opt/templux/maintenance:ro
+      - ./config:/opt/templux/config:ro
+    ports:
+      - "127.0.0.1:${TEMPLUX_HTTP_PORT:-31000}:8080"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 5s
       timeout: 8s
       retries: 10
@@ -79,12 +106,11 @@ services:
       API_INTERNAL_URL: http://api:8080
       RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
       RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
+      WEB_ENTRY_PROXY_HOSTS: entry
       WEB_TRUSTED_PROXY_CIDRS: ${WEB_TRUSTED_PROXY_CIDRS:-}
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
       - ./config:/opt/templux/config:ro
-    ports:
-      - "127.0.0.1:${TEMPLUX_HTTP_PORT:-31000}:3000"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 5s
@@ -128,12 +154,14 @@ services:
       FEISHU_APP_ID: ${FEISHU_APP_ID:-}
       FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
       FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
+      TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/templux/maintenance/release.json
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
       TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-templux}
       TEMPLUX_HTTP_PORT: ${TEMPLUX_HTTP_PORT:-31000}
       TEMPLUX_API_PORT: ${TEMPLUX_API_PORT:-31800}
       TEMPLUX_DB_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
     volumes:
+      - maintenance:/opt/templux/maintenance
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config:/opt/templux/config
       - ${TEMPLUX_CREDENTIAL_DIR:-./credentials}:/opt/templux/credentials
@@ -241,4 +269,5 @@ services:
     profiles: ["tools"]
 
 volumes:
+  maintenance:
   database:
