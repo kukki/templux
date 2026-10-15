@@ -42,3 +42,9 @@ stdout单JSON，stderr为固定诊断。退出0仅所有必需检查通过且无
 产物：`report.json`三个来源identifier/hash、current输入hash/模式、变化/人工项/逐项检查；`candidate/`待审源/vendor/准确锁和新版原始baseline；`changes.patch`无冲突文本补丁；`vendor-replacements.json`二进制替换清单；`REVIEW.md`人工应用步骤。缺基线时只有阻断报告，无伪候选。任何未全通过不标directlyApplicable；标记也只是本次声明检查范围，不是任意业务正确性保证。
 
 维护者先核对可信source/manifest/hash、全部改动/权限/检查范围，在一次性副本应用patch与明确vendor替换（无自动apply命令），保持自己业务/config与必要部署私密文件单独提供。通过真实独立构建/登录/权限验收后才按项目审批应用及安排部署。T26测试0.2.0-t26.1是标注演练发布，不是生产稳定版本。每日发现/远程提案/自动合并不属于本票。
+
+## T26审查修正：最终交付不变量
+
+七项执行结束并清理明确构建缓存后，工具自身再次验证安装组合、锁/包字节和基线，不能只信候选中的验证脚本退出0。检查前捕获全部交付源：只有lock步骤生成的package-lock及Web步骤产生的已知Next16默认next-env声明可更新预期；后续更改这些文件也不允许。其它源、配置、业务元数据/脚本/依赖、manifest/vendor/锁/原始baseline/验证器改变或新增均恢复预备快照并列manual，不能把恢复后的文件冒充已通过原检查。正常node_modules/dist/.next/指定tsbuildinfo不交付；未知生成物需要人工处理，不以受管骨架为由接受任意检查副作用。
+
+最终report.final列完整文件集合、SHA256与mode及treeSha256，绑定实际交付源。使用Git --no-prefix直接产生正文不变的patch，路径来自current完整交付与candidate集合并集，包含旧baseline独有文件删除。工具在独立临时副本真实git apply --check/apply并执行列明vendor替换，再比较完整集合、字节及模式（不只遍历新文件）；不适用或模式不能由patch表达都列patch-equivalence/manual。只有七项通过、最终不变量和补丁等价门禁同时通过才可directlyApplicable。此验证不是自动应用到现用项目；临时副本finally清理。非恶意脚本沙箱；源/输出在执行中不应被外部并发修改。

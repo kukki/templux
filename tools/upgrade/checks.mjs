@@ -8,7 +8,7 @@ export async function checked(command,args,{cwd,timeout=180000}){
   timer=setTimeout(()=>{try{process.kill(-child.pid,'SIGKILL');}catch{}finish({status:'timeout'});},timeout);
  });
 }
-export async function runChecks(candidate,behavior,timeout){
+export async function runChecks(candidate,behavior,timeout,afterStep=()=>{}){
  const steps=[['lock','npm',['install','--package-lock-only','--ignore-scripts','--no-audit','--no-fund']],['install','npm',['ci','--ignore-scripts','--no-audit','--no-fund']],['combination','node',['.templux/verify.mjs','.', '--installed']],['semantic','npm',['run','typecheck']],['api-build','npm',['run','build','--workspace','apps/api']],['web-build','npm',['run','build','--workspace','apps/web']],['behavior','node',[behavior]]];
- const results=[];for(const [name,command,args]of steps){const result=await checked(command,args,{cwd:candidate,timeout});results.push({name,...result});if(result.status!=='passed')break;}return results;
+ const results=[];for(const [name,command,args]of steps){const result=await checked(command,args,{cwd:candidate,timeout});results.push({name,...result});if(result.status!=='passed')break;afterStep(name);}return results;
 }
