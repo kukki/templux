@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';import {join} from 'node:path';
-import {version} from './versions.mjs';import {verifyProject,sha} from '../release/verify.mjs';import {capture} from '../upgrade/delivery.mjs';import {entry,safePath,digestPath,secret,json} from '../upgrade/files.mjs';
+import {version} from './versions.mjs';import {verifyProject,sha} from '../release/verify.mjs';import {capture} from '../upgrade/delivery.mjs';import {entry,safePath,digestPath,secret,publicTemplatePath,json} from '../upgrade/files.mjs';
 export const hashPattern=/^[a-f0-9]{64}$/;
-export const publicPath=p=>digestPath(p)&&!secret(p)&&p.split('/').every(x=>/^[a-zA-Z0-9_.@\[\] -]+$/.test(x));
+export const publicPath=p=>digestPath(p)&&(!secret(p)||publicTemplatePath(p))&&p.split('/').every(x=>/^[a-zA-Z0-9_.@\[\] -]+$/.test(x));
 export class UpdateError extends Error{constructor(code){super(code);this.code=code;}}
 export function validateCatalog(c){
  if(c?.schemaVersion!==1||!Array.isArray(c.releases)||!c.releases.length||c.releases.length>128)throw new UpdateError('corrupt_catalog');

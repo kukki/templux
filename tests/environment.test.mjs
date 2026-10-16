@@ -25,3 +25,4 @@ test('rows show missing/empty/blank/set and effective source only',()=>{let r=ch
 
 test('domain mode without overlay fails rather than silently publishing local-only routing',()=>assert.equal(check({...domain(),TEMPLUX_TRAEFIK:undefined}).ok,false));
 test('explicit blank typed settings remain errors; absent settings keep existing defaults',()=>{assert.equal(check(env()).ok,true);for(const key of ['AUDIT_RETENTION_DAYS','RUNTIME_LOG_MAX_BYTES','COMPONENT_EXAMPLES_ENABLED'])assert.equal(check({...env(),[key]:''}).ok,false);});
+test('explicit Compose project override cannot silently operate a different configured project',()=>assert.equal(check({...env(),TEMPLUX_EFFECTIVE_PROJECT:'different-project'}).ok,false));

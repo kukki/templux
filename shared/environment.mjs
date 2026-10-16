@@ -58,6 +58,7 @@ export function checkEnvironment({exampleText,fileText,env=process.env,scope='al
   if(needed&&state!=='set')fail(key,'required_nonblank');
  }
  if(nonblank(env.TEMPLUX_PROJECT_NAME)&&!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(env.TEMPLUX_PROJECT_NAME))fail('TEMPLUX_PROJECT_NAME','project_identifier');
+ if(env.TEMPLUX_EFFECTIVE_PROJECT!==undefined&&env.TEMPLUX_EFFECTIVE_PROJECT!==env.TEMPLUX_PROJECT_NAME)fail('TEMPLUX_PROJECT_NAME','compose_project_mismatch');
  if(nonblank(env.DEPLOYMENT_ENV)&&!['DEV','UAT','PROD'].includes(env.DEPLOYMENT_ENV))fail('DEPLOYMENT_ENV','deployment');
  if(!['local','traefik'].includes(access))fail('TEMPLUX_ACCESS_MODE','access_mode');
  let origin;try{if(nonblank(env.APP_PUBLIC_URL)){const u=new URL(env.APP_PUBLIC_URL);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.search||u.hash||u.pathname!=='/'||(u.protocol==='http:'&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname)))throw new Error();origin=u.origin;}}catch{fail('APP_PUBLIC_URL','public_origin');}
