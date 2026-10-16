@@ -1,5 +1,15 @@
 name: ${TEMPLUX_PROJECT_NAME:-templux}
 
+x-start-environment: &start-environment
+  TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME-}
+  DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-}
+  APP_PUBLIC_URL: ${APP_PUBLIC_URL-}
+  TEMPLUX_ACCESS_MODE: ${TEMPLUX_ACCESS_MODE-local}
+  APP_HOST: ${APP_HOST-}
+  DOMAIN_NAME: ${DOMAIN_NAME-}
+  NETWORK_NAME: ${NETWORK_NAME-}
+  ENTRY_TRUSTED_PROXY_CIDRS: ${ENTRY_TRUSTED_PROXY_CIDRS-}
+
 x-auth-environment: &auth-environment
   AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS-90}
   AUDIT_CLEANUP_BATCH_SIZE: ${AUDIT_CLEANUP_BATCH_SIZE-1000}
@@ -13,8 +23,8 @@ x-auth-environment: &auth-environment
   FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
   FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY:-}
   FEISHU_REDIRECT_URI: ${FEISHU_REDIRECT_URI:-}
-  APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:31000}
-  DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-PROD}
+  APP_PUBLIC_URL: ${APP_PUBLIC_URL-}
+  DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-}
   AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
   AGENT_IDLE_TIMEOUT_SECONDS: ${AGENT_IDLE_TIMEOUT_SECONDS:-600}
   AGENT_SESSION_MAX_SECONDS: ${AGENT_SESSION_MAX_SECONDS:-43200}
@@ -23,7 +33,7 @@ x-auth-environment: &auth-environment
   PERSON_SESSION_MAX_SECONDS: ${PERSON_SESSION_MAX_SECONDS:-43200}
 
 x-database-environment: &database-environment
-  DATABASE_URL: ${DATABASE_URL:-postgresql://templux:templux-local-only@database:5432/templux}
+  DATABASE_URL: ${DATABASE_URL-}
 
 x-runtime-logging: &runtime-logging
   driver: json-file
@@ -33,13 +43,64 @@ x-runtime-logging: &runtime-logging
     compress: "false"
 
 services:
+  environment:
+    build:
+      context: .
+      target: api
+    entrypoint: ["node", "shared/environment-cli.mjs"]
+    command: ["check", "--json"]
+    environment:
+      NODE_OPTIONS: ""
+      TEMPLUX_ENV_DIR: /run/templux-env
+      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME-}
+      TEMPLUX_HTTP_PORT: ${TEMPLUX_HTTP_PORT-}
+      TEMPLUX_API_PORT: ${TEMPLUX_API_PORT-}
+      TEMPLUX_DB_PASSWORD: ${TEMPLUX_DB_PASSWORD-}
+      DATABASE_URL: ${DATABASE_URL-}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL-}
+      FEISHU_APP_ID: ${FEISHU_APP_ID-}
+      FEISHU_APP_SECRET: ${FEISHU_APP_SECRET-}
+      FEISHU_TENANT_KEY: ${FEISHU_TENANT_KEY-}
+      FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY-}
+      FEISHU_REDIRECT_URI: ${FEISHU_REDIRECT_URI-}
+      PERSON_IDLE_TIMEOUT_SECONDS: ${PERSON_IDLE_TIMEOUT_SECONDS-}
+      PERSON_SESSION_MAX_SECONDS: ${PERSON_SESSION_MAX_SECONDS-}
+      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-}
+      AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED-}
+      AGENT_IDLE_TIMEOUT_SECONDS: ${AGENT_IDLE_TIMEOUT_SECONDS-}
+      AGENT_SESSION_MAX_SECONDS: ${AGENT_SESSION_MAX_SECONDS-}
+      TEMPLUX_CREDENTIAL_DIR: ${TEMPLUX_CREDENTIAL_DIR-}
+      HEARTBEAT_INTERVAL_SECONDS: ${HEARTBEAT_INTERVAL_SECONDS-}
+      PASSWORD_PROXY_HOSTS: ${PASSWORD_PROXY_HOSTS-}
+      ENTRY_TRUSTED_PROXY_CIDRS: ${ENTRY_TRUSTED_PROXY_CIDRS-}
+      WEB_TRUSTED_PROXY_CIDRS: ${WEB_TRUSTED_PROXY_CIDRS-}
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS-}
+      AUDIT_CLEANUP_BATCH_SIZE: ${AUDIT_CLEANUP_BATCH_SIZE-}
+      AUDIT_CLEANUP_MAX_BATCHES: ${AUDIT_CLEANUP_MAX_BATCHES-}
+      AUDIT_CLEANUP_INTERVAL_SECONDS: ${AUDIT_CLEANUP_INTERVAL_SECONDS-}
+      RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-}
+      RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-}
+      COMPONENT_EXAMPLES_ENABLED: ${COMPONENT_EXAMPLES_ENABLED-}
+      TEMPLUX_BACKUP_DIR: ${TEMPLUX_BACKUP_DIR-}
+      TEMPLUX_BACKUP_RETAIN: ${TEMPLUX_BACKUP_RETAIN-}
+      TEMPLUX_ACCESS_MODE: ${TEMPLUX_ACCESS_MODE-local}
+      APP_HOST: ${APP_HOST-}
+      DOMAIN_NAME: ${DOMAIN_NAME-}
+      NETWORK_NAME: ${NETWORK_NAME-}
+    volumes:
+      - .:/run/templux-env:ro
+    restart: "no"
+
   database:
     logging: *runtime-logging
+    depends_on:
+      environment:
+        condition: service_completed_successfully
     image: postgres:18.6-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
     environment:
       POSTGRES_DB: templux
       POSTGRES_USER: templux
-      POSTGRES_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
+      POSTGRES_PASSWORD: ${TEMPLUX_DB_PASSWORD-}
     volumes:
       - database:/var/lib/postgresql
     healthcheck:
@@ -51,11 +112,16 @@ services:
 
   api:
     logging: *runtime-logging
+    depends_on:
+      environment:
+        condition: service_completed_successfully
     build:
       context: .
       target: api
     environment:
-      <<: [*database-environment, *auth-environment]
+      TEMPLUX_ENV_SCOPE: api
+      NODE_OPTIONS: "--no-warnings --import=./shared/environment-startup.mjs"
+      <<: [*start-environment, *database-environment, *auth-environment]
       TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/templux/maintenance/release.json
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
@@ -72,12 +138,17 @@ services:
 
   entry:
     logging: *runtime-logging
+    depends_on:
+      environment:
+        condition: service_completed_successfully
     build:
       context: .
       target: api
     command: ["node", "apps/api/dist/entry-server.js"]
     environment:
-      <<: *database-environment
+      TEMPLUX_ENV_SCOPE: entry
+      NODE_OPTIONS: "--no-warnings --import=./shared/environment-startup.mjs"
+      <<: [*start-environment, *database-environment]
       ENTRY_TRUSTED_PROXY_CIDRS: ${ENTRY_TRUSTED_PROXY_CIDRS-}
       RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
       RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
@@ -97,11 +168,17 @@ services:
 
   web:
     logging: *runtime-logging
+    depends_on:
+      environment:
+        condition: service_completed_successfully
     build:
       context: .
       target: web
     environment:
-      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-PROD}
+      <<: *start-environment
+      TEMPLUX_ENV_SCOPE: web
+      NODE_OPTIONS: "--no-warnings --import=./shared/environment-startup.mjs"
+      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-}
       COMPONENT_EXAMPLES_ENABLED: ${COMPONENT_EXAMPLES_ENABLED-auto}
       API_INTERNAL_URL: http://api:8080
       RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
@@ -124,8 +201,10 @@ services:
       context: .
       target: migration
     environment:
-      <<: *database-environment
-      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-templux}
+      TEMPLUX_ENV_SCOPE: migration
+      NODE_OPTIONS: "--no-warnings --import=./shared/environment-startup.mjs"
+      <<: [*start-environment, *database-environment]
+      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME-}
       TEMPLUX_BACKUP_DIR: /opt/templux/backups
       TEMPLUX_BACKUP_RETAIN: ${TEMPLUX_BACKUP_RETAIN-5}
       TEMPLUX_HOST_UID: ${TEMPLUX_HOST_UID-0}
@@ -140,7 +219,10 @@ services:
     build:
       context: .
       target: api
-    environment: *auth-environment
+    environment:
+      <<: [*start-environment, *auth-environment]
+      TEMPLUX_ENV_SCOPE: probe
+      NODE_OPTIONS: "--no-warnings --import=./shared/environment-startup.mjs"
     profiles: ["tools"]
     entrypoint: ["node", "apps/api/dist/auth-config-probe.js"]
 
@@ -150,8 +232,10 @@ services:
       context: .
       target: management
     environment:
-      <<: *database-environment
-      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-PROD}
+      TEMPLUX_ENV_SCOPE: management
+      NODE_OPTIONS: "--no-warnings --import=./shared/environment-startup.mjs"
+      <<: [*start-environment, *database-environment]
+      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-}
       AGENT_LOGIN_ENABLED: ${AGENT_LOGIN_ENABLED:-}
       RUNTIME_LOG_MAX_BYTES: ${RUNTIME_LOG_MAX_BYTES-10485760}
       RUNTIME_LOG_MAX_FILES: ${RUNTIME_LOG_MAX_FILES-10}
@@ -169,10 +253,10 @@ services:
       FEISHU_ALLOWED_TENANT_KEY: ${FEISHU_ALLOWED_TENANT_KEY:-}
       TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/templux/maintenance/release.json
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
-      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME:-templux}
+      TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME-}
       TEMPLUX_HTTP_PORT: ${TEMPLUX_HTTP_PORT:-31000}
       TEMPLUX_API_PORT: ${TEMPLUX_API_PORT:-31800}
-      TEMPLUX_DB_PASSWORD: ${TEMPLUX_DB_PASSWORD:-templux-local-only}
+      TEMPLUX_DB_PASSWORD: ${TEMPLUX_DB_PASSWORD-}
     volumes:
       - ${TEMPLUX_BACKUP_DIR-./backups}:/opt/templux/backups
       - maintenance:/opt/templux/maintenance

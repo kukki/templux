@@ -1,0 +1,47 @@
+# Explicit Ubuntu domain deployment: existing Traefik owns public ports and TLS.
+services:
+  environment:
+    environment:
+      TEMPLUX_ACCESS_MODE: traefik
+      TEMPLUX_TRAEFIK: "1"
+  api:
+    ports: !reset []
+    environment:
+      TEMPLUX_ACCESS_MODE: traefik
+      TEMPLUX_TRAEFIK: "1"
+  web:
+    environment:
+      TEMPLUX_ACCESS_MODE: traefik
+      TEMPLUX_TRAEFIK: "1"
+  entry:
+    ports: !reset []
+    environment:
+      TEMPLUX_ACCESS_MODE: traefik
+      TEMPLUX_TRAEFIK: "1"
+    networks:
+      - default
+      - edge
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${NETWORK_NAME:?NETWORK_NAME required}
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME:?TEMPLUX_PROJECT_NAME required}-${DEPLOYMENT_ENV:?DEPLOYMENT_ENV required}-entry.rule=Host(`${APP_HOST:?APP_HOST full hostname required}`)
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.entrypoints=websecure
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.tls=true
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.service=${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry
+      - traefik.http.services.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.loadbalancer.server.port=8080
+  management:
+    environment:
+      TEMPLUX_ACCESS_MODE: traefik
+      TEMPLUX_TRAEFIK: "1"
+  migrate:
+    environment:
+      TEMPLUX_ACCESS_MODE: traefik
+      TEMPLUX_TRAEFIK: "1"
+  auth-config-probe:
+    environment:
+      TEMPLUX_ACCESS_MODE: traefik
+      TEMPLUX_TRAEFIK: "1"
+networks:
+  edge:
+    external: true
+    name: ${NETWORK_NAME:?NETWORK_NAME required}

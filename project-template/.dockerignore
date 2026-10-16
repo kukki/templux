@@ -7,3 +7,5 @@ node_modules
 credentials
 backups
 .git
+
+!.env.example

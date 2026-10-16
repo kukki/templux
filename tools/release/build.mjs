@@ -3,7 +3,7 @@ import {tmpdir} from 'node:os';import {join,resolve,relative} from 'node:path';i
 import {sha,isExactVersion,verifyProject} from './verify.mjs';
 const root=resolve(new URL('../..',import.meta.url).pathname),config=JSON.parse(readFileSync(join(root,'release.config.json'))),out=resolve(process.argv[2]??'/release'),commit=process.env.TEMPLUX_SOURCE_COMMIT;
 const stage=mkdtempSync(join(tmpdir(),'templux-release-'));let destination;
-const excluded=p=>p.split('/').some(name=>['node_modules','.next','.git','test-results','credentials','backups','secrets','logs'].includes(name)||/^\.env(?:\.|$)/.test(name))||/\.(map|tsbuildinfo|log)$/.test(p);
+const excluded=p=>p.split('/').some(name=>['node_modules','.next','.git','test-results','credentials','backups','secrets','logs'].includes(name)||(/^\.env(?:\.|$)/.test(name)&&name!=='.env.example'))||/\.(map|tsbuildinfo|log)$/.test(p);
 function copyAbsolute(source,to){
  if(excluded(source))return;const stat=lstatSync(source);if(stat.isSymbolicLink())throw new Error('发布输入不允许符号链接。');
  if(stat.isDirectory()){mkdirSync(to,{recursive:true,mode:0o755});for(const name of readdirSync(source))copyAbsolute(join(source,name),join(to,name));}
@@ -37,6 +37,7 @@ try{
    for(const file of readdirSync(join(directory,'shared')).filter(f=>f.endsWith('.mjs')&&!['presentation.mjs','runtime-log.mjs','features.mjs','proxy-peer.mjs','client-ip.mjs'].includes(f)))exports['./state/'+file.slice(0,-4)]={types:'./shared/'+file.replace('.mjs','.d.mts'),default:'./shared/'+file};
    peerDependencies=web.dependencies;
   }
+  for(const name of ['environment','environment-startup','environment-cli'])exports['./'+name]='./shared/'+name+'.mjs';
   write(join(directory,'package.json'),{name:'@templux/'+kind,version:config.version,type:'module',private:true,files:kind==='core'?['apps/api/dist','database','shared','config']:['apps/web','shared','config'],exports,dependencies,peerDependencies,engines:{node:'>=24 <25'}});
   const result=spawnSync('npm',['pack','--ignore-scripts','--json','--pack-destination',destination],{cwd:directory,encoding:'utf8',timeout:30000});if(result.status!==0)throw new Error('npm pack失败，未发布成功清单。');
   const packed=JSON.parse(result.stdout)[0],bytes=readFileSync(join(destination,packed.filename));packages.push({name:'@templux/'+kind,version:config.version,file:packed.filename,sha256:sha(bytes),integrity:'sha512-'+sha(bytes,'sha512')});

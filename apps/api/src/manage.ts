@@ -31,7 +31,7 @@ async function compose(args: string[]): Promise<void> {
   if (!directory || !isAbsolute(directory)) throw new OperationError('缺少容器管理项目目录。');
   await new Promise<void>((resolve, reject) => {
     const child = spawn('docker', ['compose', '--project-directory', directory,
-      '-f', `${directory}/compose.yaml`, ...args], {
+      '-f', `${directory}/compose.yaml`, ...(process.env.TEMPLUX_TRAEFIK==='1'?['-f',`${directory}/compose.traefik.yaml`]:[]), ...args], {
       stdio: ['ignore', 2, 2],
       // Compose runs against the host daemon: its bind source is a host path,
       // whereas the management tool itself writes through the container path.
@@ -133,11 +133,12 @@ async function main(): Promise<Record<string, unknown>> {
     if([...options.keys()].some(k=>k!=='--external-backup-reference')||flags.has('--overwrite'))throw new OperationError('start 参数无效。');
     if(options.has('--external-backup-reference')&&!flags.has('--confirm'))throw new OperationError('外部备份参考需要 --confirm。');
     backupSettings();loadPresentation();
+    await compose(['run', '--build', '--rm', '--no-deps', 'environment', 'check', '--json']);
     await compose(['build', 'api', 'web', 'entry', 'migrate']);
     await compose(['up', '-d', '--wait', '--wait-timeout', '60', 'database']);
     await compose(['run', '--rm', '--no-deps', '-e', `TEMPLUX_HOST_UID=${process.env.TEMPLUX_HOST_UID??process.getuid?.()??0}`, '-e', `TEMPLUX_HOST_GID=${process.env.TEMPLUX_HOST_GID??process.getgid?.()??0}`, 'migrate', ...(options.has('--external-backup-reference')?['--external-backup-reference',options.get('--external-backup-reference')!,'--confirm']:[])]);
     await compose(['up', '-d', '--wait', '--wait-timeout', '90', 'api', 'web', 'entry']);
-    return { ok: true, command, url: `http://localhost:${process.env.TEMPLUX_HTTP_PORT ?? '31000'}` };
+    return { ok: true, command, url: process.env.APP_PUBLIC_URL };
   }
   if (command === 'stop') await compose(['stop', 'entry', 'web', 'api', 'database']);
   if (command === 'logs') await compose(['logs', '--no-color', '--tail', '100', 'entry', 'api', 'web', 'database']);

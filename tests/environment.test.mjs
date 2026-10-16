@@ -1,0 +1,26 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync}from'node:fs';
+import {checkEnvironment,parseEnvironmentFile}from'../shared/environment.mjs';
+const example=()=>readFileSync(new URL('../.env.example',import.meta.url),'utf8');
+const env=()=>({TEMPLUX_PROJECT_NAME:'review-uat',DEPLOYMENT_ENV:'UAT',APP_PUBLIC_URL:'http://localhost:31000',DATABASE_URL:'postgresql://user:synthetic@external:5432/app'});
+const check=(e=env(),extra={})=>checkEnvironment({exampleText:example(),env:e,...extra});
+test('explicit required values and optional empty Feishu are valid',()=>assert.equal(check({...env(),FEISHU_APP_ID:'',FEISHU_APP_SECRET:''}).ok,true));
+for(const key of ['TEMPLUX_PROJECT_NAME','DEPLOYMENT_ENV','APP_PUBLIC_URL','DATABASE_URL'])for(const value of [undefined,'',' \t\n '])test(`required ${key} ${JSON.stringify(value)}`,()=>assert.equal(check({...env(),[key]:value}).ok,false));
+test('external database does not need local PostgreSQL password',()=>assert.equal(check().ok,true));
+test('Compose database requires explicit nonblank password',()=>assert.equal(check({...env(),DATABASE_URL:'postgresql://u:synthetic@database:5432/db'}).ok,false));
+test('Web does not require database or Feishu secrets',()=>assert.equal(check({...env(),DATABASE_URL:undefined,FEISHU_APP_ID:'app'},{scope:'web'}).ok,true));
+test('management realm metadata does not require long-lived secret',()=>assert.equal(check({...env(),FEISHU_APP_ID:'app',FEISHU_TENANT_KEY:'tenant'},{scope:'management'}).ok,true));
+test('Feishu partial configuration fails without leaking secret',()=>{let r=check({...env(),FEISHU_APP_SECRET:'synthetic-do-not-print'});assert.equal(r.ok,false);assert.equal(JSON.stringify(r).includes('synthetic-do-not-print'),false);});
+test('Feishu complete config and matching callback',()=>assert.equal(check({...env(),FEISHU_APP_ID:'app',FEISHU_APP_SECRET:'synthetic',FEISHU_TENANT_KEY:'tenant',FEISHU_REDIRECT_URI:env().APP_PUBLIC_URL+'/api/auth/feishu/callback'}).ok,true));
+test('Feishu tenant aliases conflict and mismatched callback rejected',()=>{let e={...env(),FEISHU_APP_ID:'app',FEISHU_APP_SECRET:'synthetic',FEISHU_TENANT_KEY:'a',FEISHU_ALLOWED_TENANT_KEY:'b',FEISHU_REDIRECT_URI:'https://other.test/callback'};assert.equal(check(e).ok,false);});
+const domain=()=>({...env(),TEMPLUX_ACCESS_MODE:'traefik',TEMPLUX_TRAEFIK:'1',APP_HOST:'review.example.test',DOMAIN_NAME:'example.test',NETWORK_NAME:'review-proxy',APP_PUBLIC_URL:'https://review.example.test',ENTRY_TRUSTED_PROXY_CIDRS:'172.29.0.2/32'});
+test('domain exact HTTPS origin and explicit network/peer',()=>assert.equal(check(domain()).ok,true));
+for(const key of ['APP_HOST','NETWORK_NAME','ENTRY_TRUSTED_PROXY_CIDRS'])test(`domain missing ${key}`,()=>assert.equal(check({...domain(),[key]:''}).ok,false));
+for(const value of ['https://review.example.test','evil.test`) || Host(`x','UPPER.test','a..test'])test(`invalid domain ${value}`,()=>assert.equal(check({...domain(),APP_HOST:value}).ok,false));
+test('wrong origin and broad all-address proxy rejected',()=>{assert.equal(check({...domain(),APP_PUBLIC_URL:'http://review.example.test'}).ok,false);assert.equal(check({...domain(),ENTRY_TRUSTED_PROXY_CIDRS:'0.0.0.0/0'}).ok,false);});
+test('example drift and missing metadata rejected',()=>{assert.equal(check(env(),{exampleText:example().replace('APP_PUBLIC_URL=','REMOVED_PUBLIC_URL=')}).ok,false);assert.equal(check(env(),{exampleText:example().replace(/# @env APP_PUBLIC_URL[^\n]*\n/,'')}).ok,false);});
+test('dotenv quotes, CRLF and multiline parse as inert text',()=>{const p=parseEnvironmentFile('A="line one\nline two"\r\nB=\'$(touch /tmp/never)\'\nC="quote \\" text"\n');assert.equal(p.A,'line one\nline two');assert.equal(p.B,'$(touch /tmp/never)');});
+test('duplicate keys and malformed syntax reject without values',()=>{assert.throws(()=>parseEnvironmentFile('A=one\nA=synthetic-secret\n'),/duplicate/);assert.throws(()=>parseEnvironmentFile('A="unterminated'),/syntax/);});
+test('unknown file keys warn but do not become echoed values',()=>{const r=check(env(),{fileText:'PROJECT_CUSTOM=synthetic-secret\n'});assert.equal(r.ok,true);assert(r.warnings.some(x=>x.key==='PROJECT_CUSTOM'));assert(!JSON.stringify(r).includes('synthetic-secret'));});
+test('rows show missing/empty/blank/set and effective source only',()=>{let r=check({...env(),FEISHU_APP_ID:'',AGENT_LOGIN_ENABLED:' \t'},{fileText:'APP_PUBLIC_URL=http://other.test\n'});assert.equal(r.rows.find(x=>x.key==='FEISHU_APP_ID').state,'empty');assert.equal(r.rows.find(x=>x.key==='AGENT_LOGIN_ENABLED').state,'blank');assert.match(r.rows.find(x=>x.key==='APP_PUBLIC_URL').source,/container/);});
+
+test('domain mode without overlay fails rather than silently publishing local-only routing',()=>assert.equal(check({...domain(),TEMPLUX_TRAEFIK:undefined}).ok,false));

@@ -12,6 +12,7 @@ COPY apps apps
 COPY database database
 COPY tests tests
 COPY shared shared
+COPY .env.example .env.example
 COPY config config
 COPY tools tools
 COPY project-template project-template
@@ -30,6 +31,7 @@ RUN npm ci --omit=dev --workspace @templux/api
 COPY --from=api-build /opt/templux/apps/api/dist apps/api/dist
 COPY database database
 COPY shared shared
+COPY .env.example .env.example
 COPY config config
 USER node
 CMD ["node", "apps/api/dist/server.js"]
@@ -50,6 +52,7 @@ COPY apps/web/server.mjs apps/web/server.mjs
 COPY apps/web/project-server.mjs apps/web/project-server.mjs
 COPY apps/web/public apps/web/public
 COPY shared shared
+COPY .env.example .env.example
 COPY config config
 USER node
 CMD ["node", "apps/web/server.mjs"]

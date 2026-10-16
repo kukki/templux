@@ -16,6 +16,7 @@ COPY --from=dependencies /opt/project/apps/web/package.json apps/web/package.jso
 COPY --from=dependencies /opt/project/vendor vendor
 COPY --from=dependencies /opt/project/.templux .templux
 COPY --from=dependencies /opt/project/templux.lock.json templux.lock.json
+COPY --from=dependencies /opt/project/.env.example .env.example
 RUN node .templux/verify.mjs . && npm ci --ignore-scripts --omit=dev --workspace project-api --no-audit --no-fund
 COPY --from=api-build /opt/project/apps/api/dist apps/api/dist
 COPY --from=dependencies /opt/project/config config
@@ -31,6 +32,7 @@ COPY --from=dependencies /opt/project/apps/web/package.json apps/web/package.jso
 COPY --from=dependencies /opt/project/vendor vendor
 COPY --from=dependencies /opt/project/.templux .templux
 COPY --from=dependencies /opt/project/templux.lock.json templux.lock.json
+COPY --from=dependencies /opt/project/.env.example .env.example
 RUN node .templux/verify.mjs . && npm ci --ignore-scripts --omit=dev --workspace project-web --no-audit --no-fund
 COPY --from=web-build --chown=node:node /opt/project/apps/web/.next apps/web/.next
 COPY --from=dependencies /opt/project/apps/web/server.mjs apps/web/server.mjs

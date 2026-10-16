@@ -1,6 +1,26 @@
 #!/bin/sh
 set -eu
 TEMPLUX_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+# Explicit selection; never source/eval deployment .env in the host shell.
+TEMPLUX_OVERLAY_ARG=''
+case "${TEMPLUX_TRAEFIK-0}" in
+  0|'') :;;
+  1) TEMPLUX_OVERLAY_ARG="--file=$TEMPLUX_ROOT/compose.traefik.yaml";;
+  *) echo 'TEMPLUX_TRAEFIK must be 0 or 1' >&2; exit 1;;
+esac
+case "${1-}" in
+  --help|help)
+    echo 'Usage: ./templux [management-command] [options]'
+    echo 'Environment: ./templux env-check|env-list [--json] (no database required)'
+    echo 'Domain mode: TEMPLUX_TRAEFIK=1 ./templux start --json (existing external network/TLS)'
+    exit 0;;
+  env-check|env-list)
+    TEMPLUX_ENV_ACTION=check
+    if [ "$1" = env-list ]; then TEMPLUX_ENV_ACTION=list; fi
+    shift
+    exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" ${TEMPLUX_OVERLAY_ARG:+"$TEMPLUX_OVERLAY_ARG"} run --build --quiet-build --rm --no-deps environment "$TEMPLUX_ENV_ACTION" "$@";;
+esac
+
 # Reject incomplete scripted restore before even probing/building a Docker image.
 TEMPLUX_RESTORE_TARGET_KEY=''
 if [ "${1-}" = restore ]; then
@@ -52,11 +72,11 @@ for TEMPLUX_OWNER_VALUE in "${TEMPLUX_HOST_UID-$(id -u)}" "${TEMPLUX_HOST_GID-$(
     echo '宿主属主覆盖超出UID/GID范围。' >&2; exit 1
   fi
 done
-TEMPLUX_AUTH_AVAILABILITY=$(docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" \
+TEMPLUX_AUTH_AVAILABILITY=$(docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" ${TEMPLUX_OVERLAY_ARG:+"$TEMPLUX_OVERLAY_ARG"} \
   run --build --quiet-build --rm --no-deps auth-config-probe) || TEMPLUX_AUTH_AVAILABILITY=''
 if [ -n "$TEMPLUX_RESTORE_TARGET_KEY" ]; then set -- -e "$TEMPLUX_RESTORE_TARGET_KEY" management "$@"; else set -- management "$@"; fi
 if [ "${TEMPLUX_RESTORE_ADMIN_URL+x}" = x ]; then set -- -e TEMPLUX_RESTORE_ADMIN_URL "$@"; fi
-exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" \
+exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" ${TEMPLUX_OVERLAY_ARG:+"$TEMPLUX_OVERLAY_ARG"} \
   run --build --quiet-build --rm --no-deps \
   -e "TEMPLUX_AUTH_AVAILABILITY_JSON=$TEMPLUX_AUTH_AVAILABILITY" \
   -e "TEMPLUX_PROJECT_DIR=$TEMPLUX_ROOT" \
