@@ -45,6 +45,8 @@ x-runtime-logging: &runtime-logging
 
 services:
   environment:
+    # Controlled read-only check must read 0600 .env regardless of app UID.
+    user: "0:0"
     build:
       context: .
       target: api
