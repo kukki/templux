@@ -1,18 +1,25 @@
 #!/bin/sh
 set -eu
 TEMPLUX_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+templux_run() {
+  TEMPLUX_RUN_STDERR=''
+  if [ ! -t 1 ] && [ -t 2 ]; then TEMPLUX_RUN_STDERR="${TMPDIR:-/tmp}/templux-run.$$"; fi
+  TEMPLUX_RUN_STATUS=0
+  if [ -n "$TEMPLUX_RUN_STDERR" ]; then
+    docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" run --build --quiet-build --rm --no-deps "$@" 2>"$TEMPLUX_RUN_STDERR" || TEMPLUX_RUN_STATUS=$?
+    cat "$TEMPLUX_RUN_STDERR" >&2
+    rm -f "$TEMPLUX_RUN_STDERR"
+  else
+    docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" run --build --quiet-build --rm --no-deps "$@" || TEMPLUX_RUN_STATUS=$?
+  fi
+  return "$TEMPLUX_RUN_STATUS"
+}
 # Explicit selection; never source/eval deployment .env in the host shell.
-TEMPLUX_OVERLAY_ARG=''
-case "${TEMPLUX_TRAEFIK-0}" in
-  0|'') :;;
-  1) TEMPLUX_OVERLAY_ARG="--file=$TEMPLUX_ROOT/compose.traefik.yaml";;
-  *) echo 'TEMPLUX_TRAEFIK must be 0 or 1' >&2; exit 1;;
-esac
 case "${1-}" in
   --help|help)
     echo 'Usage: ./templux [management-command] [options]'
     echo 'Environment: ./templux env-check|env-list [--json] (no database required)'
-    echo 'Domain mode: TEMPLUX_TRAEFIK=1 ./templux start --json (existing external network/TLS)'
+    echo 'Traefik mode: ./templux start --json (existing external network/TLS and domain .env values)'
     exit 0;;
   env-check|env-list)
     TEMPLUX_ENV_ACTION=check
@@ -25,7 +32,7 @@ case "${1-}" in
       echo 'environment: require regular .env and .env.example files; existing values are never printed' >&2
       exit 1
     fi
-    exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" ${TEMPLUX_OVERLAY_ARG:+"$TEMPLUX_OVERLAY_ARG"} run --build --quiet-build --rm --no-deps environment "$TEMPLUX_ENV_ACTION" "$@";;
+    templux_run environment "$TEMPLUX_ENV_ACTION" "$@"; exit $?;;
 esac
 
 # Reject incomplete scripted restore before even probing/building a Docker image.
@@ -79,12 +86,10 @@ for TEMPLUX_OWNER_VALUE in "${TEMPLUX_HOST_UID-$(id -u)}" "${TEMPLUX_HOST_GID-$(
     echo '宿主属主覆盖超出UID/GID范围。' >&2; exit 1
   fi
 done
-TEMPLUX_AUTH_AVAILABILITY=$(docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" ${TEMPLUX_OVERLAY_ARG:+"$TEMPLUX_OVERLAY_ARG"} \
-  run --build --quiet-build --rm --no-deps auth-config-probe) || TEMPLUX_AUTH_AVAILABILITY=''
+TEMPLUX_AUTH_AVAILABILITY=$(templux_run auth-config-probe) || TEMPLUX_AUTH_AVAILABILITY=''
 if [ -n "$TEMPLUX_RESTORE_TARGET_KEY" ]; then set -- -e "$TEMPLUX_RESTORE_TARGET_KEY" management "$@"; else set -- management "$@"; fi
 if [ "${TEMPLUX_RESTORE_ADMIN_URL+x}" = x ]; then set -- -e TEMPLUX_RESTORE_ADMIN_URL "$@"; fi
-exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" ${TEMPLUX_OVERLAY_ARG:+"$TEMPLUX_OVERLAY_ARG"} \
-  run --build --quiet-build --rm --no-deps \
+templux_run \
   -e "TEMPLUX_AUTH_AVAILABILITY_JSON=$TEMPLUX_AUTH_AVAILABILITY" \
   -e "TEMPLUX_PROJECT_DIR=$TEMPLUX_ROOT" \
   -e "TEMPLUX_HOST_UID=${TEMPLUX_HOST_UID-$(id -u)}" -e "TEMPLUX_HOST_GID=${TEMPLUX_HOST_GID-$(id -g)}" \

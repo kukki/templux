@@ -6,7 +6,7 @@ const database=['DATABASE_URL'];const localDatabase=['TEMPLUX_DB_PASSWORD'];
 const domain=['APP_HOST','NETWORK_NAME','ENTRY_TRUSTED_PROXY_CIDRS'];
 const feishu=['FEISHU_APP_ID','FEISHU_APP_SECRET','FEISHU_REDIRECT_URI'];
 const configured=['AUDIT_RETENTION_DAYS','AUDIT_CLEANUP_BATCH_SIZE','AUDIT_CLEANUP_MAX_BATCHES','AUDIT_CLEANUP_INTERVAL_SECONDS','RUNTIME_LOG_MAX_BYTES','RUNTIME_LOG_MAX_FILES','COMPONENT_EXAMPLES_ENABLED'];
-const optional=['DOMAIN_NAME','TEMPLUX_HTTP_PORT','TEMPLUX_API_PORT','TEMPLUX_ACCESS_MODE','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','PERSON_IDLE_TIMEOUT_SECONDS','PERSON_SESSION_MAX_SECONDS','AGENT_LOGIN_ENABLED','AGENT_IDLE_TIMEOUT_SECONDS','AGENT_SESSION_MAX_SECONDS','TEMPLUX_CREDENTIAL_DIR','HEARTBEAT_INTERVAL_SECONDS','PASSWORD_PROXY_HOSTS','WEB_TRUSTED_PROXY_CIDRS','AUDIT_RETENTION_DAYS','AUDIT_CLEANUP_BATCH_SIZE','AUDIT_CLEANUP_MAX_BATCHES','AUDIT_CLEANUP_INTERVAL_SECONDS','RUNTIME_LOG_MAX_BYTES','RUNTIME_LOG_MAX_FILES','COMPONENT_EXAMPLES_ENABLED','TEMPLUX_BACKUP_DIR','TEMPLUX_BACKUP_RETAIN'].filter(key=>!configured.includes(key));
+const optional=['DOMAIN_NAME','TEMPLUX_HTTP_PORT','TEMPLUX_API_PORT','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','PERSON_IDLE_TIMEOUT_SECONDS','PERSON_SESSION_MAX_SECONDS','AGENT_LOGIN_ENABLED','AGENT_IDLE_TIMEOUT_SECONDS','AGENT_SESSION_MAX_SECONDS','TEMPLUX_CREDENTIAL_DIR','HEARTBEAT_INTERVAL_SECONDS','PASSWORD_PROXY_HOSTS','WEB_TRUSTED_PROXY_CIDRS','AUDIT_RETENTION_DAYS','AUDIT_CLEANUP_BATCH_SIZE','AUDIT_CLEANUP_MAX_BATCHES','AUDIT_CLEANUP_INTERVAL_SECONDS','RUNTIME_LOG_MAX_BYTES','RUNTIME_LOG_MAX_FILES','COMPONENT_EXAMPLES_ENABLED','TEMPLUX_BACKUP_DIR','TEMPLUX_BACKUP_RETAIN'].filter(key=>!configured.includes(key));
 const secret=new Set(['DATABASE_URL','TEMPLUX_DB_PASSWORD','FEISHU_APP_SECRET']);
 export const environmentContract=Object.freeze(Object.fromEntries(Object.entries({required,database,localDatabase,domain,feishu,configured,optional}).flatMap(([policy,keys])=>keys.map(key=>[key,Object.freeze({policy,visibility:secret.has(key)?'secret':'public'})]))));
 const nonblank=v=>typeof v==='string'&&v.trim()!=='';
@@ -41,7 +41,6 @@ export function checkEnvironment({exampleText,fileText,env=process.env,scope='al
  }catch{fail('.env.example','example_drift');}
  if(fileText!==undefined)try{file=parseEnvironmentFile(fileText);}catch{fail('.env','syntax_or_duplicate');}
  for(const key of Object.keys(file))if(!Object.hasOwn(environmentContract,key))warnings.push({key,code:'unknown_file_key'});
- const access=env.TEMPLUX_ACCESS_MODE??'local';const isDomain=access==='traefik';
  const authScope=['all','api','probe'].includes(scope);const serving=['all','api','web','entry','probe'].includes(scope);
  const hasFeishu=authScope&&(nonblank(env.FEISHU_APP_ID)||nonblank(env.FEISHU_APP_SECRET));
  let ownDatabase=false;
@@ -51,7 +50,7 @@ export function checkEnvironment({exampleText,fileText,env=process.env,scope='al
   let needed=rule.policy==='required'&&(key!=='APP_PUBLIC_URL'||serving);
   if(rule.policy==='database')needed=!['web','probe'].includes(scope);
   if(rule.policy==='localDatabase')needed=scope==='all'&&ownDatabase;
-  if(rule.policy==='domain')needed=isDomain&&serving;
+  if(rule.policy==='domain')needed=serving;
   if(rule.policy==='feishu')needed=hasFeishu;
   if(rule.policy==='configured')needed=value!==undefined;
   rows.push({key,policy:rule.policy,required:needed,visibility:rule.visibility,state,source:value===undefined?'missing':Object.hasOwn(file,key)&&file[key]===value?'container (.env match)':'container (effective override or Compose projection)'});
@@ -60,10 +59,8 @@ export function checkEnvironment({exampleText,fileText,env=process.env,scope='al
  if(nonblank(env.TEMPLUX_PROJECT_NAME)&&!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(env.TEMPLUX_PROJECT_NAME))fail('TEMPLUX_PROJECT_NAME','project_identifier');
  if(env.TEMPLUX_EFFECTIVE_PROJECT!==undefined&&env.TEMPLUX_EFFECTIVE_PROJECT!==env.TEMPLUX_PROJECT_NAME)fail('TEMPLUX_PROJECT_NAME','compose_project_mismatch');
  if(nonblank(env.DEPLOYMENT_ENV)&&!['DEV','UAT','PROD'].includes(env.DEPLOYMENT_ENV))fail('DEPLOYMENT_ENV','deployment');
- if(!['local','traefik'].includes(access))fail('TEMPLUX_ACCESS_MODE','access_mode');
  let origin;try{if(nonblank(env.APP_PUBLIC_URL)){const u=new URL(env.APP_PUBLIC_URL);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.search||u.hash||u.pathname!=='/'||(u.protocol==='http:'&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname)))throw new Error();origin=u.origin;}}catch{fail('APP_PUBLIC_URL','public_origin');}
- if(isDomain&&serving){
-  if(env.TEMPLUX_TRAEFIK!=='1')fail('TEMPLUX_ACCESS_MODE','traefik_overlay_required');
+ if(serving){
   if(typeof env.APP_HOST!=='string'||env.APP_HOST.length>253||!env.APP_HOST.includes('.')||!env.APP_HOST.split('.').every(label=>/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label)))fail('APP_HOST','hostname');
   if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$/.test(env.NETWORK_NAME??''))fail('NETWORK_NAME','network_identifier');
   if(nonblank(env.DOMAIN_NAME)&&env.APP_HOST!==env.DOMAIN_NAME&&!env.APP_HOST?.endsWith('.'+env.DOMAIN_NAME))fail('DOMAIN_NAME','host_outside_root');

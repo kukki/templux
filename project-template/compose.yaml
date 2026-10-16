@@ -1,3 +1,4 @@
+# Ubuntu domain deployment: an existing Traefik owns public ports and TLS.
 name: ${TEMPLUX_PROJECT_NAME:-project-app}
 
 x-start-environment: &start-environment
@@ -5,7 +6,6 @@ x-start-environment: &start-environment
   TEMPLUX_PROJECT_NAME: ${TEMPLUX_PROJECT_NAME-}
   DEPLOYMENT_ENV: ${DEPLOYMENT_ENV-}
   APP_PUBLIC_URL: ${APP_PUBLIC_URL-}
-  TEMPLUX_ACCESS_MODE: ${TEMPLUX_ACCESS_MODE-local}
   APP_HOST: ${APP_HOST-}
   DOMAIN_NAME: ${DOMAIN_NAME-}
   NETWORK_NAME: ${NETWORK_NAME-}
@@ -87,7 +87,6 @@ services:
       COMPONENT_EXAMPLES_ENABLED: ${COMPONENT_EXAMPLES_ENABLED-auto}
       TEMPLUX_BACKUP_DIR: ${TEMPLUX_BACKUP_DIR-}
       TEMPLUX_BACKUP_RETAIN: ${TEMPLUX_BACKUP_RETAIN-}
-      TEMPLUX_ACCESS_MODE: ${TEMPLUX_ACCESS_MODE-local}
       APP_HOST: ${APP_HOST-}
       DOMAIN_NAME: ${DOMAIN_NAME-}
       NETWORK_NAME: ${NETWORK_NAME-}
@@ -145,8 +144,6 @@ services:
         bind: {create_host_path: false}
       - maintenance:/opt/project/maintenance:ro
       - ./config:/opt/project/config:ro
-    ports:
-      - "127.0.0.1:${TEMPLUX_API_PORT:-31800}:8080"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 5s
@@ -180,8 +177,17 @@ services:
         bind: {create_host_path: false}
       - maintenance:/opt/project/maintenance:ro
       - ./config:/opt/project/config:ro
-    ports:
-      - "127.0.0.1:${TEMPLUX_HTTP_PORT:-31000}:8080"
+    networks:
+      - default
+      - edge
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${NETWORK_NAME:?NETWORK_NAME required}
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME:?TEMPLUX_PROJECT_NAME required}-${DEPLOYMENT_ENV:?DEPLOYMENT_ENV required}-entry.rule=Host(`${APP_HOST:?APP_HOST full hostname required}`)
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.entrypoints=websecure
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.tls=true
+      - traefik.http.routers.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.service=${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry
+      - traefik.http.services.${TEMPLUX_PROJECT_NAME}-${DEPLOYMENT_ENV}-entry.loadbalancer.server.port=8080
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 5s
@@ -302,3 +308,8 @@ services:
 volumes:
   maintenance:
   database:
+
+networks:
+  edge:
+    external: true
+    name: ${NETWORK_NAME:?NETWORK_NAME required}

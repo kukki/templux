@@ -2,15 +2,31 @@
 
 供新项目复用、也可独立启动的通用模板项目。基于 Supplieroom、Skoope、Catchouse 提取共通能力，业务与数据由各项目保有。
 
-首版规格与29项实施任务已发布。当前已实现 T01–T22：容器启动、品牌配置、飞书首登Pending与CLI授权、人员/Agent密码、持久会话、管理员网页账号管理、持久密码失败限制、验证关联/管理员密码重置、审计查询/日志留存、受保护控件示例入口、统一搜索/只读列表、整行多选列表筛选、分页/三态排序/刷新恢复、普通表单/未保存离开保护、可选按行保存/编辑弹窗、顶部通知/队列/显式键合并、图片预览/可选图库、完整值复制/本地反馈、锚定浮层/单个非模态面板、横纵导航/账号记忆/窄屏抽屉、持续维护提醒/停服维护入口及容器数据库备份/迁移前自动保留。真实飞书组织人工验收仍另列；恢复及其它后续任务尚未完成，不能视为完整首版。
+首版通用能力及实际隔离演练见 [T29验收](docs/discovery/t29-acceptance.md)。Ubuntu真实主机与真实飞书组织人工验收仍未完成，不能视为完整首版通过。新增 #31/#32 实现现有 Traefik 域名入口与启动环境校验；本机测试候选与独立审查状态见 [本轮验收](docs/discovery/domain-environment-acceptance.md)，旧锁定包不自动获得新功能。
 
 ## 启动
 
 部署目标为 Ubuntu 主机上的 UAT/生产，macOS 仅作为可选开发主机；两者使用下列 Docker、Compose 和基础 Shell 入口。Windows/WSL2 已移出支持与验收范围，不表示通过。Ubuntu 具体版本/架构待环境提供后核验，真实主机尚未执行；见 [平台范围与验收状态](docs/specs/deployment-platforms.md)。
 
+首次仅在新项目目录复制示例（不要覆盖既有配置），填写真实域名、外部网络与精确信任 peer；模板默认复用已有 Traefik/websecure/TLS，不发布宿主端口：
+
 ```sh
-./templux
+cp -n .env.example .env
+chmod 600 .env
+# 编辑 .env：TEMPLUX_PROJECT_NAME、DEPLOYMENT_ENV、APP_PUBLIC_URL、APP_HOST、NETWORK_NAME、ENTRY_TRUSTED_PROXY_CIDRS
+./templux env-check --json
+./templux start --json
 ```
+
+Ubuntu 域名部署复用已有 Traefik/websecure/TLS 与 external 网络：`DOMAIN_NAME` 为可选根域，`APP_HOST` 为完整项目域名；只有 entry 接入已存在的 external 网络。先按 [Ubuntu逐步测试指南](docs/specs/ubuntu-domain-testing.md) 填写和检查真实域名/网络/精确信任peer，不在原生产目录演练。模板与准确新包消费者共用相同入口。
+
+```sh
+./templux --help
+./templux env-check --json
+./templux env-list --json
+```
+
+环境清单只显示键、来源、必填/可选与赋值状态，不回显任何值。直接 Compose 启动也执行校验，必填空/空白拒启、真正可选空值可跳过；审计/容量等 configured 设置显式空仍拒绝。详见 [域名与环境合同](docs/specs/domain-and-environment.md)。
 
 无参数且有终端时进入容器内菜单。自动化使用完整命令：
 
@@ -23,9 +39,9 @@
 ./templux stop --non-interactive --confirm --json
 ```
 
-默认页面为 http://localhost:31000，公开状态 API 为 http://localhost:31800/api/status。端口绑定本机回环地址，不占用已有的3000或8080服务；数据库不发布宿主端口。31000由独立entry服务提供，Web只在内部网络运行；普通stop停止入口、业务及DB进程并保留数据卷，不提供停服维护页。计划维护请用下述maintenance命令。
+域名入口由独立 entry 服务提供并经已有 Traefik 的 websecure/TLS 暴露；API、Web、数据库不发布宿主端口，只在项目内部网络运行。普通 stop 停止入口、业务及DB进程并保留数据卷，不提供停服维护页。计划维护请用下述maintenance命令。
 
-启动顺序为构建前后端、启动数据库、一次性管理容器迁移并校验、启动应用并等待健康。迁移失败返回非零，不执行后续应用启动。普通重启检查已有迁移，不重复应用；Web 不自行修改结构。
+启动顺序为构建前后端、启动数据库、一次性管理容器迁移并校验、启动应用并等待健康。迁移失败返回非零，不执行后续应用启动。普通重启检查已有迁移，不重复应用；Web 不自行修改结构。首次在新机器启动若报绑定挂载属主检查，见[数据库备份（T22）](#数据库备份t22)。
 
 JSON 模式 stdout 仅一个结果对象，构建进度及诊断不混入结果；错误返回非零。无终端、JSON或非交互模式缺命令立即失败，不等待输入。停止须显式确认。`--interactive` 可明确要求交互终端，不可与 JSON 或非交互同用。
 
@@ -42,7 +58,7 @@ JSON 模式 stdout 仅一个结果对象，构建进度及诊断不混入结果�
 
 ## 飞书登录与首位授权
 
-登录入口为 `/login`。配置 `FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_TENANT_KEY`，在飞书自建应用登记 `http://localhost:31000/api/auth/feishu/callback`；其它部署通过 `APP_PUBLIC_URL` 与可选 `FEISHU_REDIRECT_URI` 设置同源回调，生产使用HTTPS。本人完成允许组织的真实飞书授权后为Pending，宿主操作者可通过菜单9/10或完整命令查看并授予角色：
+登录入口为 `/login`。配置 `FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_TENANT_KEY`，在飞书自建应用登记 `${APP_PUBLIC_URL}/api/auth/feishu/callback`（也可用可选 `FEISHU_REDIRECT_URI` 显式设置同源回调，生产使用HTTPS）。本人完成允许组织的真实飞书授权后为Pending，宿主操作者可通过菜单9/10或完整命令查看并授予角色：
 
 ```sh
 ./templux users --non-interactive --json
@@ -187,3 +203,5 @@ DEV/UAT默认从账号页进入 /examples，PROD默认关闭；COMPONENT_EXAMPLE
 ## 数据库备份（T22）
 
 `./templux backup --confirm --json`（菜单25）产生容器内校验的custom归档与受限清单；已有结构的待迁移默认先自动备份，成功自动默认保留5份。详见[备份/权限/外部库与迁移合同](docs/specs/backup-and-recovery.md#t22-已实现容器备份与迁移前置)。数据库备份不含代码、.env或文件；字节校验不等于恢复验收。恢复CLI与恢复后会话撤销仍待后续任务，真实飞书组织人工验收仍单列pending。
+
+macOS/Docker Desktop 的绑定挂载在容器内呈现为属主 `0:0`，严格检查会拒绝而非自动降级，`./templux start`（含迁移前置备份）因此报`备份目录须为指定宿主属主…`。先用 `stat -f '%u %g %Lp' backups backups/backup-*/archive.dump` 在宿主独立核实属主与权限，再以 `TEMPLUX_HOST_UID=0 TEMPLUX_HOST_GID=0 ./templux start` 重跑；Ubuntu/Linux 卷呈现真实属主，不可照抄。属主映射合同见[备份/恢复](docs/specs/backup-and-recovery.md#宿主uid映射)。

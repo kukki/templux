@@ -44,3 +44,8 @@
 ## T23 恢复
 
 菜单26及 `restore --mode original|independent --target current|env:VAR --archive ABS --sha256 HEX --confirm --overwrite --json` 已实现，详见[恢复合同](backup-and-recovery.md#t23明确目标恢复)。模式/目标无默认；宿主包装器只作破坏性命令缺项前检和配置键转交，Docker前拒缺项，实际权限/身份/归档/恢复仍由容器统一校验。目标URL只通过受限环境提供，不放argv；`TEMPLUX_RESTORE_ADMIN_URL`可指定已存在救援库。未知完成不会自动重试或开放，恢复成功仍offline，须另一次明确maintenance-resume。自动定时/异地服务仍不属于此范围。
+
+
+## #31/#32 域名与环境入口
+
+宿主 `./templux env-check|env-list [--json]` 在无DB/Web时运行受控环境容器，所有值隐藏，JSON stdout及非零失败遵守同一合同；`--help`无需Docker给出入口说明。无参数管理菜单的原26项保持，独立环境诊断不依赖先执行认证probe。入口始终为Traefik模式（已有外部网络/TLS），内部维护/恢复/启动编排与直接Compose共用同一`compose.yaml`。详见 [域名与环境合同](domain-and-environment.md) 和 [Ubuntu测试步骤](ubuntu-domain-testing.md)。

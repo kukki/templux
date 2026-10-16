@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Real own Traefik Docker-provider + TLS + standard wrapper/SQL/entry exercise."""
 import hashlib,http.client,json,os,pathlib,secrets,shutil,socket,ssl,subprocess,tempfile,time
-ROOT=pathlib.Path(__file__).resolve().parents[2];OUT=ROOT/'test-results/domain-environment';OUT.mkdir(parents=True,exist_ok=True)
+ROOT=pathlib.Path(__file__).resolve().parents[2];OUT=pathlib.Path(os.environ.get('DOMAIN_EVIDENCE_DIR',str(ROOT/'test-results/domain-environment')));OUT.mkdir(parents=True,exist_ok=True)
 nonce=secrets.token_hex(4);name='tdomain-'+nonce;network=name+'-edge';proxy=name+'-proxy'
 work=pathlib.Path(tempfile.mkdtemp(prefix='templux-domain-real-',dir=ROOT.parent));os.chmod(work,0o700)
 records=[];secret_values=[];context=ssl._create_unverified_context();projectA=name+'-a';projectB=name+'-b'
@@ -11,10 +11,10 @@ def call(args,cwd=None,env=None,allow=False,timeout=180):
  return p
 
 def dc(project,*args,allow=False):
- return call(['docker','compose','--project-directory',str(project),'-f',str(project/'compose.yaml'),'-f',str(project/'compose.traefik.yaml'),*args],allow=allow)
+ return call(['docker','compose','--project-directory',str(project),'-f',str(project/'compose.yaml'),*args],allow=allow)
 
 def cli(*args,allow=False):
- p=call(['./templux',*map(str,args),'--json'],cwd=work/'a',env={**os.environ,'TEMPLUX_TRAEFIK':'1','TEMPLUX_HOST_UID':'0','TEMPLUX_HOST_GID':'0'},allow=allow)
+ p=call(['./templux',*map(str,args),'--json'],cwd=work/'a',env={**os.environ,'TEMPLUX_HOST_UID':'0','TEMPLUX_HOST_GID':'0'},allow=allow)
  try:j=json.loads(p.stdout)
  except:raise RuntimeError('CLI stdout not single JSON: '+p.stdout[:200]+' '+p.stderr[-500:])
  if not allow:assert p.returncode==0 and j['ok'],j
@@ -30,14 +30,18 @@ def req(host,path='/',body=None,cookie=None,origin=None,headers=None):
  c.request('POST'if body is not None else'GET',path,body=data,headers=h);r=c.getresponse();value=r.read();head=dict(r.getheaders());status=r.status;c.close();return status,head,value
 
 def write_env(path,host,db,peer,password):
- text=(ROOT/'.env.example').read_text();values={'TEMPLUX_PROJECT_NAME':projectA if path.name=='a'else projectB,'DEPLOYMENT_ENV':'UAT','TEMPLUX_DB_PASSWORD':password,'DATABASE_URL':db,'APP_PUBLIC_URL':'https://'+host,'TEMPLUX_ACCESS_MODE':'traefik','APP_HOST':host,'DOMAIN_NAME':'example.test','NETWORK_NAME':network,'ENTRY_TRUSTED_PROXY_CIDRS':peer+'/32'}
+ text=(path/'.env.example').read_text();values={'TEMPLUX_PROJECT_NAME':projectA if path.name=='a'else projectB,'DEPLOYMENT_ENV':'UAT','TEMPLUX_DB_PASSWORD':password,'DATABASE_URL':db,'APP_PUBLIC_URL':'https://'+host,'APP_HOST':host,'DOMAIN_NAME':'example.test','NETWORK_NAME':network,'ENTRY_TRUSTED_PROXY_CIDRS':peer+'/32'}
  import re
  for k,v in values.items():text=re.sub(r'^'+k+r'=.*$',lambda m:k+'='+v,text,flags=re.M)
  (path/'.env').write_text(text);(path/'.env').chmod(0o600)
 
 def copy_source(to):
+ consumer=os.environ.get('DOMAIN_CONSUMER_SOURCE')
+ if consumer:
+  shutil.copytree(consumer,to)
+  cfg=json.loads((to/'config/presentation.json').read_text());cfg['project']['name']='Synthetic Domain '+to.name.upper();cfg['brand']['wordmark']='domain-'+to.name;(to/'config/presentation.json').write_text(json.dumps(cfg));return
  to.mkdir();paths=set(call(['git','ls-files'],cwd=ROOT).stdout.splitlines())
- paths.update(['compose.traefik.yaml','shared/environment.mjs','shared/environment-cli.mjs','shared/environment-startup.mjs','project-template/.env.example','project-template/compose.traefik.yaml','project-template/tools/environment.mjs'])
+ paths.update(['shared/environment.mjs','shared/environment-cli.mjs','shared/environment-startup.mjs','project-template/.env.example','project-template/tools/environment.mjs'])
  for name_ in sorted(paths):
   p=ROOT/name_
   if not p.is_file()or name_.startswith(('test-results/','docs/'))or p.name=='.env':continue
@@ -54,9 +58,8 @@ try:
  write_env(a,'a.example.test',f'postgresql://templux:{password}@database:5432/templux',peer,password)
  write_env(b,'b.example.test','postgresql://unused:unused@127.0.0.1:1/unavailable',peer,password)
  for p in [a,b]:
-  with (p/'compose.traefik.yaml').open('a')as f:f.write('\n')
   # add own provider constraint label to entry; no production proxy watches test-owned services.
-  s=(p/'compose.traefik.yaml').read_text().replace('      - traefik.enable=true','      - templux.test='+name+'\n      - traefik.enable=true');(p/'compose.traefik.yaml').write_text(s)
+  s=(p/'compose.yaml').read_text().replace('      - traefik.enable=true','      - templux.test='+name+'\n      - traefik.enable=true');(p/'compose.yaml').write_text(s)
  source_files={str(p.relative_to(a)):hashlib.sha256(p.read_bytes()).hexdigest() for p in a.rglob('*') if p.is_file() and p.name!='.env'}
  (OUT/'real-source-inventory.json').write_text(json.dumps(source_files,indent=2)+'\n')
  # Direct Compose cannot launch a service when required effective URL is blank.
@@ -70,6 +73,11 @@ try:
  (a/'.env').write_text(saved);(a/'.env').chmod(0o600)
  cli('env-check');cli('env-list');started=cli('start');assert started['url']=='https://a.example.test'
  images=json.loads(dc(a,'images','--format','json').stdout);records.append({'case':'runtime-images','images':[{k:x.get(k)for k in ['Service','ID','Repository','Tag']}for x in images]})
+ roles={}
+ for service in ['environment','api','web','entry']:
+  cid=dc(a,'ps','-aq',service).stdout.strip();user=call(['docker','inspect',cid,'--format','{{.Config.User}}']).stdout.strip();roles[service]={'user':user,'state':call(['docker','inspect',cid,'--format','{{.State.Status}}/{{.State.ExitCode}}']).stdout.strip()}
+  assert user==('0:0'if service=='environment'else'node'),roles
+ assert roles['environment']['state']=='exited/0';records.append({'case':'short-lived-root-gate-nonroot-services','roles':roles})
  for _ in range(30):
   try:
    if req('a.example.test','/login')[0]==200:break
@@ -89,13 +97,15 @@ try:
  cli('authorize','--account',person['accountId'],'--roles','user','--confirm');assert req('a.example.test','/api/protected',cookie=cookie)[0]==401
  cookie=login()[1]['Set-Cookie'].split(';')[0];assert req('a.example.test','/api/protected',cookie=cookie)[0]==200
  records.append({'case':'domain-real-password-origin-cookie','wrongOrigin':403,'secureCookie':True,'zeroRoles':403,'oldRevoked':401,'authorized':200})
+ limits=[req('a.example.test','/api/auth/password',{'username':'synthetic.source-limit','password':'wrong-synthetic'},origin='https://a.example.test',headers={'X-Forwarded-For':'198.51.100.'+str(i+1),'X-Templux-Client-IP':'203.0.113.'+str(i+1)})[0]for i in range(6)]
+ assert limits==[401,401,401,401,429,429],limits;records.append({'case':'real-Traefik-spoofed-forwarded-headers-do-not-evade-IP-limit','statuses':limits})
  state=cli('maintenance-status')['state'];cli('maintenance-halt','--expected-version',state['version'],'--confirm');assert req('a.example.test')[0]==503
  records.append({'case':'domain-maintenance-halt','status':503,'entryLive':req('a.example.test','/health/live')[0]})
  state=cli('maintenance-status')['state'];cli('maintenance-resume','--expected-version',state['version'],'--confirm');assert req('a.example.test','/api/protected',cookie=cookie)[0]==200
  # B reuses precisely A's compiled API artifact; distinct config/env/router and no business backend.
  api_image=call(['docker','image','inspect',projectA+'-api','--format','{{.Id}}']).stdout.strip()
  override=b/'test-image.yaml';override.write_text('services:\n  entry:\n    image: '+api_image+'\n  environment:\n    image: '+api_image+'\n')
- call(['docker','compose','--project-directory',str(b),'-f',str(b/'compose.yaml'),'-f',str(b/'compose.traefik.yaml'),'-f',str(override),'up','--no-build','-d','entry'])
+ call(['docker','compose','--project-directory',str(b),'-f',str(b/'compose.yaml'),'-f',str(override),'up','--no-build','-d','entry'])
  for _ in range(25):
   st,_,body=req('b.example.test')
   if st==503 and b'Synthetic Domain B'in body:break
@@ -116,6 +126,6 @@ finally:
  # Do not publish .env, account files, cookies, credentials, dumps or daemon configuration.
  for r in records:
   for value in secret_values:assert value not in json.dumps(r)
- (OUT/'real-traefik.json').write_text(json.dumps({'records':records,'cleanup':cleanup,'workRemoved':True,'sourceCommit':call(['git','rev-parse','HEAD'],cwd=ROOT).stdout.strip()},indent=2)+'\n')
+ (OUT/'real-traefik.json').write_text(json.dumps({'records':records,'cleanup':cleanup,'workRemoved':True,'sourceCommit':call(['git','rev-parse','HEAD'],cwd=ROOT).stdout.strip(),'consumerSource':os.environ.get('DOMAIN_CONSUMER_SOURCE')},indent=2)+'\n')
  shutil.rmtree(work)
  print('Own integration finished:',len(records),'records')

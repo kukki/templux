@@ -1,3 +1,3 @@
 .maintenance-notice{position:sticky;top:0;z-index:40;padding:12px max(16px,calc((100vw - 1440px)/2));border-bottom:2px solid var(--accent);background:var(--surface);color:var(--text);font-size:.9rem;line-height:1.6;max-height:30dvh;overflow:auto;overflow-wrap:anywhere}.maintenance-notice>div{display:flex;flex-wrap:wrap;gap:4px 18px}.maintenance-notice strong{color:var(--accent)}.maintenance-notice time{font-variant-numeric:tabular-nums}.maintenance-notice+*{scroll-margin-top:var(--maintenance-height,0px)}body:has(.maintenance-notice) .top-notices{top:calc(var(--maintenance-height,0px) + 1rem);max-height:calc(100dvh - var(--maintenance-height,0px) - 2rem)}@media(max-width:760px){.maintenance-notice>div{display:grid;gap:2px}}
 
-.maintenance-notice:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.maintenance-notice:focus-visible{outline:var(--focus-ring) solid var(--accent);outline-offset:-3px}

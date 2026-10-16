@@ -1,4 +1,5 @@
 import ApplicationShell from './application-shell';
+import {buildVersionLabel} from './build-metadata';
 import {EditNavigationProvider} from './elements/edit-navigation';
 import {projectFeatures} from '../../../../shared/features.mjs';
 import type {Profile} from './session';
@@ -15,6 +16,6 @@ export default function ProjectShell({ config, children, account }: { config: Pr
     </header>}
     <main>{children}</main>
     {config.footer.visible && <footer><span>{config.footer.text}{config.footer.copyright && <span className="copyright">{config.footer.copyright}</span>}</span>
-      {config.footer.showVersion && <span>{config.copy.version} {config.project.version}</span>}</footer>}
+      {config.footer.showVersion && <span>{buildVersionLabel}</span>}</footer>}
   </div>;
 }

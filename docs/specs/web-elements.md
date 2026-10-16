@@ -269,7 +269,7 @@ T14实现具体化见 [表单与离开保护合同](forms-and-unsaved-edits.md)�
 - 项目按需采用，定义目标值和可识别的按钮名称。
 - 空值不提供可用复制按钮，隐藏或禁用可按项目变体呈现。
 - 复制传入的完整目标值，不复制视觉截断片段；业务文本的规范化由新项目定义。
-- 复制成功后在原按钮显示确认图标/提示，默认约 1.5 秒后恢复，项目可配置；失败不显示成功状态，不承诺后台浏览器精确计时。
+- 复制成功后在原按钮显示确认图标，默认约 1 秒后恢复，项目可配置；失败不显示成功状态，不承诺后台浏览器精确计时。
 - 失败在控件本地状态及按钮提示/辅助反馈中说明，允许再次点击尝试；默认不静默或交页面统一错误，不据来源代码声称已有可见错误弹窗。
 
 ### 待来源分歧选择或细化
@@ -316,3 +316,11 @@ T14实现具体化见 [表单与离开保护合同](forms-and-unsaved-edits.md)�
 ## T20实施细化（2026-10-15）
 
 真实横纵导航、图标模式、项目/账号浏览器记忆、窄屏文字抽屉和编辑/退出整合见[应用导航](application-navigation.md)，截图与最终验证点见[T20验收](../discovery/t20-acceptance.md)。保留前述来源与决策历史，不把后续维护或升级票算作已交付。
+
+## 页面一致性细化（2026-10-16）
+
+统一设计令牌集中在`apps/web/app/style.css`：`--radius-control`(6px) 控件圆角、`--radius-surface`(10px) 容器圆角、`--control-h`(44px) 控件最小高度、`--focus-ring`(3px)、`--focus-offset`(3px)。单行表单控件、只读/审计表格、分页、通知、浮层与图片预览统一引用这些令牌；表头字号与颜色对齐，`.management-pagination`补齐与`.management-pages`一致的布局与按钮内边距。
+
+外部链接按钮：`ExternalLinkButton`（`components/elements/external-link-button.tsx`）与操作按钮同尺寸（`.action.secondary-action`）并附`aria-hidden`外链图标；`href`须为http/https绝对地址，`label`为非空可识别名称（≤200字符）；以`target="_blank" rel="noopener noreferrer"`在新窗口打开，不承接提交、复制或权限行为。
+
+编号复制：账号页、管理员账号列表/编辑、审计事件ID与目标账号ID复用`CopyButton`，标签取自`elements-copy.json`（`copyAccountId`/`copyEventId`/`copyTargetId`/`copyId`），不显示目标值预览。

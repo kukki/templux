@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync}from'node:fs';
 import {checkEnvironment,parseEnvironmentFile}from'../shared/environment.mjs';
 const example=()=>readFileSync(new URL('../.env.example',import.meta.url),'utf8');
-const env=()=>({TEMPLUX_PROJECT_NAME:'review-uat',DEPLOYMENT_ENV:'UAT',APP_PUBLIC_URL:'http://localhost:31000',DATABASE_URL:'postgresql://user:synthetic@external:5432/app'});
+const env=()=>({TEMPLUX_PROJECT_NAME:'review-uat',DEPLOYMENT_ENV:'UAT',APP_PUBLIC_URL:'https://review.example.test',APP_HOST:'review.example.test',NETWORK_NAME:'review-proxy',ENTRY_TRUSTED_PROXY_CIDRS:'172.29.0.2/32',DATABASE_URL:'postgresql://user:synthetic@external:5432/app'});
 const check=(e=env(),extra={})=>checkEnvironment({exampleText:example(),env:e,...extra});
 test('explicit required values and optional empty Feishu are valid',()=>assert.equal(check({...env(),FEISHU_APP_ID:'',FEISHU_APP_SECRET:''}).ok,true));
 for(const key of ['TEMPLUX_PROJECT_NAME','DEPLOYMENT_ENV','APP_PUBLIC_URL','DATABASE_URL'])for(const value of [undefined,'',' \t\n '])test(`required ${key} ${JSON.stringify(value)}`,()=>assert.equal(check({...env(),[key]:value}).ok,false));
@@ -12,7 +12,7 @@ test('management realm metadata does not require long-lived secret',()=>assert.e
 test('Feishu partial configuration fails without leaking secret',()=>{let r=check({...env(),FEISHU_APP_SECRET:'synthetic-do-not-print'});assert.equal(r.ok,false);assert.equal(JSON.stringify(r).includes('synthetic-do-not-print'),false);});
 test('Feishu complete config and matching callback',()=>assert.equal(check({...env(),FEISHU_APP_ID:'app',FEISHU_APP_SECRET:'synthetic',FEISHU_TENANT_KEY:'tenant',FEISHU_REDIRECT_URI:env().APP_PUBLIC_URL+'/api/auth/feishu/callback'}).ok,true));
 test('Feishu tenant aliases conflict and mismatched callback rejected',()=>{let e={...env(),FEISHU_APP_ID:'app',FEISHU_APP_SECRET:'synthetic',FEISHU_TENANT_KEY:'a',FEISHU_ALLOWED_TENANT_KEY:'b',FEISHU_REDIRECT_URI:'https://other.test/callback'};assert.equal(check(e).ok,false);});
-const domain=()=>({...env(),TEMPLUX_ACCESS_MODE:'traefik',TEMPLUX_TRAEFIK:'1',APP_HOST:'review.example.test',DOMAIN_NAME:'example.test',NETWORK_NAME:'review-proxy',APP_PUBLIC_URL:'https://review.example.test',ENTRY_TRUSTED_PROXY_CIDRS:'172.29.0.2/32'});
+const domain=()=>({...env(),DOMAIN_NAME:'example.test'});
 test('domain exact HTTPS origin and explicit network/peer',()=>assert.equal(check(domain()).ok,true));
 for(const key of ['APP_HOST','NETWORK_NAME','ENTRY_TRUSTED_PROXY_CIDRS'])test(`domain missing ${key}`,()=>assert.equal(check({...domain(),[key]:''}).ok,false));
 for(const value of ['https://review.example.test','evil.test`) || Host(`x','UPPER.test','a..test'])test(`invalid domain ${value}`,()=>assert.equal(check({...domain(),APP_HOST:value}).ok,false));
@@ -23,6 +23,6 @@ test('duplicate keys and malformed syntax reject without values',()=>{assert.thr
 test('unknown file keys warn but do not become echoed values',()=>{const r=check(env(),{fileText:'PROJECT_CUSTOM=synthetic-secret\n'});assert.equal(r.ok,true);assert(r.warnings.some(x=>x.key==='PROJECT_CUSTOM'));assert(!JSON.stringify(r).includes('synthetic-secret'));});
 test('rows show missing/empty/blank/set and effective source only',()=>{let r=check({...env(),FEISHU_APP_ID:'',AGENT_LOGIN_ENABLED:' \t'},{fileText:'APP_PUBLIC_URL=http://other.test\n'});assert.equal(r.rows.find(x=>x.key==='FEISHU_APP_ID').state,'empty');assert.equal(r.rows.find(x=>x.key==='AGENT_LOGIN_ENABLED').state,'blank');assert.match(r.rows.find(x=>x.key==='APP_PUBLIC_URL').source,/container/);});
 
-test('domain mode without overlay fails rather than silently publishing local-only routing',()=>assert.equal(check({...domain(),TEMPLUX_TRAEFIK:undefined}).ok,false));
+test('serving scopes require the full domain contract with no local fallback',()=>assert.equal(check({...env(),NETWORK_NAME:undefined}).ok,false));
 test('explicit blank typed settings remain errors; absent settings keep existing defaults',()=>{assert.equal(check(env()).ok,true);for(const key of ['AUDIT_RETENTION_DAYS','RUNTIME_LOG_MAX_BYTES','COMPONENT_EXAMPLES_ENABLED'])assert.equal(check({...env(),[key]:''}).ok,false);});
 test('explicit Compose project override cannot silently operate a different configured project',()=>assert.equal(check({...env(),TEMPLUX_EFFECTIVE_PROJECT:'different-project'}).ok,false));

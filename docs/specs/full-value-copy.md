@@ -20,7 +20,7 @@ T18/#19、父规格故事90。共享`shared/copy`控制反馈代次，React `Cop
 
 不使用已弃用execCommand/隐藏textarea或绕过权限的fallback。失败只提示当前按钮与邻近polite live状态，可再次尝试；不显示异常文本/目标、不默认发全局通知。项目可传`write:(value:string)=>Promise<void>`适配其它平台，必须在真实复制确认后才resolve，失败reject合适分类；不得用假成功适配器替代平台结果。示例“演示复制被拒绝”只模拟拒绝，不模拟成功，和真实权限拒绝证据分开。
 
-idle点击后pending并禁用重复写，API resolve后才copied；成功原按钮“已复制”，默认1500ms后恢复，后台浏览器不承诺精确到毫秒。成功期间再点是一次新的明确复制；新尝试清除前一次timer。失败消息保留至重试或目标变化，不自动声称成功。读屏通过局部role=status播报，ARIA名称保留操作名称，反馈不嵌目标。
+idle点击后pending并禁用重复写，API resolve后才copied；成功后按钮由操作文案切换为对勾图标，默认1000ms后恢复，后台浏览器不承诺精确到毫秒。成功期间再点是一次新的明确复制；新尝试清除前一次timer。失败消息保留至重试或目标变化，不自动声称成功。读屏通过局部role=status播报“已复制”，图标为装饰性aria-hidden，ARIA名称保留操作名称，反馈不嵌目标。
 
 ## 异步、身份与隐私
 
@@ -32,6 +32,6 @@ idle点击后pending并禁用重复写，API resolve后才copied；成功原按�
 
 ## 配置及移除
 
-`elements.copy`默认`{feedbackMs:1500,emptyMode:'disable'}`，whole branch缺省兼容schema1旧文件；显式null/空对象/不完整/未知字段/错误类型拒绝。feedbackMs须100–60000整数，emptyMode仅hide/disable。`CopyButton.settings`可以项目显式覆盖，计时范围和空值枚举仍校验；完整呈现配置另执行上述严格字段校验。既有配置载入快照/重启合同保持，实际presentation本票不修改。
+`elements.copy`默认`{feedbackMs:1000,emptyMode:'disable'}`，whole branch缺省兼容schema1旧文件；显式null/空对象/不完整/未知字段/错误类型拒绝。feedbackMs须100–60000整数，emptyMode仅hide/disable。`CopyButton.settings`可以项目显式覆盖，计时范围和空值枚举仍校验；完整呈现配置另执行上述严格字段校验。既有配置载入快照/重启合同保持，实际presentation本票不修改。
 
 受保护/examples的短/长/空值和拒绝开关均纯内存/合成文本；刷新/重置清除演示状态。复制按钮不授予业务权限，不增业务API/SQL。物理移除examples及其copy后共享组件与正常登录/管理不依赖该模块。

@@ -1,6 +1,8 @@
 FROM node:24.21.0-bookworm-slim AS dependencies
 WORKDIR /opt/templux
 ENV NEXT_TELEMETRY_DISABLED=1
+# git is required by upgrade/updates checks (git diff/merge-file); only the tools images inherit this stage.
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
@@ -17,6 +19,7 @@ COPY config config
 COPY tools tools
 COPY project-template project-template
 COPY release.config.json release.config.json
+COPY .git .git
 
 FROM source AS api-build
 RUN npm run build --workspace @templux/api
@@ -37,7 +40,8 @@ USER node
 CMD ["node", "apps/api/dist/server.js"]
 
 FROM source AS web-build
-RUN npm run build --workspace @templux/web
+RUN node tools/build-metadata/resolve.mjs > /tmp/templux-build-metadata \
+  && NEXT_PUBLIC_BUILD_MONTH="$(head -n 1 /tmp/templux-build-metadata)" NEXT_PUBLIC_BUILD_COMMIT="$(tail -n 1 /tmp/templux-build-metadata)" npm run build --workspace @templux/web
 
 FROM node:24.21.0-bookworm-slim AS web
 WORKDIR /opt/templux
@@ -83,8 +87,6 @@ FROM checks AS release-tools
 CMD ["node", "tools/release/build.mjs", "/release"]
 
 FROM release-tools AS upgrade-tools
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["node", "tools/upgrade/cli.mjs"]
 
 FROM upgrade-tools AS updates-tools

@@ -31,7 +31,7 @@ async function compose(args: string[]): Promise<void> {
   if (!directory || !isAbsolute(directory)) throw new OperationError('缺少容器管理项目目录。');
   await new Promise<void>((resolve, reject) => {
     const child = spawn('docker', ['compose', '--project-directory', directory,
-      '-f', `${directory}/compose.yaml`, ...(process.env.TEMPLUX_TRAEFIK==='1'?['-f',`${directory}/compose.traefik.yaml`]:[]), ...args], {
+      '-f', `${directory}/compose.yaml`, ...args], {
       stdio: ['ignore', 2, 2],
       // Compose runs against the host daemon: its bind source is a host path,
       // whereas the management tool itself writes through the container path.

@@ -29,7 +29,7 @@
     "multiselect": { "delayMs": 1000 },
     "popover": { "width": 320 },
     "panel": { "width": 420, "height": 360, "draggable": true, "resizable": true },
-    "copy": { "feedbackMs": 1500, "emptyMode": "disable" },
+    "copy": { "feedbackMs": 1000, "emptyMode": "disable" },
     "images": { "zoomPan": false, "maxScale": 4 },
     "notifications": { "durationMs": 15000, "desktopVisible": 3, "narrowVisible": 1, "queueCapacity": 50 }
   }

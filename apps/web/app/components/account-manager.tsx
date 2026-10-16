@@ -1,5 +1,7 @@
 'use client';
 import LoginMethodManager from './login-method-manager';
+import CopyButton from './elements/copy-button';
+import elementsCopy from '../../../../config/elements-copy.json';
 import { useEffect, useState } from 'react';
 import type { AuthCopy } from './auth-copy';
 import { endSession, sessionFetch, wakeSessionTabs } from './session-client';
@@ -44,7 +46,7 @@ export default function AccountManager({copy,pagination,ownAccountId}:{copy:Auth
     </div>
     {error&&<p role="alert" className="auth-message failed">{error}</p>}{notice&&<p role="status" className="auth-message ready">{notice}</p>}
     <button className="secondary-action" disabled={loading||busy} onClick={()=>{setTarget(null);setRefresh(value=>value+1);}}>{copy.managementRefresh}</button>
-    {target&&<section className="management-editor" aria-labelledby="edit-title"><h3 id="edit-title" tabIndex={-1}>{copy.managementTarget}: {target.name} (#{target.id})</h3><p>{copy.accountKind}: {target.kind==='agent'?copy.managementAgent:copy.managementPerson} · {label(target.state)}</p>
+    {target&&<section className="management-editor" aria-labelledby="edit-title"><h3 id="edit-title" tabIndex={-1}>{copy.managementTarget}: {target.name} (#{target.id} <CopyButton value={target.id} label={elementsCopy.copyAccountId}/>)</h3><p>{copy.accountKind}: {target.kind==='agent'?copy.managementAgent:copy.managementPerson} · {label(target.state)}</p>
       <fieldset disabled={busy}><legend>{copy.accountRoles}</legend><p className="scope-note">{copy.managementRoleHint}</p>{Object.entries(data?.roles??{}).map(([key,role])=><label className="management-option" key={key}><input type="checkbox" checked={roles.includes(key)} onChange={event=>{setRoles(current=>event.target.checked?[...current,key]:current.filter(value=>value!==key));setConfirmed(false);}}/><span>{role.label} <small>({key})</small></span></label>)}</fieldset>
       {conflict&&<p className="failed" role="alert">{copy.role_conflict}</p>}
       <label className="management-state">{copy.managementState}<select disabled={busy} value={nextState} onChange={event=>{setNextState(event.target.value as 'active'|'disabled');setConfirmed(false);}}><option value="active">{copy.managementActive}</option><option value="disabled">{copy.managementDisabled}</option></select></label>
@@ -57,7 +59,7 @@ export default function AccountManager({copy,pagination,ownAccountId}:{copy:Auth
       <p className="scope-note">{copy.managementTotal}: {data.total}</p>
       <div className="management-accounts">{data.accounts.length===0?<p>{copy.managementEmpty}</p>:data.accounts.map(account=><article className="management-account" key={account.id}>
         <div className="panel-heading"><h3>{account.name}</h3><span className="badge">{label(account.state)}</span></div>
-        <dl><div><dt>{copy.accountId}</dt><dd>{account.id}</dd></div><div><dt>{copy.accountKind}</dt><dd>{account.kind==='agent'?copy.managementAgent:copy.managementPerson}</dd></div><div><dt>{copy.managementOwner}</dt><dd>{account.kind==='agent'?`${account.responsiblePersonName??'—'} (#${account.responsiblePersonId})`:copy.managementNoOwner}</dd></div><div><dt>{copy.accountRoles}</dt><dd>{account.roles.length?account.roles.map(role=>data.roles[role]?.label??role).join(', '):copy.managementZero}</dd></div></dl>
+        <dl><div><dt>{copy.accountId}</dt><dd>{account.id} <CopyButton value={account.id} label={elementsCopy.copyAccountId}/></dd></div><div><dt>{copy.accountKind}</dt><dd>{account.kind==='agent'?copy.managementAgent:copy.managementPerson}</dd></div><div><dt>{copy.managementOwner}</dt><dd>{account.kind==='agent'?`${account.responsiblePersonName??'—'} (#${account.responsiblePersonId})`:copy.managementNoOwner}</dd></div><div><dt>{copy.accountRoles}</dt><dd>{account.roles.length?account.roles.map(role=>data.roles[role]?.label??role).join(', '):copy.managementZero}</dd></div></dl>
         <button disabled={busy} onClick={()=>edit(account)} aria-label={`${copy.managementEdit} ${account.name}`}>{copy.managementEdit}</button>
       </article>)}</div>
       <div className="management-pages" aria-label={copy.managementPage}><button disabled={busy||data.page===1} onClick={()=>setPage(1)}>{copy.managementFirst}</button><button disabled={busy||data.page===1} onClick={()=>setPage(data.page-1)}>{copy.managementPrevious}</button><span>{data.page} / {data.pages}</span><button disabled={busy||data.page===data.pages} onClick={()=>setPage(data.page+1)}>{copy.managementNext}</button><button disabled={busy||data.page===data.pages} onClick={()=>setPage(data.pages)}>{copy.managementLast}</button><label>{copy.managementSize}<select disabled={busy} value={size} onChange={event=>{setSize(Number(event.target.value));setPage(1);}}>{pagination.pageSizes.map(value=><option key={value}>{value}</option>)}</select></label></div>

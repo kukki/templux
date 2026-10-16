@@ -1,5 +1,5 @@
 /** Instance-bound clipboard feedback. Snapshots and diagnostics never contain the target. */
-export function createCopyFeedback({value,label,emptyMode='disable',feedbackMs=1500,write,schedule=setTimeout,cancel=clearTimeout}){
+export function createCopyFeedback({value,label,emptyMode='disable',feedbackMs=1000,write,schedule=setTimeout,cancel=clearTimeout}){
  if((value!=null&&typeof value!=='string')||typeof label!=='string'||!label.trim()||label.length>200||!['hide','disable'].includes(emptyMode)||!Number.isInteger(feedbackMs)||feedbackMs<100||feedbackMs>60000||typeof write!=='function')throw new Error('Invalid copy control configuration');
  const empty=value==null||value.length===0,listeners=new Set();let status='idle',ended=false,generation=0,timer,snapshot;
  const publish=()=>{snapshot=Object.freeze({status,empty,hidden:empty&&emptyMode==='hide',ended});for(const listener of listeners)listener();};

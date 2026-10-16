@@ -18,7 +18,7 @@ export default function MultiSelect({label,options,values,onChange,onClose}:{lab
   return()=>{window.removeEventListener('resize',position);window.removeEventListener('scroll',position,true);window.visualViewport?.removeEventListener('resize',position);window.visualViewport?.removeEventListener('scroll',position);};
  },[open]);
  const summary=values.length===options.length?copy.allSelected:values.length===0?copy.noneSelected:copy.selected+' '+values.length+' / '+options.length;
- return <div className="multi-select" onBlur={event=>{if(open&&event.relatedTarget&&!event.currentTarget.contains(event.relatedTarget as Node))popup.current?.hidePopover();}}>
+ return <div className="multi-select" onBlur={event=>{if(!open)return;const next=event.relatedTarget;if(!(next instanceof Node)||event.currentTarget.contains(next)||next.contains(event.currentTarget))return;popup.current?.hidePopover();}}>
   <button type="button" className="secondary-action multi-select-trigger" ref={button} popoverTarget={id} aria-haspopup="dialog" aria-expanded={open} aria-controls={id}><span>{label}</span><span>{summary}</span></button>
   <div id={id} ref={popup} popover="auto" role="dialog" aria-label={label} className="multi-select-popup" onKeyDown={event=>{if(event.key==='Escape'&&!event.nativeEvent.isComposing){event.preventDefault();event.stopPropagation();popup.current?.hidePopover();button.current?.focus();}}} onToggle={event=>{const isOpen=event.newState==='open';setOpen(isOpen);if(!isOpen){setTerm('');closeCallback.current?.();}}}>
    <div className="multi-select-heading"><strong>{label}</strong><button type="button" className="secondary-action" aria-label={copy.closeOptions} onClick={()=>{popup.current?.hidePopover();button.current?.focus();}}>×</button></div>
