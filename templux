@@ -18,6 +18,13 @@ case "${1-}" in
     TEMPLUX_ENV_ACTION=check
     if [ "$1" = env-list ]; then TEMPLUX_ENV_ACTION=list; fi
     shift
+    if [ ! -f "$TEMPLUX_ROOT/.env" ] || [ -L "$TEMPLUX_ROOT/.env" ] || [ ! -f "$TEMPLUX_ROOT/.env.example" ] || [ -L "$TEMPLUX_ROOT/.env.example" ]; then
+      TEMPLUX_ENV_JSON=0
+      for TEMPLUX_ENV_ARG in "$@"; do if [ "$TEMPLUX_ENV_ARG" = --json ]; then TEMPLUX_ENV_JSON=1; fi; done
+      if [ "$TEMPLUX_ENV_JSON" = 1 ]; then echo '{"ok":false,"errors":[{"key":".env/.env.example","code":"missing_or_not_regular"}]}'; fi
+      echo 'environment: require regular .env and .env.example files; existing values are never printed' >&2
+      exit 1
+    fi
     exec docker compose --project-directory "$TEMPLUX_ROOT" -f "$TEMPLUX_ROOT/compose.yaml" ${TEMPLUX_OVERLAY_ARG:+"$TEMPLUX_OVERLAY_ARG"} run --build --quiet-build --rm --no-deps environment "$TEMPLUX_ENV_ACTION" "$@";;
 esac
 

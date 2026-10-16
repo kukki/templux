@@ -7,8 +7,11 @@ cmd=['docker','run','--rm','--tmpfs','/env','-v',str(ROOT)+':/source:ro','-e','T
 control=cmd[:-1]+[script.replace('exec node /source/shared/environment-cli.mjs check --json',"exec su -s /bin/sh node -c 'node /source/shared/environment-cli.mjs check --json'")]
 r=subprocess.run(control,text=True,capture_output=True,timeout=20);assert r.returncode==1 and any(e['key']=='.env' and e['code']=='unreadable' for e in json.loads(r.stdout)['errors'])
 p=subprocess.run(cmd,text=True,capture_output=True,timeout=20);assert p.returncode==0,p.stderr;assert json.loads(p.stdout)['ok']
+runtime=cmd[:-1]+[script.replace('exec node /source/shared/environment-cli.mjs check --json',"mkdir /env/public; cp /source/.env.example /env/public/.env.example; TEMPLUX_ENV_DIR=/env/public TEMPLUX_ENV_SCOPE=api exec su -s /bin/sh node -c 'node --import /source/shared/environment-startup.mjs -e \"console.log(process.getuid())\"'")]
+a=subprocess.run(runtime,text=True,capture_output=True,timeout=20);assert a.returncode==0 and a.stdout.strip()=='1000',a.stderr
+
 # The deployment's actual diagnostic container must use the controlled root role, not app UID1000.
 for source in [ROOT/'compose.yaml',ROOT/'project-template/compose.yaml']:
  text=source.read_text().split('  environment:\n',1)[1].split('  database:\n',1)[0]
- assert 'user: "0:0"'in text,str(source)
-(out/'environment-permissions.json').write_text(json.dumps({'linuxTmpfsOwner':1001,'mode':'0600','diagnosticEffectiveUid':0,'exit':p.returncode,'scope':'read-only controlled environment check; app services stay non-root'},indent=2)+'\n');print('PASS private dotenv ownership')
+ assert 'user: "0:0"'in text and '- .:/run/templux-env:ro'not in text and 'source: ./.env' in text and 'create_host_path: false'in text,str(source)
+(out/'environment-permissions.json').write_text(json.dumps({'linuxTmpfsOwner':1001,'mode':'0600','diagnosticEffectiveUid':0,'applicationPreloadUid':1000,'applicationDoesNotReadPrivateDotenv':True,'exit':p.returncode,'scope':'read-only controlled environment check; app services stay non-root'},indent=2)+'\n');print('PASS private dotenv ownership')

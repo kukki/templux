@@ -92,7 +92,16 @@ services:
       DOMAIN_NAME: ${DOMAIN_NAME-}
       NETWORK_NAME: ${NETWORK_NAME-}
     volumes:
-      - .:/run/templux-env:ro
+      - type: bind
+        source: ./.env
+        target: /run/templux-env/.env
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./.env.example
+        target: /run/templux-env/.env.example
+        read_only: true
+        bind: {create_host_path: false}
     restart: "no"
 
   database:
@@ -129,6 +138,11 @@ services:
       TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/templux/maintenance/release.json
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
+      - type: bind
+        source: ./.env.example
+        target: /opt/templux/.env.example
+        read_only: true
+        bind: {create_host_path: false}
       - maintenance:/opt/templux/maintenance:ro
       - ./config:/opt/templux/config:ro
     ports:
@@ -159,6 +173,11 @@ services:
       TEMPLUX_MAINTENANCE_RELEASE_FILE: /opt/templux/maintenance/release.json
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
+      - type: bind
+        source: ./.env.example
+        target: /opt/templux/.env.example
+        read_only: true
+        bind: {create_host_path: false}
       - maintenance:/opt/templux/maintenance:ro
       - ./config:/opt/templux/config:ro
     ports:
@@ -191,6 +210,11 @@ services:
       WEB_TRUSTED_PROXY_CIDRS: ${WEB_TRUSTED_PROXY_CIDRS:-}
       TEMPLUX_CONFIG_PATH: /opt/templux/config/presentation.json
     volumes:
+      - type: bind
+        source: ./.env.example
+        target: /opt/templux/.env.example
+        read_only: true
+        bind: {create_host_path: false}
       - ./config:/opt/templux/config:ro
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
