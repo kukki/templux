@@ -3,4 +3,5 @@ import {environmentReport}from'./environment-cli.mjs';
 if(process.env.TEMPLUX_ENV_SCOPE){
  const result=environmentReport({scope:process.env.TEMPLUX_ENV_SCOPE});
  if(!result.ok){process.stderr.write('environment startup rejected: '+result.errors.map(e=>`${e.key}:${e.code}`).join(', ')+'\n');process.exit(1);}
+ for(const row of result.rows)if(row.policy==='optional'&&['empty','blank'].includes(row.state))delete process.env[row.key];
 }

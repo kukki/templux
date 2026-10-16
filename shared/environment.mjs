@@ -5,9 +5,10 @@ const required=['TEMPLUX_PROJECT_NAME','DEPLOYMENT_ENV','APP_PUBLIC_URL'];
 const database=['DATABASE_URL'];const localDatabase=['TEMPLUX_DB_PASSWORD'];
 const domain=['APP_HOST','NETWORK_NAME','ENTRY_TRUSTED_PROXY_CIDRS'];
 const feishu=['FEISHU_APP_ID','FEISHU_APP_SECRET','FEISHU_REDIRECT_URI'];
-const optional=['DOMAIN_NAME','TEMPLUX_HTTP_PORT','TEMPLUX_API_PORT','TEMPLUX_ACCESS_MODE','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','PERSON_IDLE_TIMEOUT_SECONDS','PERSON_SESSION_MAX_SECONDS','AGENT_LOGIN_ENABLED','AGENT_IDLE_TIMEOUT_SECONDS','AGENT_SESSION_MAX_SECONDS','TEMPLUX_CREDENTIAL_DIR','HEARTBEAT_INTERVAL_SECONDS','PASSWORD_PROXY_HOSTS','WEB_TRUSTED_PROXY_CIDRS','AUDIT_RETENTION_DAYS','AUDIT_CLEANUP_BATCH_SIZE','AUDIT_CLEANUP_MAX_BATCHES','AUDIT_CLEANUP_INTERVAL_SECONDS','RUNTIME_LOG_MAX_BYTES','RUNTIME_LOG_MAX_FILES','COMPONENT_EXAMPLES_ENABLED','TEMPLUX_BACKUP_DIR','TEMPLUX_BACKUP_RETAIN'];
+const configured=['AUDIT_RETENTION_DAYS','AUDIT_CLEANUP_BATCH_SIZE','AUDIT_CLEANUP_MAX_BATCHES','AUDIT_CLEANUP_INTERVAL_SECONDS','RUNTIME_LOG_MAX_BYTES','RUNTIME_LOG_MAX_FILES','COMPONENT_EXAMPLES_ENABLED'];
+const optional=['DOMAIN_NAME','TEMPLUX_HTTP_PORT','TEMPLUX_API_PORT','TEMPLUX_ACCESS_MODE','FEISHU_TENANT_KEY','FEISHU_ALLOWED_TENANT_KEY','PERSON_IDLE_TIMEOUT_SECONDS','PERSON_SESSION_MAX_SECONDS','AGENT_LOGIN_ENABLED','AGENT_IDLE_TIMEOUT_SECONDS','AGENT_SESSION_MAX_SECONDS','TEMPLUX_CREDENTIAL_DIR','HEARTBEAT_INTERVAL_SECONDS','PASSWORD_PROXY_HOSTS','WEB_TRUSTED_PROXY_CIDRS','AUDIT_RETENTION_DAYS','AUDIT_CLEANUP_BATCH_SIZE','AUDIT_CLEANUP_MAX_BATCHES','AUDIT_CLEANUP_INTERVAL_SECONDS','RUNTIME_LOG_MAX_BYTES','RUNTIME_LOG_MAX_FILES','COMPONENT_EXAMPLES_ENABLED','TEMPLUX_BACKUP_DIR','TEMPLUX_BACKUP_RETAIN'].filter(key=>!configured.includes(key));
 const secret=new Set(['DATABASE_URL','TEMPLUX_DB_PASSWORD','FEISHU_APP_SECRET']);
-export const environmentContract=Object.freeze(Object.fromEntries(Object.entries({required,database,localDatabase,domain,feishu,optional}).flatMap(([policy,keys])=>keys.map(key=>[key,Object.freeze({policy,visibility:secret.has(key)?'secret':'public'})]))));
+export const environmentContract=Object.freeze(Object.fromEntries(Object.entries({required,database,localDatabase,domain,feishu,configured,optional}).flatMap(([policy,keys])=>keys.map(key=>[key,Object.freeze({policy,visibility:secret.has(key)?'secret':'public'})]))));
 const nonblank=v=>typeof v==='string'&&v.trim()!=='';
 export function parseEnvironmentFile(text){
  if(typeof text!=='string'||Buffer.byteLength(text)>65536||text.includes('\0'))throw new Error('dotenv syntax');
@@ -52,6 +53,7 @@ export function checkEnvironment({exampleText,fileText,env=process.env,scope='al
   if(rule.policy==='localDatabase')needed=scope==='all'&&ownDatabase;
   if(rule.policy==='domain')needed=isDomain&&serving;
   if(rule.policy==='feishu')needed=hasFeishu;
+  if(rule.policy==='configured')needed=value!==undefined;
   rows.push({key,policy:rule.policy,required:needed,visibility:rule.visibility,state,source:value===undefined?'missing':Object.hasOwn(file,key)&&file[key]===value?'container (.env match)':'container (effective override or Compose projection)'});
   if(needed&&state!=='set')fail(key,'required_nonblank');
  }
