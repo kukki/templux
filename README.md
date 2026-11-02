@@ -150,7 +150,7 @@ DEV/UAT默认从账号页进入 /examples，PROD默认关闭；COMPONENT_EXAMPLE
 
 ### 分页、排序与刷新恢复（T13）
 
-显式采用PagedList/view后提供默认10条及5/10/15/20/25/50、完整分页和合法页码下拉。名称/编号示例排序支持升/降/基础三态，表头与下拉同步，排序/数量改变回1；page/pageSize/sort写地址并replace当前历史，刷新恢复且校验规范化。窄屏直接保留上页/位置/下页，其余可展开。旧pagination分支缺controls补默认全显示；项目可完整配置五项可选入口。53条纯合成数据及53/12/0情景支持组合/收缩/空验证，无业务API/表。详见 [分页排序合同](docs/specs/pagination-sort-url.md) 与 [T13验收](docs/discovery/t13-acceptance.md)。
+显式采用PagedList/view后提供默认10条及5/10/15/20/25/50、Skoope连体分页按钮组（连续最多5个页码）和合法页码下拉；账号管理与审计也复用相同按钮组。名称/编号示例排序支持升/降/基础三态，表头与下拉同步，排序/数量改变回1；page/pageSize/sort写地址并replace当前历史，刷新恢复且校验规范化。窄屏直接保留上页/位置/下页，其余可展开。旧pagination分支缺controls补默认全显示；项目可完整配置五项可选入口。53条纯合成数据及53/12/0情景支持组合/收缩/空验证，无业务API/表。详见 [分页排序合同](docs/specs/pagination-sort-url.md) 与 [T13验收](docs/discovery/t13-acceptance.md)。
 
 ### 普通表单与未保存编辑（T14）
 

@@ -1,4 +1,5 @@
 'use client';
+import Pagination from './elements/pagination';
 import LoginMethodManager from './login-method-manager';
 import CopyButton from './elements/copy-button';
 import elementsCopy from '../../../../config/elements-copy.json';
@@ -62,7 +63,7 @@ export default function AccountManager({copy,pagination,ownAccountId}:{copy:Auth
         <dl><div><dt>{copy.accountId}</dt><dd>{account.id} <CopyButton value={account.id} label={elementsCopy.copyAccountId}/></dd></div><div><dt>{copy.accountKind}</dt><dd>{account.kind==='agent'?copy.managementAgent:copy.managementPerson}</dd></div><div><dt>{copy.managementOwner}</dt><dd>{account.kind==='agent'?`${account.responsiblePersonName??'—'} (#${account.responsiblePersonId})`:copy.managementNoOwner}</dd></div><div><dt>{copy.accountRoles}</dt><dd>{account.roles.length?account.roles.map(role=>data.roles[role]?.label??role).join(', '):copy.managementZero}</dd></div></dl>
         <button disabled={busy} onClick={()=>edit(account)} aria-label={`${copy.managementEdit} ${account.name}`}>{copy.managementEdit}</button>
       </article>)}</div>
-      <div className="management-pages" aria-label={copy.managementPage}><button disabled={busy||data.page===1} onClick={()=>setPage(1)}>{copy.managementFirst}</button><button disabled={busy||data.page===1} onClick={()=>setPage(data.page-1)}>{copy.managementPrevious}</button><span>{data.page} / {data.pages}</span><button disabled={busy||data.page===data.pages} onClick={()=>setPage(data.page+1)}>{copy.managementNext}</button><button disabled={busy||data.page===data.pages} onClick={()=>setPage(data.pages)}>{copy.managementLast}</button><label>{copy.managementSize}<select disabled={busy} value={size} onChange={event=>{setSize(Number(event.target.value));setPage(1);}}>{pagination.pageSizes.map(value=><option key={value}>{value}</option>)}</select></label></div>
+      <Pagination state={{page:data.page,pageSize:size,sort:'base'}} total={data.total} settings={{...pagination,controls:{total:false,size:true,edges:true,pages:true,jump:true}}} disabled={busy} onChange={patch=>{if(patch.pageSize!==undefined)setSize(patch.pageSize);if(patch.page!==undefined)setPage(patch.page);}}/>
     </>}
 
   </section>;

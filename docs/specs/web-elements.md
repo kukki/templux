@@ -324,3 +324,9 @@ T14实现具体化见 [表单与离开保护合同](forms-and-unsaved-edits.md)�
 外部链接按钮：`ExternalLinkButton`（`components/elements/external-link-button.tsx`）与操作按钮同尺寸（`.action.secondary-action`）并附`aria-hidden`外链图标；`href`须为http/https绝对地址，`label`为非空可识别名称（≤200字符）；以`target="_blank" rel="noopener noreferrer"`在新窗口打开，不承接提交、复制或权限行为。
 
 编号复制：账号页、管理员账号列表/编辑、审计事件ID与目标账号ID复用`CopyButton`，标签取自`elements-copy.json`（`copyAccountId`/`copyEventId`/`copyTargetId`/`copyId`），不显示目标值预览。
+
+## 页面一致性细化（2026-10-27）
+
+桌面与窄屏统一使用`style.css`的设计令牌：页眉、页脚与`main`共用`--page-gutter`水平留白，登录前后页面共用`--page-padding-block`垂直留白；窄屏在760px统一切换为30px垂直留白与20px水平留白。全站字体层级收敛为`--font-xs`/`--font-sm`/`--font-md`/`--font-body`/`--font-h3`/`--font-h2`/`--font-brand`，标题、提示、标签与表格表头不再分别使用孤立的px值。访客页内容宽度保持`--content-max`(820px)，已登录工作区保持1160px，由各自页面类型决定，但页眉页脚与内容区左右边界对齐。
+
+控件统一保持`--control-h`(44px)、`--radius-control`(6px)与统一焦点环；统一搜索的输入框扣除标签内边距与边框后与外层 44px 控件同高。窄屏下管理筛选在420px以下改为单列，账号详情与状态列表在480px以下改为单列，避免长编号挤压。管理员账号列表复用`.panel-heading`作为卡片标题，浮动面板标题规则改为`.floating-panel .panel-heading`限定作用域，避免面板样式污染状态页与账号卡片。审计表格与只读表格继续只在自身滚动容器内横向滚动，页面整体不横向溢出。

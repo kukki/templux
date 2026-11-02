@@ -7,4 +7,4 @@ export function parseListState<Row>(params:{get:(key:string)=>string|null},setti
 export function writeListState(href:string,state:ListViewState):string;
 export function cycleSort(current:string,key:string):string;
 export function orderRows<Row>(rows:readonly Row[],sort:string,fields:readonly SortField<Row>[],baseCompare:(a:Row,b:Row)=>number):Row[];
-export function pageNumbers(total:number,current:number):(number|null)[];
+export function pageNumbers(total:number,current:number):number[];
