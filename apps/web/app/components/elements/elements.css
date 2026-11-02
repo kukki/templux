@@ -2,7 +2,42 @@
 
 .unified-search label>span{flex:0 1 auto;min-width:0;max-width:45%;overflow-wrap:anywhere}@media(max-width:480px){.unified-search label>span{max-width:100%}}
 .multi-select{max-width:100%;margin:0 0 1rem}.multi-select-trigger{display:flex;gap:1rem;justify-content:space-between;min-height:var(--control-h);max-width:100%;text-align:left}.multi-select-trigger span{min-width:0;overflow-wrap:anywhere}.multi-select-trigger span+span{color:var(--muted)}.multi-select-popup{position:fixed;inset:auto;margin:0;box-sizing:border-box;overflow:auto;padding:1rem;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-surface);box-shadow:0 10px 28px #0002;overscroll-behavior:contain}.multi-select-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.7rem}.multi-select-heading strong{min-width:0;overflow-wrap:anywhere}.multi-select-heading button{min-width:var(--control-h);min-height:var(--control-h);flex-shrink:0}.multi-select-search{display:block;font-size:var(--font-sm);color:var(--muted)}.multi-select-search input{box-sizing:border-box;width:100%;min-width:0;min-height:var(--control-h);font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-control);padding:.4rem .6rem;margin:.3rem 0 .7rem}.multi-select-row{display:flex;align-items:flex-start;gap:.65rem;min-height:var(--control-h);padding:.65rem .5rem;box-sizing:border-box;cursor:pointer;border-radius:var(--radius-control)}.multi-select-row:hover,.multi-select-row:focus-within{background:var(--background)}.multi-select-row input{width:20px;height:20px;flex:0 0 20px;margin:.12rem 0;accent-color:var(--accent)}.multi-select-row span{min-width:0;flex:1;overflow-wrap:anywhere;line-height:1.4}.multi-select-all{border-bottom:1px solid var(--border);border-radius:0}.multi-select-options p{color:var(--muted);line-height:1.5}.multi-select :focus-visible{outline:var(--focus-ring) solid var(--accent);outline-offset:var(--focus-offset)}
-.list-sort,.pagination-size,.pagination-jump{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;font-size:var(--font-md);min-width:0}.list-sort{margin-bottom:1rem}.list-sort select,.list-pagination select{font:inherit;min-height:var(--control-h);max-width:100%;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-control);padding:.4rem .6rem}.table-sort{font:inherit;color:var(--text);background:transparent;border:0;padding:.2rem 0;min-height:var(--control-h);cursor:pointer;text-align:left;overflow-wrap:anywhere;max-width:100%}.table-sort:focus-visible,.list-pagination :focus-visible,.list-sort select:focus-visible{outline:var(--focus-ring) solid var(--accent);outline-offset:var(--focus-offset)}.list-pagination{margin:1rem 0;display:flex;flex-wrap:wrap;align-items:center;gap:.8rem 1.2rem}.pagination-desktop,.pagination-primary,.pagination-pages,.pagination-options{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}.pagination-primary{max-width:100%;gap:.4rem}.pagination-primary>button,.pagination-pages button,.pagination-desktop>button{min-height:var(--control-h);min-width:var(--control-h);font:inherit;color:var(--text);border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);padding:.45rem .65rem;cursor:pointer}.list-pagination button:disabled{opacity:.55;cursor:default}.list-pagination button[aria-current=page]{background:var(--accent);color:var(--accentText);opacity:1}.pagination-position{font-size:var(--font-md);overflow-wrap:anywhere}.pagination-count{font-size:var(--font-sm);color:var(--muted);margin:.2rem 0}.pagination-options{gap:.9rem}.pagination-more{display:none}.pagination-expanded{display:flex;flex-wrap:wrap;gap:1rem;padding:1rem 0}.pagination-expanded>.pagination-count{width:100%}@media(max-width:700px){.list-pagination{display:block}.pagination-desktop{display:none}.pagination-primary{display:flex;flex-wrap:nowrap;justify-content:space-between}.pagination-primary>button{flex-shrink:0;padding:.45rem .4rem}.pagination-position{text-align:center;min-width:0}.pagination-more{display:block;margin-top:.8rem}.pagination-more summary{cursor:pointer;min-height:var(--control-h);align-content:center;color:var(--accent)}.pagination-expanded>.pagination-pages{width:100%}.pagination-expanded label{max-width:100%}}
+.list-sort,.pagination-size,.pagination-jump{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;font-size:var(--font-md);min-width:0}.list-sort{margin-bottom:1rem}.list-sort select,.list-pagination select{font:inherit;min-height:var(--control-h);max-width:100%;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-control);padding:.4rem .6rem}.table-sort{font:inherit;color:var(--text);background:transparent;border:0;padding:.2rem 0;min-height:var(--control-h);cursor:pointer;text-align:left;overflow-wrap:anywhere;max-width:100%}.table-sort:focus-visible,.list-pagination :focus-visible,.list-sort select:focus-visible{outline:var(--focus-ring) solid var(--accent);outline-offset:var(--focus-offset)}/* Connected pagination follows the project tokens and keeps navigation in one group. */
+.list-pagination{margin:1rem 0;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:.8rem 1.2rem;padding-top:1rem;border-top:1px solid var(--border);min-width:0;max-width:100%}
+.pagination-desktop,.pagination-primary,.pagination-options{display:flex;align-items:center;gap:.8rem;min-width:0;max-width:100%}
+.pagination-total{margin-right:auto}
+.pagination-primary{flex-wrap:wrap;justify-content:flex-end}
+.pagination-buttons-scroll{max-width:100%;min-width:0;overflow-x:auto;padding:var(--focus-offset);margin:calc(-1 * var(--focus-offset));scrollbar-color:var(--border) var(--surface)}
+.pagination-button-group{display:inline-flex;align-items:stretch;isolation:isolate;white-space:nowrap;vertical-align:middle}
+.pagination-button-group>button,.pagination-mobile-primary>button{position:relative;flex-shrink:0;min-height:var(--control-h);min-width:var(--control-h);font:inherit;color:var(--text);border:1px solid var(--border);background:var(--surface);padding:.45rem .65rem;cursor:pointer}
+.pagination-button-group>button{border-radius:0}
+.pagination-button-group>button+button{margin-left:-1px}
+.pagination-button-group>button:first-child{border-radius:var(--radius-control) 0 0 var(--radius-control)}
+.pagination-button-group>button:last-child{border-radius:0 var(--radius-control) var(--radius-control) 0}
+.pagination-button-group>button:only-child{border-radius:var(--radius-control)}
+.list-pagination button:disabled{opacity:.55;cursor:default}
+.list-pagination button:not(:disabled):hover{background:var(--background);border-color:var(--accent);z-index:1}
+.list-pagination button[aria-current=page]{background:var(--accent);color:var(--accentText);border-color:var(--accent);opacity:1;z-index:1}
+.list-pagination button:focus-visible{z-index:2}
+.pagination-position{font-size:var(--font-md);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pagination-count{font-size:var(--font-sm);color:var(--muted);margin:.2rem 0;font-variant-numeric:tabular-nums}
+.pagination-options{flex-wrap:wrap;gap:.9rem}
+.list-pagination .pagination-size select,.list-pagination .pagination-jump select{width:auto;padding:.4rem .6rem}
+.pagination-more,.pagination-mobile-primary{display:none}
+.pagination-expanded{display:flex;flex-wrap:wrap;gap:1rem;padding:1rem 0;min-width:0}
+.pagination-expanded>.pagination-count{width:100%}
+@media(max-width:700px){
+ .list-pagination{display:block}
+ .pagination-desktop{display:none}
+ .pagination-mobile-primary{display:flex;align-items:center;justify-content:space-between;gap:.4rem}
+ .pagination-mobile-primary>button{border-radius:var(--radius-control);padding:.45rem .4rem}
+ .pagination-position{text-align:center;min-width:0}
+ .pagination-more{display:block;margin-top:.8rem}
+ .pagination-more summary{cursor:pointer;min-height:var(--control-h);align-content:center;color:var(--accent)}
+ .pagination-expanded>.pagination-buttons-scroll{flex-basis:100%}
+ .pagination-expanded label{max-width:100%}
+}
+
 
 .readonly-list-table th{vertical-align:middle}.unified-search label>span{flex-shrink:0}
 

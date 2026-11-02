@@ -59,7 +59,7 @@ button:focus-visible { outline: var(--focus-ring) solid var(--accent); outline-o
 
 .account-management { margin-top: 32px; }
 .management-filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; margin: 22px 0; }
-.management-filters label, .management-state, .management-pages label, .management-pagination label { display: grid; gap: 6px; font-size: var(--font-sm); }
+.management-filters label, .management-state { display: grid; gap: 6px; font-size: var(--font-sm); }
 .account-management input[type=search], .account-management select { width: 100%; min-width: 0; min-height: var(--control-h); padding: .7rem; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-control); font: inherit; }
 .account-management input:focus-visible, .account-management select:focus-visible { outline: var(--focus-ring) solid var(--accent); outline-offset: var(--focus-offset); }
 .management-accounts { display: grid; gap: 16px; }
@@ -67,8 +67,6 @@ button:focus-visible { outline: var(--focus-ring) solid var(--accent); outline-o
 .management-account h3, .management-editor h3 { margin: 0; overflow-wrap: anywhere; }
 .management-account dl { margin: 20px 0; gap: 18px; }
 .management-account dd { font-size: var(--font-md); }
-.management-pages, .management-pagination { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 22px 0; }
-.management-pages button, .management-pagination button { padding: .45rem .65rem; }
 .secondary-action { background: var(--surface); color: var(--text); border-color: var(--border); }
 .management-editor { margin-top: 24px; border-top: 3px solid var(--accent); }
 .management-editor fieldset { border: 1px solid var(--border); border-radius: var(--radius-control); margin: 20px 0; min-width: 0; }

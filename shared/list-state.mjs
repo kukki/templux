@@ -18,4 +18,4 @@ export function orderRows(rows,sort,fields,baseCompare){
  const checked=(compare,a,b)=>{const value=compare(a,b);if(typeof value!=='number'||!Number.isFinite(value))throw new Error('比较器必须返回有限数字。');return value;};
  return [...rows].sort((a,b)=>{const value=selected?checked(selected.compare,a,b)*(sort.endsWith(':desc')?-1:1):0;return value||checked(baseCompare,a,b);});
 }
-export function pageNumbers(total,current){const numbers=new Set([1,total]);for(let n=Math.max(1,current-2);n<=Math.min(total,current+2);n++)numbers.add(n);const out=[];for(const n of [...numbers].sort((a,b)=>a-b)){if(out.length&&n-out.at(-1)>1)out.push(null);out.push(n);}return out;}
+export function pageNumbers(total,current){const start=Math.min(Math.max(1,current-2),Math.max(1,total-4));return Array.from({length:Math.min(5,total)},(_,i)=>start+i);}
